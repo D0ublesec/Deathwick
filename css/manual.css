@@ -63,12 +63,14 @@ nav a:hover {
 }
 
 /* Content links: orange (accent) instead of default blue */
-#manual-view a {
+#manual-view a:link,
+#manual-view a:visited {
     color: var(--accent-color);
     text-decoration: underline;
     text-underline-offset: 2px;
 }
-#manual-view a:hover {
+#manual-view a:hover,
+#manual-view a:focus {
     color: var(--highlight);
 }
 
