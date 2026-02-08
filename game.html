@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Deathwick — Play</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect fill='%231a1612' stroke='%23666' width='20' height='28' x='6' y='2' rx='2'/><text x='16' y='20' font-size='12' fill='%23b8b4ac' text-anchor='middle' font-family='sans-serif'>F</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,500&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/game.css">
+</head>
+<body class="game-page">
+
+    <nav class="game-nav">
+        <a href="index.html" onclick="showManual(); return false;">← Manual</a>
+        <div id="view-switcher-wrap" class="view-switcher-wrap">
+            <span class="view-switcher-label">View:</span>
+            <button type="button" class="view-switcher-btn active" id="view-btn-neighbours" onclick="setViewAllPlayers(false)">Neighbours</button>
+            <button type="button" class="view-switcher-btn" id="view-btn-all" onclick="setViewAllPlayers(true)">All</button>
+        </div>
+        <div class="nav-left-buttons">
+            <button type="button" class="top-right-btn" id="btn-mute" aria-label="Mute">&#128266;</button>
+            <button type="button" class="top-right-btn" id="btn-settings" onclick="openSettingsModal()" aria-label="Settings">⚙</button>
+        </div>
+        <div class="nav-right-buttons">
+            <button type="button" class="top-right-btn" id="btn-cheatsheet" onclick="openCheatsheet()">RULES</button>
+            <button type="button" class="top-right-btn" onclick="resetGameSetup()">QUIT / RESET</button>
+        </div>
+    </nav>
+
+    <div id="setup-modal" class="modal" style="display:flex;">
+        <div class="modal-content">
+            <h2 style="color:var(--accent-color)">SETUP RITUAL</h2>
+            <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:14px; text-align:center;">When the game starts you'll choose the <strong>Empty Candle rule</strong>: <strong>Standard ritual</strong> (check at end of turn) or <strong>Dark ritual</strong> (eliminated immediately). <a href="index.html#ritual-type" target="_blank" rel="noopener" style="color:var(--accent-color);">Manual → Ritual type</a></p>
+            <div id="local-setup">
+                <div id="player-setup-list" style="margin-bottom:10px;"></div>
+                <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;">
+                    <button type="button" class="game-btn" onclick="addPlayerSlot()">+ ADD PLAYER</button>
+                    <button type="button" class="game-btn" style="background:var(--bg-elevated); color:var(--text-muted);" onclick="clearAllSetupNames()">CLEAR ALL NAMES</button>
+                </div>
+                <button type="button" class="game-btn magic" onclick="startClassSelection()">NEXT</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="class-modal" class="modal">
+        <div class="modal-content">
+            <h2 id="class-select-title">CHOOSE CURSE</h2>
+            <div id="class-options" style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;"></div>
+            <button type="button" class="game-btn" onclick="goBackToSetup()" style="margin-top:20px;">⬅ BACK</button>
+        </div>
+    </div>
+
+    <div id="dark-mode-modal" class="modal" style="z-index:2500;">
+        <div class="modal-content" style="border-color:var(--accent-color);">
+            <h2 style="color:var(--accent-color)">CHOOSE RULE</h2>
+            <p style="margin-bottom:16px;">How should an empty Candle be handled?</p>
+            <div style="display:flex; gap:16px; justify-content:center; flex-wrap:wrap;">
+                <button type="button" class="game-btn" onclick="chooseDarkMode(false)">STANDARD RITUAL<br><small>Check at end of turn</small></button>
+                <button type="button" class="game-btn" style="background:#333; color:#ccc;" onclick="chooseDarkMode(true)">DARK RITUAL<br><small>Eliminated immediately</small></button>
+            </div>
+        </div>
+    </div>
+
+    <div id="queen-modal" class="modal">
+        <div class="modal-content">
+            <h2 style="color:var(--magic-color)">THE MEDIUM'S TRANCE</h2>
+            <button type="button" class="game-btn" onclick="queenExhume()">EXHUME (Pick 1 from Dark)</button>
+            <button type="button" class="game-btn" onclick="queenRekindle()">REKINDLE (Top 2 from Dark → top of Candle)</button>
+            <div id="exhume-area" class="card-grid"></div>
+        </div>
+    </div>
+    
+    <div id="hand-view-modal" class="modal">
+        <div class="modal-content" style="border-color:var(--ice-color);">
+            <h2 style="color:var(--ice-color)">SIGHT REVEALED</h2>
+            <div id="hand-view-area" class="card-grid"></div>
+            <button type="button" class="game-btn" onclick="closeHandView()">CLOSE</button>
+        </div>
+    </div>
+
+    <div id="salt-modal" class="modal" style="z-index:3000;">
+        <div class="modal-content" style="border-color:var(--salt-color);">
+            <h2 style="color:var(--salt-color)">SALT REACTION</h2>
+            <p id="salt-msg">Interrupt?</p>
+            <div id="salt-defender-buttons" style="display:flex; gap:20px; justify-content:center;">
+                <button type="button" class="game-btn" style="background:#444;" onclick="resolveSalt(false)">ALLOW</button>
+                <button type="button" class="game-btn panic" style="background:var(--salt-color); color:black;" onclick="resolveSalt(true)">INTERRUPT</button>
+            </div>
+            <div id="salt-counter-buttons" style="display:none; gap:20px; justify-content:center;" class="salt-buttons-row">
+                <button type="button" class="game-btn" style="background:#444;" onclick="resolveSaltCounter(false)">No (Haunt cancelled)</button>
+                <button type="button" class="game-btn panic" style="background:var(--salt-color); color:black;" onclick="resolveSaltCounter(true)">Yes (Counter with Salt)</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="phantom-modal" class="modal" style="z-index:3000;">
+        <div class="modal-content" style="border-color:var(--magic-color);">
+            <h2 style="color:var(--magic-color)">THE UNSEEN</h2>
+            <p id="phantom-msg">Discard 1 card to cancel the Haunt?</p>
+            <div style="display:flex; gap:20px; justify-content:center;">
+                <button type="button" class="game-btn" style="background:#444;" onclick="resolvePhantomCancel(true)">ALLOW HAUNT</button>
+                <button type="button" class="game-btn" style="background:var(--magic-color); color:black;" onclick="resolvePhantomCancel(false)">DISCARD 1 TO CANCEL</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="settings-modal" class="modal">
+        <div class="modal-content" style="border-color:var(--border-color);">
+            <h2 style="color:var(--accent-color)">SETTINGS</h2>
+            <div class="settings-row" style="margin-bottom:16px;">
+                <label style="display:block; margin-bottom:8px;">Ritual theme</label>
+                <div style="display:flex; gap:10px;">
+                    <button type="button" class="game-btn" id="theme-btn-fire" onclick="setRitualTheme('fire')">FIRE</button>
+                    <button type="button" class="game-btn" id="theme-btn-blood" onclick="setRitualTheme('blood')">BLOOD</button>
+                </div>
+            </div>
+            <div style="margin-bottom:14px;">
+                <label style="display:block; margin-bottom:6px;">Music volume</label>
+                <input type="range" id="music-volume" min="0" max="100" value="50" style="width:100%;">
+                <span id="music-volume-value">50</span>%
+            </div>
+            <div style="margin-bottom:14px;">
+                <label style="display:block; margin-bottom:6px;">Sound effects volume</label>
+                <input type="range" id="sfx-volume" min="0" max="100" value="80" style="width:100%;">
+                <span id="sfx-volume-value">80</span>%
+            </div>
+            <p style="margin-bottom:14px; font-size:0.9em;"><a href="attribution.html" target="_blank" rel="noopener noreferrer" style="color:var(--text-muted);">Credits / Attribution</a></p>
+            <button type="button" class="game-btn" onclick="closeSettingsModal()">CLOSE</button>
+        </div>
+    </div>
+
+    <div id="class-desc-modal" class="modal">
+        <div class="modal-content class-desc-modal-content" style="border-color:var(--magic-color);">
+            <h2 id="class-desc-title" style="color:var(--magic-color)">CLASS</h2>
+            <img id="class-desc-card" class="class-desc-card-img" src="" alt="" style="display:none;">
+            <p id="class-desc-text"></p>
+            <button type="button" class="game-btn" onclick="closeClassDesc()">CLOSE</button>
+        </div>
+    </div>
+
+    <div id="cheatsheet-modal" class="modal">
+        <div class="modal-content cheatsheet-content">
+            <h2 style="color:var(--accent-color)">QUICK RULES</h2>
+            <div id="cheatsheet-body"></div>
+            <button type="button" class="game-btn" onclick="closeCheatsheet()">CLOSE</button>
+        </div>
+    </div>
+
+    <div id="alert-modal" class="modal">
+        <div class="modal-content alert-modal-content">
+            <h2 id="alert-modal-title" style="color:var(--accent-color)">—</h2>
+            <p id="alert-modal-msg"></p>
+            <button type="button" class="game-btn" id="alert-modal-btn" onclick="closeAlertModal()">OK</button>
+        </div>
+    </div>
+
+    <div id="priest-draw-modal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <h2 style="color:var(--accent-color)">PRIEST</h2>
+            <p>Draw 1 card from your Candle?</p>
+            <div style="display:flex; gap:12px; justify-content:center; margin-top:12px;">
+                <button type="button" class="game-btn" onclick="resolvePriestDraw(true)">Draw 1</button>
+                <button type="button" class="game-btn" style="background:#444;" onclick="resolvePriestDraw(false)">Skip</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="oracle-modal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <h2 style="color:var(--magic-color)">THE ORACLE — Precognition</h2>
+            <p>Top card of your Candle:</p>
+            <div id="oracle-card-slot" class="card-slot-inline"></div>
+            <p style="margin-top:8px;">Put it on top or on the bottom?</p>
+            <div style="display:flex; gap:12px; justify-content:center; margin-top:12px;">
+                <button type="button" class="game-btn" onclick="resolveOracle(true)">Keep on top</button>
+                <button type="button" class="game-btn" onclick="resolveOracle(false)">Put on bottom</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="grimoire-rejection-modal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <h2 style="color:var(--magic-color)">THE GRIMOIRE OF REJECTION</h2>
+            <p>Write down a card to reject (next time it's played, cancel it). Does not count as action.</p>
+            <div id="grimoire-rank-buttons" class="card-grid" style="margin-top:12px;"></div>
+            <button type="button" class="game-btn" style="margin-top:12px; background:#444;" onclick="closeGrimoireRejectionModal()">Skip</button>
+        </div>
+    </div>
+
+    <div id="seer-modal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <h2 style="color:var(--magic-color)">THE WATCHER</h2>
+            <p id="seer-target-label">Top card of their Candle:</p>
+            <div id="seer-card-slot" class="card-slot-inline"></div>
+            <p style="margin-top:8px;">Leave on top or put on bottom?</p>
+            <div style="display:flex; gap:12px; justify-content:center; margin-top:12px;">
+                <button type="button" class="game-btn" onclick="resolveSeerChoice(false)">Leave on top</button>
+                <button type="button" class="game-btn" onclick="resolveSeerChoice(true)">Put on bottom</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="actions-modal" class="modal">
+        <div class="modal-content">
+            <h2 style="color:var(--accent-color)">Actions</h2>
+            <div class="actions-modal-grid">
+                <button type="button" class="game-btn" id="modal-btn-haunt" onclick="actionFromModal(actionHaunt)">HAUNT</button>
+                <button type="button" class="game-btn" id="modal-btn-banish" onclick="actionFromModal(actionBanish)">BANISH</button>
+                <button type="button" class="game-btn seance" id="modal-btn-seance" onclick="actionFromModal(actionSeance)">SÉANCE</button>
+                <button type="button" class="game-btn magic" id="modal-btn-cast" onclick="actionFromModal(actionCast)">CAST</button>
+                <button type="button" class="game-btn class-ability" id="modal-btn-class" onclick="actionFromModal(actionClass)">ABILITY</button>
+                <button type="button" class="game-btn flicker" id="modal-btn-flicker" onclick="actionFromModal(actionFlicker)">FLICKER</button>
+                <button type="button" class="game-btn panic" id="modal-btn-panic" onclick="actionFromModal(actionPanic)">PANIC</button>
+            </div>
+            <button type="button" class="game-btn" style="margin-top:12px;" onclick="closeActionsModal()">Close</button>
+        </div>
+    </div>
+
+    <div id="game-board">
+        <div id="selection-hint" class="selection-hint" aria-live="polite"></div>
+
+        <div id="log-panel" class="log-panel">
+            <button type="button" id="log-toggle" class="log-toggle" onclick="toggleLog()" aria-label="Toggle log">Log</button>
+            <div id="game-log" class="game-log">Log...</div>
+        </div>
+
+        <div id="ritual-table" class="ritual-table">
+            <!-- Ambient candles in pentagram pattern — 3 per point (clusters) -->
+            <div class="ritual-candles" aria-hidden="true">
+                <!-- Thin lines connecting candle clusters (ritual light) -->
+                <svg class="ritual-candle-lines" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+                    <!-- Outer pentagon: clusters 1→2→3→4→5→1 -->
+                    <path class="ritual-line ritual-line-outer" d="M 50 15 L 83.2 39.1 L 70.6 78.4 L 29.4 78.4 L 16.8 39.1 Z" />
+                    <!-- Inner pentagon: clusters 6→7→8→9→10→6 -->
+                    <path class="ritual-line ritual-line-inner" d="M 62.9 32.4 L 70.9 56.7 L 50 72 L 29.1 56.7 L 37.1 32.4 Z" />
+                </svg>
+                <!-- data-candle labels for dev: tell me which numbers to remove -->
+                <div class="ambient-candle" data-candle="1"><div class="ambient-flame-wrap"><div class="ambient-flame"></div></div><div class="ambient-wax"></div></div>
+                <div class="ambient-candle" data-candle="2"><div class="ambient-flame-wrap"><div class="ambient-flame"></div></div><div class="ambient-wax"></div></div>
+                <div class="ambient-candle" data-candle="3"><div class="ambient-flame-wrap"><div class="ambient-flame"></div></div><div class="ambient-wax"></div></div>
+                <div class="ambient-candle" data-candle="4"><div class="ambient-flame-wrap"><div class="ambient-flame"></div></div><div class="ambient-wax"></div></div>
+                <div class="ambient-candle" data-candle="5"><div class="ambient-flame-wrap"><div class="ambient-flame"></div></div><div class="ambient-wax"></div></div>
+                <div class="ambient-candle" data-candle="6"><div class="ambient-flame-wrap"><div class="ambient-flame"></div></div><div class="ambient-wax"></div></div>
+                <div class="ambient-candle" data-candle="7"><div class="ambient-flame-wrap"><div class="ambient-flame"></div></div><div class="ambient-wax"></div></div>
+                <div class="ambient-candle" data-candle="8"><div class="ambient-flame-wrap"><div class="ambient-flame"></div></div><div class="ambient-wax"></div></div>
+                <div class="ambient-candle" data-candle="9"><div class="ambient-flame-wrap"><div class="ambient-flame"></div></div><div class="ambient-wax"></div></div>
+                <div class="ambient-candle" data-candle="10"><div class="ambient-flame-wrap"><div class="ambient-flame"></div></div><div class="ambient-wax"></div></div>
+                <div class="ambient-candle" data-candle="11"><div class="ambient-flame-wrap"><div class="ambient-flame"></div></div><div class="ambient-wax"></div></div>
+                <div class="ambient-candle" data-candle="12"><div class="ambient-flame-wrap"><div class="ambient-flame"></div></div><div class="ambient-wax"></div></div>
+                <div class="ambient-candle" data-candle="13"><div class="ambient-flame-wrap"><div class="ambient-flame"></div></div><div class="ambient-wax"></div></div>
+                <div class="ambient-candle" data-candle="14"><div class="ambient-flame-wrap"><div class="ambient-flame"></div></div><div class="ambient-wax"></div></div>
+                <div class="ambient-candle" data-candle="15"><div class="ambient-flame-wrap"><div class="ambient-flame"></div></div><div class="ambient-wax"></div></div>
+                <div class="ambient-candle" data-candle="16"><div class="ambient-flame-wrap"><div class="ambient-flame"></div></div><div class="ambient-wax"></div></div>
+                <div class="ambient-candle" data-candle="17"><div class="ambient-flame-wrap"><div class="ambient-flame"></div></div><div class="ambient-wax"></div></div>
+                <div class="ambient-candle" data-candle="18"><div class="ambient-flame-wrap"><div class="ambient-flame"></div></div><div class="ambient-wax"></div></div>
+                <div class="ambient-candle" data-candle="19"><div class="ambient-flame-wrap"><div class="ambient-flame"></div></div><div class="ambient-wax"></div></div>
+                <div class="ambient-candle" data-candle="20"><div class="ambient-flame-wrap"><div class="ambient-flame"></div></div><div class="ambient-wax"></div></div>
+                <div class="ambient-candle" data-candle="21"><div class="ambient-flame-wrap"><div class="ambient-flame"></div></div><div class="ambient-wax"></div></div>
+                <div class="ambient-candle" data-candle="22"><div class="ambient-flame-wrap"><div class="ambient-flame"></div></div><div class="ambient-wax"></div></div>
+                <div class="ambient-candle" data-candle="23"><div class="ambient-flame-wrap"><div class="ambient-flame"></div></div><div class="ambient-wax"></div></div>
+                <div class="ambient-candle" data-candle="24"><div class="ambient-flame-wrap"><div class="ambient-flame"></div></div><div class="ambient-wax"></div></div>
+                <div class="ambient-candle" data-candle="25"><div class="ambient-flame-wrap"><div class="ambient-flame"></div></div><div class="ambient-wax"></div></div>
+                <div class="ambient-candle" data-candle="26"><div class="ambient-flame-wrap"><div class="ambient-flame"></div></div><div class="ambient-wax"></div></div>
+                <div class="ambient-candle" data-candle="27"><div class="ambient-flame-wrap"><div class="ambient-flame"></div></div><div class="ambient-wax"></div></div>
+                <div class="ambient-candle" data-candle="28"><div class="ambient-flame-wrap"><div class="ambient-flame"></div></div><div class="ambient-wax"></div></div>
+                <div class="ambient-candle" data-candle="29"><div class="ambient-flame-wrap"><div class="ambient-flame"></div></div><div class="ambient-wax"></div></div>
+                <div class="ambient-candle" data-candle="30"><div class="ambient-flame-wrap"><div class="ambient-flame"></div></div><div class="ambient-wax"></div></div>
+            </div>
+            <div id="ritual-other-seats" class="ritual-other-seats"></div>
+
+            <div id="seat-you" class="ritual-seat ritual-seat-you">
+                <div class="seat-header">
+                    <span id="player-name" class="seat-name">YOU</span>
+                    <img id="player-class-img" class="class-card-img seat-class-img" alt="" src="">
+                    <span id="player-class" class="seat-class"></span>
+                    <span id="player-status"></span>
+                </div>
+                <div class="seat-candle-wrap">
+                    <div id="player-candle" class="candle-visual" style="--candle-pct: 100">
+                        <div class="candle-flame"></div>
+                        <div class="candle-wax"></div>
+                    </div>
+                </div>
+                <div class="seat-shadow-label">Your Shadow</div>
+                <div class="shadow-split-wrap">
+                    <div class="shadow-from-neighbour">
+                        <span class="shadow-sublabel" id="player-shadow-left-label">From Left</span>
+                        <div class="shadow-zone" id="player-shadow-left"></div>
+                    </div>
+                    <div class="shadow-from-neighbour">
+                        <span class="shadow-sublabel" id="player-shadow-right-label">From Right</span>
+                        <div class="shadow-zone" id="player-shadow-right"></div>
+                    </div>
+                </div>
+                <div class="seat-hand-label">Your Hand</div>
+                <div class="hand-zone" id="player-hand"></div>
+            </div>
+
+            <!-- The Dark: after seat-you so it always draws on top; discard pile in centre of circle -->
+            <div class="ritual-center-zone" aria-hidden="true">
+                <div id="ritual-center" class="ritual-center">
+                    <div class="dark-ritual-symbol" aria-hidden="true">
+                        <div id="ritual-discard-pile" class="ritual-discard-pile" aria-label="Discard pile"></div>
+                    </div>
+                    <div class="ritual-center-label">THE DARK</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="controls-bar">
+            <button type="button" class="game-btn actions-trigger" id="btn-actions" onclick="openActionsModal()" aria-label="Open actions">ACTIONS</button>
+            <button type="button" class="game-btn" id="btn-cancel-target" onclick="cancelTargetMode()" style="display:none;">CANCEL TARGET</button>
+            <button type="button" class="game-btn" id="btn-discard-down" onclick="resolveDiscardDown()" style="display:none;">DISCARD SELECTED</button>
+            <button type="button" class="game-btn" id="btn-haunt" onclick="actionHaunt()">HAUNT</button>
+            <button type="button" class="game-btn" id="btn-banish" onclick="actionBanish()">BANISH</button>
+            <button type="button" class="game-btn seance" id="btn-seance" onclick="actionSeance()">SÉANCE</button>
+            <button type="button" class="game-btn magic" id="btn-cast" onclick="actionCast()">CAST</button>
+            <button type="button" class="game-btn class-ability" id="btn-class" onclick="actionClass()">ABILITY</button>
+            <button type="button" class="game-btn flicker" id="btn-flicker" onclick="actionFlicker()">FLICKER</button>
+            <button type="button" class="game-btn panic" id="btn-panic" onclick="actionPanic()">PANIC</button>
+        </div>
+    </div>
+    
+    <div id="possession-warning">POSSESSION IMMINENT</div>
+
+    <div id="card-effect-tooltip" class="card-effect-tooltip" aria-hidden="true" role="tooltip">
+        <span class="card-effect-rank-suit"></span>
+        <span class="card-effect-name"></span>
+        <span class="card-effect-text"></span>
+    </div>
+
+    <div id="dark-preview" class="dark-preview" aria-label="The Dark – top card" aria-hidden="true">
+        <span class="dark-preview-label">THE DARK</span>
+        <div id="dark-preview-card" class="dark-preview-card"></div>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/data.js"></script>
+    <script src="js/audio.js"></script>
+    <script src="js/game.js"></script>
+</body>
+</html>

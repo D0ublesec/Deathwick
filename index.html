@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Deathwick</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect fill='%23666' width='8' height='20' x='12' y='10' rx='2'/><ellipse fill='%23f90' cx='16' cy='8' rx='4' ry='6'/><ellipse fill='%23fc0' cx='16' cy='8' rx='2' ry='4'/></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,500&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/manual.css">
+</head>
+<body>
+
+    <nav>
+        <a href="index.html">Manual</a>
+        <a class="play-btn-nav" href="game.html">▶ PLAY GAME</a>
+    </nav>
+
+    <div id="manual-view" class="container">
+        <header>
+            <h1>Deathwick</h1>
+            <p class="subtitle">Official Manual: Version 1.0</p>
+            <p class="game-overview">A card game of survival and betrayal. 2–20 players, or as many as you can fit around a table. Burn cards from your Candle to play, fend off ghosts and Possession, and be the last flame standing to win.</p>
+            <div class="flavor-text">
+                <h2 class="flavor-text-title">The Story</h2>
+                <p>You are in the dark, part of a ritual you did not choose. Someone drew the circle and gave you each a candle. There is no leaving until only one flame is left flickering. Around you, others hold their own candles, strangers or allies, you cannot yet say.</p>
+                <p>This candle is your heartbeat. As long as it flickers, you are safe. But every card you burn brings you one step closer to being Consumed by the Darkness.</p>
+                <p>However, the dark isn't the only danger. If you let too many ghosts of the same kind gather, too many of one shade, you won't just die; you will lose your mind to the Possession.</p>
+                <p>Do not trust your neighbours. They are not your friends. They will shove the ghosts into your shadow to save their own skin.</p>
+                <span class="tagline">"You don't have to be the brightest light in the room. You just have to be the last one burning."</span>
+            </div>
+        </header>
+
+        <section id="setup">
+            <h2>1. The Setup</h2>
+            <h3>The Supplies</h3>
+            <p><strong>Ratio:</strong> 1 Standard Deck (54 cards) for every 2 players.</p>
+            <ul class="setup-list">
+                <li><strong>IMPORTANT:</strong> Use strictly <strong>2 Jokers per Deck</strong>.</li>
+                <li>2 Players: 1 Deck</li>
+                <li>3-4 Players: 2 Decks</li>
+                <li>5-6 Players: 3 Decks</li>
+                <li>7-8 Players: 4 Decks</li>
+                <li>9-? Players: Scale accordingly (1 deck per 2 players)</li>
+            </ul>
+            <p><strong>The Shuffle:</strong> Shuffle all decks together to create one massive pool.</p>
+
+            <h3>The Calling (Class Selection)</h3>
+            <p>Before the game begins, every player must accept a curse. Each player is offered <strong>3 random classes</strong> and chooses one.</p>
+            
+            <div id="class-tool">
+                <h3 style="border:none; margin:0;">The Random Selector</h3>
+                <p id="pool-status" style="color:#888; font-size:0.9em; margin-bottom:15px;">Classes Available in the Darkness.</p>
+                <button type="button" class="tool-btn" onclick="drawClassesManual()">Draw 3 Classes</button>
+                <button type="button" class="tool-btn secondary" onclick="resetPoolManual()">Reset Ritual</button>
+                <div id="selection-area">
+                    <div class="choice-card" onclick="pickClassManual(0)"><span class="choice-name" id="name-0">Class A</span><div id="desc-0">...</div></div>
+                    <div class="choice-card" onclick="pickClassManual(1)"><span class="choice-name" id="name-1">Class B</span><div id="desc-1">...</div></div>
+                    <div class="choice-card" onclick="pickClassManual(2)"><span class="choice-name" id="name-2">Class C</span><div id="desc-2">...</div></div>
+                </div>
+                <div id="result-area"></div>
+            </div>
+
+            <h3>The Circle & The Start</h3>
+            <ol class="setup-list">
+                <li>Sit in a circle.</li>
+                <li>Deal exactly <strong>27 cards</strong> (half a deck) to each player. This is your <strong>Candle</strong>.</li>
+                <li>Place any remaining undealt cards <strong>Face Up</strong> into <strong>THE DARK</strong> (Discard Pile) to start the game.</li>
+                <li>Each player draws <strong>3 cards</strong> from their Candle into their hand; this is their <strong>starting hand</strong>.</li>
+                <li><strong>The Chilling Touch:</strong> All players must touch the hand of the person to their left. The player at the table with the <strong>Coldest Hands</strong> goes first.</li>
+                <li style="border: 1px solid var(--accent-color); padding: 10px; border-radius: 4px; background: #2a1a1a;">
+                    <strong>CONCURRENT FLAMES (6+ players):</strong> 
+                    <br>With 6 or more players, multiple players take a turn at the same time. With <strong>6–8 players</strong>, 2 players act simultaneously; with <strong>9+ players</strong>, 3 players act simultaneously. Play proceeds clockwise from each starter so everyone gets one turn per round. See the <a href="#concurrent-flames-table">Concurrent Flames table</a> at the end of the manual for which player numbers act together.
+                </li>
+            </ol>
+
+            <h3 id="ritual-type">The Empty Candle Rule</h3>
+            <p>Agree before play how an <strong>empty Candle</strong> (no cards left to burn) is handled. These two variants apply to both <strong>physical</strong> and <strong>digital</strong> play:</p>
+            <ul class="setup-list">
+                <li><strong>Standard ritual:</strong> Empty Candle is checked at the <strong>end of your turn</strong>. You may finish your turn; if your Candle is still empty when you end it, you are <strong>Consumed</strong> (eliminated).</li>
+                <li><strong>Dark ritual:</strong> If your Candle becomes empty <strong>at any moment</strong> (e.g. after burning for Ghosts), you are <strong>Consumed immediately</strong> — no chance to act.</li>
+            </ul>
+            <p>In the digital version, you choose Standard ritual or Dark ritual when starting a match (after class selection).</p>
+        </section>
+
+        <section id="board">
+            <h2>2. The Ritual Circle</h2>
+            <p><strong>Who plays when:</strong> In a 2–5 player game, one person takes a turn at a time (clockwise). In a 6–8 player game, two people play at once; in a 9+ player game, three or more play at once. Each concurrent group does Burn, Draw, One Action, and Discard in parallel; then the round advances clockwise. For which player numbers act together (6–20 players), see the <a href="#concurrent-flames-table">Concurrent Flames table</a> at the end of the manual. The diagrams below show where each player sits and which seats start the round (❄️ starter, 🔥 concurrent starters).</p>
+            <p><strong>Shadow layout (3+ players):</strong> In games with three or more players, each player’s <strong>Shadow</strong> is shown split: <strong>ghosts on the left</strong> are from your <strong>left neighbour</strong> (who Haunted you from that side), and <strong>ghosts on the right</strong> are from your <strong>right neighbour</strong>. This lets you see at a glance who Haunted which ghost—especially useful for classes like <strong>The Sealbinder</strong> (whose Haunted ghosts cannot be moved or Recalled) or <strong>The Clown</strong> (whose Haunted ghosts can only be Banished by Face or Cleanse). In a 2‑player game there is only one opponent, so the Shadow is a single zone.</p>
+            <div id="layout-tool">
+                <button type="button" class="tool-btn" onclick="showDiagram(2)">2 Players</button>
+                <button type="button" class="tool-btn" onclick="showDiagram(3)">3 Players</button>
+                <button type="button" class="tool-btn" onclick="showDiagram(4)">4 Players</button>
+                <button type="button" class="tool-btn" onclick="showDiagram(5)">5 Players</button>
+                <button type="button" class="tool-btn" onclick="showDiagram(6)">6 Players</button>
+                <button type="button" class="tool-btn" onclick="showDiagram(9)">9 Players</button>
+                <button type="button" class="tool-btn" onclick="showDiagram(12)">12 Players</button>
+
+                <div id="diag-2" class="diagram-display">
+                    <div class="center-deck"><div class="card-shape dark-pile">THE<br>DARK</div></div>
+                    <div class="d-node starter" style="bottom: 40px; left: 50%; transform: translateX(-50%);">
+                        <span class="d-node-name">YOU<br>❄️</span><div class="candle-mini"></div>
+                        <div class="d-shadow-box"><span class="ghost-mini">👻</span></div>
+                    </div>
+                    <div class="d-node" style="top: 20px; left: 50%; transform: translateX(-50%);">
+                        <span class="d-node-name">P2</span><div class="candle-mini"></div>
+                        <div class="d-shadow-box"><span class="ghost-mini">👻</span></div>
+                    </div>
+                </div>
+                
+                <div id="diag-3" class="diagram-display">
+                    <div class="center-deck"><div class="card-shape dark-pile">THE<br>DARK</div></div>
+                    <div class="d-node starter" style="bottom: 40px; left: 50%; transform: translateX(-50%);">
+                        <span class="d-node-name">YOU<br>❄️</span><div class="candle-mini"></div>
+                        <div class="d-shadow-box d-shadow-split"><div class="d-shadow-left"><span class="ghost-mini">👻</span></div><div class="d-shadow-right"><span class="ghost-mini">👻</span></div></div>
+                    </div>
+                    <div class="d-node" style="top: 20%; left: 20%;">
+                        <span class="d-node-name">P2 (L)</span><div class="candle-mini"></div>
+                        <div class="d-shadow-box d-shadow-split"><div class="d-shadow-left"><span class="ghost-mini">👻</span></div><div class="d-shadow-right"><span class="ghost-mini">👻</span></div></div>
+                    </div>
+                    <div class="d-node" style="top: 20%; right: 20%;">
+                        <span class="d-node-name">P3 (R)</span><div class="candle-mini"></div>
+                        <div class="d-shadow-box d-shadow-split"><div class="d-shadow-left"><span class="ghost-mini">👻</span></div><div class="d-shadow-right"><span class="ghost-mini">👻</span></div></div>
+                    </div>
+                </div>
+
+                <div id="diag-4" class="diagram-display active">
+                    <div class="center-deck"><div class="card-shape dark-pile">THE<br>DARK</div></div>
+                    <div class="d-node starter" style="bottom: 40px; left: 50%; transform: translateX(-50%);">
+                        <span class="d-node-name">YOU<br>❄️</span><div class="candle-mini"></div>
+                        <div class="d-shadow-box d-shadow-split"><div class="d-shadow-left"><span class="ghost-mini">👻</span></div><div class="d-shadow-right"><span class="ghost-mini">👻</span></div></div>
+                    </div>
+                    <div class="d-node" style="top: 50%; left: 10px;">
+                        <span class="d-node-name">P2 (L)</span><div class="candle-mini"></div>
+                        <div class="d-shadow-box d-shadow-split"><div class="d-shadow-left"><span class="ghost-mini">👻</span></div><div class="d-shadow-right"><span class="ghost-mini">👻</span></div></div>
+                    </div>
+                    <div class="d-node" style="top: 20px; left: 50%; transform: translateX(-50%);">
+                        <span class="d-node-name">P3</span><div class="candle-mini"></div>
+                        <div class="d-shadow-box d-shadow-split"><div class="d-shadow-left"><span class="ghost-mini">👻</span></div><div class="d-shadow-right"><span class="ghost-mini">👻</span></div></div>
+                    </div>
+                    <div class="d-node" style="top: 50%; right: 10px;">
+                        <span class="d-node-name">P4 (R)</span><div class="candle-mini"></div>
+                        <div class="d-shadow-box d-shadow-split"><div class="d-shadow-left"><span class="ghost-mini">👻</span></div><div class="d-shadow-right"><span class="ghost-mini">👻</span></div></div>
+                    </div>
+                </div>
+                
+                <div id="diag-5" class="diagram-display">
+                    <div class="center-deck"><div class="card-shape dark-pile">THE<br>DARK</div></div>
+                    <div class="d-node starter" style="bottom: 40px; left: 50%; transform: translateX(-50%);">
+                        <span class="d-node-name">YOU<br>❄️</span><div class="candle-mini"></div>
+                        <div class="d-shadow-box d-shadow-split"><div class="d-shadow-left"><span class="ghost-mini">👻</span></div><div class="d-shadow-right"><span class="ghost-mini">👻</span></div></div>
+                    </div>
+                    <div class="d-node" style="bottom: 25%; left: 10%;">
+                        <span class="d-node-name">P2 (L)</span><div class="candle-mini"></div>
+                        <div class="d-shadow-box d-shadow-split"><div class="d-shadow-left"><span class="ghost-mini">👻</span></div><div class="d-shadow-right"><span class="ghost-mini">👻</span></div></div>
+                    </div>
+                    <div class="d-node" style="top: 15%; left: 20%;">
+                        <span class="d-node-name">P3</span><div class="candle-mini"></div>
+                        <div class="d-shadow-box d-shadow-split"><div class="d-shadow-left"><span class="ghost-mini">👻</span></div><div class="d-shadow-right"><span class="ghost-mini">👻</span></div></div>
+                    </div>
+                    <div class="d-node" style="top: 15%; right: 20%;">
+                        <span class="d-node-name">P4</span><div class="candle-mini"></div>
+                        <div class="d-shadow-box d-shadow-split"><div class="d-shadow-left"><span class="ghost-mini">👻</span></div><div class="d-shadow-right"><span class="ghost-mini">👻</span></div></div>
+                    </div>
+                    <div class="d-node" style="bottom: 25%; right: 10%;">
+                        <span class="d-node-name">P5 (R)</span><div class="candle-mini"></div>
+                        <div class="d-shadow-box d-shadow-split"><div class="d-shadow-left"><span class="ghost-mini">👻</span></div><div class="d-shadow-right"><span class="ghost-mini">👻</span></div></div>
+                    </div>
+                </div>
+
+                <div id="diag-6" class="diagram-display">
+                    <div class="center-deck"><div class="card-shape dark-pile">THE<br>DARK</div><div class="twin-label">Concurrent Flames (P1, P4)</div></div>
+                    <div class="d-node starter" style="bottom: 40px; left: 50%; transform: translateX(-50%);">
+                        <span class="d-node-name">P1<br>❄️</span><div class="candle-mini"></div>
+                        <div class="d-shadow-box d-shadow-split"><div class="d-shadow-left"><span class="ghost-mini">👻</span></div><div class="d-shadow-right"><span class="ghost-mini">👻</span></div></div>
+                    </div>
+                    <div class="d-node twin" style="top: 20px; left: 50%; transform: translateX(-50%);">
+                        <span class="d-node-name">P4<br>🔥</span><div class="candle-mini"></div>
+                        <div class="d-shadow-box d-shadow-split"><div class="d-shadow-left"><span class="ghost-mini">👻</span></div><div class="d-shadow-right"><span class="ghost-mini">👻</span></div></div>
+                    </div>
+                    <div class="d-node" style="bottom: 20%; left: 10%;">
+                        <span class="d-node-name">P2 (L)</span><div class="candle-mini"></div>
+                        <div class="d-shadow-box d-shadow-split"><div class="d-shadow-left"><span class="ghost-mini">👻</span></div><div class="d-shadow-right"><span class="ghost-mini">👻</span></div></div>
+                    </div>
+                    <div class="d-node" style="top: 20%; left: 10%;">
+                        <span class="d-node-name">P3</span><div class="candle-mini"></div>
+                        <div class="d-shadow-box d-shadow-split"><div class="d-shadow-left"><span class="ghost-mini">👻</span></div><div class="d-shadow-right"><span class="ghost-mini">👻</span></div></div>
+                    </div>
+                    <div class="d-node" style="top: 20%; right: 10%;">
+                        <span class="d-node-name">P5</span><div class="candle-mini"></div>
+                        <div class="d-shadow-box d-shadow-split"><div class="d-shadow-left"><span class="ghost-mini">👻</span></div><div class="d-shadow-right"><span class="ghost-mini">👻</span></div></div>
+                    </div>
+                    <div class="d-node" style="bottom: 20%; right: 10%;">
+                        <span class="d-node-name">P6 (R)</span><div class="candle-mini"></div>
+                        <div class="d-shadow-box d-shadow-split"><div class="d-shadow-left"><span class="ghost-mini">👻</span></div><div class="d-shadow-right"><span class="ghost-mini">👻</span></div></div>
+                    </div>
+                </div>
+                <div id="diag-9" class="diagram-display diagram-9">
+                    <div class="center-deck"><div class="card-shape dark-pile">THE<br>DARK</div><div class="twin-label">Concurrent Flames (P1, P4, P7)</div></div>
+                    <!-- 9 players: symmetrical circle, 40° apart, P1 at bottom (270°) -->
+                    <div class="d-node starter" style="left: 50%; top: 88%; transform: translate(-50%, -50%);"><span class="d-node-name">P1<br>❄️</span><div class="candle-mini"></div><div class="d-shadow-box d-shadow-split"><div class="d-shadow-left"><span class="ghost-mini">👻</span></div><div class="d-shadow-right"><span class="ghost-mini">👻</span></div></div></div>
+                    <div class="d-node" style="left: 74.4%; top: 79.1%; transform: translate(-50%, -50%);"><span class="d-node-name">P2 (L)</span><div class="candle-mini"></div><div class="d-shadow-box d-shadow-split"><div class="d-shadow-left"><span class="ghost-mini">👻</span></div><div class="d-shadow-right"><span class="ghost-mini">👻</span></div></div></div>
+                    <div class="d-node" style="left: 87.3%; top: 56.6%; transform: translate(-50%, -50%);"><span class="d-node-name">P3</span><div class="candle-mini"></div><div class="d-shadow-box d-shadow-split"><div class="d-shadow-left"><span class="ghost-mini">👻</span></div><div class="d-shadow-right"><span class="ghost-mini">👻</span></div></div></div>
+                    <div class="d-node twin" style="left: 82.9%; top: 31%; transform: translate(-50%, -50%);"><span class="d-node-name">P4<br>🔥</span><div class="candle-mini"></div><div class="d-shadow-box d-shadow-split"><div class="d-shadow-left"><span class="ghost-mini">👻</span></div><div class="d-shadow-right"><span class="ghost-mini">👻</span></div></div></div>
+                    <div class="d-node" style="left: 63%; top: 14.3%; transform: translate(-50%, -50%);"><span class="d-node-name">P5</span><div class="candle-mini"></div><div class="d-shadow-box d-shadow-split"><div class="d-shadow-left"><span class="ghost-mini">👻</span></div><div class="d-shadow-right"><span class="ghost-mini">👻</span></div></div></div>
+                    <div class="d-node" style="left: 37%; top: 14.3%; transform: translate(-50%, -50%);"><span class="d-node-name">P6</span><div class="candle-mini"></div><div class="d-shadow-box d-shadow-split"><div class="d-shadow-left"><span class="ghost-mini">👻</span></div><div class="d-shadow-right"><span class="ghost-mini">👻</span></div></div></div>
+                    <div class="d-node twin" style="left: 17.1%; top: 31%; transform: translate(-50%, -50%);"><span class="d-node-name">P7<br>🔥</span><div class="candle-mini"></div><div class="d-shadow-box d-shadow-split"><div class="d-shadow-left"><span class="ghost-mini">👻</span></div><div class="d-shadow-right"><span class="ghost-mini">👻</span></div></div></div>
+                    <div class="d-node" style="left: 12.7%; top: 56.6%; transform: translate(-50%, -50%);"><span class="d-node-name">P8</span><div class="candle-mini"></div><div class="d-shadow-box d-shadow-split"><div class="d-shadow-left"><span class="ghost-mini">👻</span></div><div class="d-shadow-right"><span class="ghost-mini">👻</span></div></div></div>
+                    <div class="d-node" style="left: 25.6%; top: 79.1%; transform: translate(-50%, -50%);"><span class="d-node-name">P9 (R)</span><div class="candle-mini"></div><div class="d-shadow-box d-shadow-split"><div class="d-shadow-left"><span class="ghost-mini">👻</span></div><div class="d-shadow-right"><span class="ghost-mini">👻</span></div></div></div>
+                </div>
+
+                <div id="diag-12" class="diagram-display diagram-12">
+                    <div class="center-deck"><div class="card-shape dark-pile">THE<br>DARK</div><div class="twin-label">Concurrent Flames (P1, P4, P7, P10)</div></div>
+                    <div class="d-node starter" style="left: 50%; top: 88%; transform: translate(-50%, -50%);"><span class="d-node-name">P1<br>❄️</span><div class="candle-mini"></div><div class="d-shadow-box d-shadow-split"><div class="d-shadow-left"><span class="ghost-mini">👻</span></div><div class="d-shadow-right"><span class="ghost-mini">👻</span></div></div></div>
+                    <div class="d-node" style="left: 72.5%; top: 82%; transform: translate(-50%, -50%);"><span class="d-node-name">P2 (L)</span><div class="candle-mini"></div><div class="d-shadow-box d-shadow-split"><div class="d-shadow-left"><span class="ghost-mini">👻</span></div><div class="d-shadow-right"><span class="ghost-mini">👻</span></div></div></div>
+                    <div class="d-node" style="left: 88%; top: 65%; transform: translate(-50%, -50%);"><span class="d-node-name">P3</span><div class="candle-mini"></div><div class="d-shadow-box d-shadow-split"><div class="d-shadow-left"><span class="ghost-mini">👻</span></div><div class="d-shadow-right"><span class="ghost-mini">👻</span></div></div></div>
+                    <div class="d-node twin" style="left: 93%; top: 43%; transform: translate(-50%, -50%);"><span class="d-node-name">P4<br>🔥</span><div class="candle-mini"></div><div class="d-shadow-box d-shadow-split"><div class="d-shadow-left"><span class="ghost-mini">👻</span></div><div class="d-shadow-right"><span class="ghost-mini">👻</span></div></div></div>
+                    <div class="d-node" style="left: 85%; top: 22%; transform: translate(-50%, -50%);"><span class="d-node-name">P5</span><div class="candle-mini"></div><div class="d-shadow-box d-shadow-split"><div class="d-shadow-left"><span class="ghost-mini">👻</span></div><div class="d-shadow-right"><span class="ghost-mini">👻</span></div></div></div>
+                    <div class="d-node" style="left: 70%; top: 10%; transform: translate(-50%, -50%);"><span class="d-node-name">P6</span><div class="candle-mini"></div><div class="d-shadow-box d-shadow-split"><div class="d-shadow-left"><span class="ghost-mini">👻</span></div><div class="d-shadow-right"><span class="ghost-mini">👻</span></div></div></div>
+                    <div class="d-node twin" style="left: 50%; top: 8%; transform: translate(-50%, -50%);"><span class="d-node-name">P7<br>🔥</span><div class="candle-mini"></div><div class="d-shadow-box d-shadow-split"><div class="d-shadow-left"><span class="ghost-mini">👻</span></div><div class="d-shadow-right"><span class="ghost-mini">👻</span></div></div></div>
+                    <div class="d-node" style="left: 30%; top: 10%; transform: translate(-50%, -50%);"><span class="d-node-name">P8</span><div class="candle-mini"></div><div class="d-shadow-box d-shadow-split"><div class="d-shadow-left"><span class="ghost-mini">👻</span></div><div class="d-shadow-right"><span class="ghost-mini">👻</span></div></div></div>
+                    <div class="d-node" style="left: 15%; top: 22%; transform: translate(-50%, -50%);"><span class="d-node-name">P9</span><div class="candle-mini"></div><div class="d-shadow-box d-shadow-split"><div class="d-shadow-left"><span class="ghost-mini">👻</span></div><div class="d-shadow-right"><span class="ghost-mini">👻</span></div></div></div>
+                    <div class="d-node twin" style="left: 7%; top: 43%; transform: translate(-50%, -50%);"><span class="d-node-name">P10<br>🔥</span><div class="candle-mini"></div><div class="d-shadow-box d-shadow-split"><div class="d-shadow-left"><span class="ghost-mini">👻</span></div><div class="d-shadow-right"><span class="ghost-mini">👻</span></div></div></div>
+                    <div class="d-node" style="left: 12%; top: 65%; transform: translate(-50%, -50%);"><span class="d-node-name">P11</span><div class="candle-mini"></div><div class="d-shadow-box d-shadow-split"><div class="d-shadow-left"><span class="ghost-mini">👻</span></div><div class="d-shadow-right"><span class="ghost-mini">👻</span></div></div></div>
+                    <div class="d-node" style="left: 27.5%; top: 82%; transform: translate(-50%, -50%);"><span class="d-node-name">P12 (R)</span><div class="candle-mini"></div><div class="d-shadow-box d-shadow-split"><div class="d-shadow-left"><span class="ghost-mini">👻</span></div><div class="d-shadow-right"><span class="ghost-mini">👻</span></div></div></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="turn">
+            <h2>3. The Passage of Time</h2>
+            <div class="reference-cards-wrap">
+                <img class="reference-card-img" src="images/cards/reference/deathwick_passage_of_time_reference.png" alt="Passage of Time reference card">
+            </div>
+            <dl class="passage-terms">
+                <dt class="game-term">Neighbours</dt>
+                <dd>The two players immediately to your left and right in the circle. You can only Haunt, Drain, etc. a neighbour unless a card says otherwise.</dd>
+                <dt class="game-term">Shadow</dt>
+                <dd>The pile of ghost cards in front of you. For each ghost there, you <strong>Burn</strong> one card from your Candle at the start of your turn.</dd>
+                <dt class="game-term">Burn</dt>
+                <dd>Take the top card of your Candle and put it face up on top of The Dark.</dd>
+                <dt class="game-term">Suit tier</dt>
+                <dd>For tie-breaking: <span class="suit-spades">♠</span> &gt; <span class="suit-hearts">♥</span> &gt; <span class="suit-clubs">♣</span> &gt; <span class="suit-diamonds">♦</span> (Spades, Hearts, Clubs, Diamonds).</dd>
+            </dl>
+            <h3>The Haunting</h3>
+            <p>Look at your <strong>Shadow</strong>. For <strong>each ghost</strong> in your Shadow, <strong>burn 1 card</strong> from the top of your Candle (place it face up on top of The Dark).</p>
+            <h3>The Draw</h3>
+            <p><strong>Draw 1 card</strong> from the top of your Candle into your hand.</p>
+            <h3>The Ritual</h3>
+            <p>Perform <strong>exactly one</strong> of the following actions:</p>
+            <div class="ritual-actions">
+                <div class="ritual-action">
+                    <h4 class="ritual-action-name">HAUNT <span class="ritual-action-tag">Attack</span></h4>
+                    <p class="ritual-action-summary">Choose a neighbour. Play a number card (A–10) from your hand into their Shadow—or a face card (J, Q, K) if you are The Warlock (counts as strength 10). That card becomes a ghost there; they will Burn one card per ghost (to The Dark) at the start of their next turn.</p>
+                </div>
+                <div class="ritual-action">
+                    <h4 class="ritual-action-name">BANISH <span class="ritual-action-tag">Defend</span></h4>
+                    <p class="ritual-action-summary">Play a card from your hand onto one ghost in <em>your</em> Shadow. Your card must have <strong>equal or higher value</strong> than the ghost; on a tie, <strong>suit tier</strong> breaks it: Spades <span class="suit-spades">♠</span> &gt; Hearts <span class="suit-hearts">♥</span> &gt; Clubs <span class="suit-clubs">♣</span> &gt; Diamonds <span class="suit-diamonds">♦</span>. The ghost is destroyed (to The Dark, or to the bottom of your Candle if you Siphon).</p>
+                    <div class="ritual-action-detail">
+                        <strong>Siphon:</strong> If your card’s <strong>rank matches</strong> the ghost’s rank (e.g. 7<span class="suit-hearts">♥</span> on 7<span class="suit-clubs">♣</span>), you <strong>siphon</strong>—put that ghost on the bottom of your Candle instead of The Dark. With <strong>Cleanse (7)</strong>, you can also siphon if <strong>suits match</strong> (e.g. 7<span class="suit-hearts">♥</span> on 3<span class="suit-hearts">♥</span>). You cannot siphon <strong>Spades (<span class="suit-spades">♠</span>)</strong>.
+                    </div>
+                </div>
+                <div class="ritual-action">
+                    <h4 class="ritual-action-name">CAST / SUMMON <span class="ritual-action-tag">Effect</span></h4>
+                    <p class="ritual-action-summary">Discard a card to The Dark to use its effect (see <a href="#grimoire">The Grimoire</a>). Number cards (A–10) have special effects (often choosing a neighbour); face cards (J, Q, K) and Jokers have unique powers.</p>
+                </div>
+                <div class="ritual-action">
+                    <h4 class="ritual-action-name">FLICKER <span class="ritual-action-tag">Reset</span></h4>
+                    <p class="ritual-action-summary">Shuffle your entire hand back into your Candle, then draw 3 new cards to your hand.</p>
+                </div>
+                <div class="ritual-action">
+                    <h4 class="ritual-action-name">SÉANCE <span class="ritual-action-tag">Heal</span></h4>
+                    <p class="ritual-action-summary">Discard a <strong>matching pair</strong> from your hand to the top of The Dark (two cards of the same rank). Take the <strong>bottom 4 cards</strong> of The Dark and add them to the bottom of your Candle.</p>
+                </div>
+                <div class="ritual-action">
+                    <h4 class="ritual-action-name">PANIC <span class="ritual-action-tag">Desperation</span></h4>
+                    <p class="ritual-action-summary">Reveal the <strong>top card of your Candle</strong> (you do not look first). Compare it to the ghost: <strong>higher or equal</strong> = success (ghost destroyed); <strong>lower</strong> = failure (the ghost stays and the revealed card goes to The Dark). Face cards (J, Q, K) count as <strong>0</strong>.</p>
+                    <div class="ritual-action-detail">
+                        <strong>Joker:</strong> Instant success; you siphon the ghost (unless it is a Spade).
+                    </div>
+                </div>
+            </div>
+            <h3>The Burden</h3>
+            <p>Discard down to your hand limit (usually 5 cards).</p>
+            <h3>Am I Alive?</h3>
+            <p><strong>Candle check:</strong> If your Candle is empty, you are <strong>Consumed by the Darkness</strong> and are eliminated.</p>
+            <p><strong>Possession check:</strong> If you have <strong>3 or more ghosts of the same suit</strong> in your Shadow, you are <strong>Possessed</strong> and lose immediately.</p>
+            <p><em>Note:</em> At the <strong>start</strong> of your turn (The Haunting), you burn one card per ghost before you draw. If your Candle is empty when you must burn, you are Consumed then. If your Candle becomes empty <strong>during</strong> your turn, see <a href="#faq">FAQ</a> for the optional ruling.</p>
+        </section>
+
+        <section id="grimoire">
+            <h2>4. The Grimoire</h2>
+            <p class="grimoire-intro">Card art shown is <span class="suit-spades">♠</span> Spades only. Effects are the same for all suits.</p>
+            <div class="reference-cards-wrap">
+                <img class="reference-card-img" src="images/cards/reference/deathwick_grimoire_reference1.png" alt="Grimoire reference card 1">
+                <img class="reference-card-img" src="images/cards/reference/deathwick_grimoire_reference2.png" alt="Grimoire reference card 2">
+            </div>
+            <div class="grimoire-table-wrap">
+            <table class="grimoire-table">
+                <thead><tr><th>Card</th><th>Rank</th><th>Name</th><th>Effect</th></tr></thead>
+                <tbody>
+                    <tr><td><img class="grimoire-card-img" src="images/cards/ranks/ace/deathwick_ace_spades.png" alt="Ace of Spades"></td><td>A</td><td>SIGHT</td><td class="grimoire-effect">Choose a neighbour; reveal their hand to you (The Watcher: both neighbours).</td></tr>
+                    <tr><td><img class="grimoire-card-img" src="images/cards/ranks/two/deathwick_2_spades.png" alt="2 of Spades"></td><td>2</td><td>GREED</td><td class="grimoire-effect">Draw 2 cards to your hand.</td></tr>
+                    <tr><td><img class="grimoire-card-img" src="images/cards/ranks/three/deathwick_3_spades.png" alt="3 of Spades"></td><td>3</td><td>SCARE</td><td class="grimoire-effect">Choose a neighbour. They shuffle their hand and blindly discard 1 card to The Dark (The Sadist: 2 cards to The Dark; you pick which).</td></tr>
+                    <tr><td><img class="grimoire-card-img" src="images/cards/ranks/four/deathwick_4_spades.png" alt="4 of Spades"></td><td>4</td><td>DRAIN</td><td class="grimoire-effect">Choose a neighbour. Take the top card of their Candle and put it on top of your Candle.</td></tr>
+                    <tr><td><img class="grimoire-card-img" src="images/cards/ranks/five/deathwick_5_spades.png" alt="5 of Spades"></td><td>5</td><td>SALT</td><td class="grimoire-effect"><strong>Reaction:</strong> Cancel an action targeting you; your Salt and their card go to The Dark (see Salt section below).</td></tr>
+                    <tr><td><img class="grimoire-card-img" src="images/cards/ranks/six/deathwick_6_spades.png" alt="6 of Spades"></td><td>6</td><td>CLAIM</td><td class="grimoire-effect">Choose a neighbour. Take 1 random card from their hand and add it to your hand.</td></tr>
+                    <tr><td><img class="grimoire-card-img" src="images/cards/ranks/seven/deathwick_7_spades.png" alt="7 of Spades"></td><td>7</td><td>CLEANSE</td><td class="grimoire-effect">Destroy 1 ghost from your Shadow (to the top of The Dark, or to the bottom of your Candle if Siphon—rank or suit match; <span class="suit-spades">♠</span> cannot be Siphoned).</td></tr>
+                    <tr><td><img class="grimoire-card-img" src="images/cards/ranks/eight/deathwick_8_spades.png" alt="8 of Spades"></td><td>8</td><td>RECALL</td><td class="grimoire-effect">Take a ghost from any Shadow and add it to your hand.</td></tr>
+                    <tr><td><img class="grimoire-card-img" src="images/cards/ranks/nine/deathwick_9_spades.png" alt="9 of Spades"></td><td>9</td><td>POSSESS</td><td class="grimoire-effect">Move a ghost from your Shadow to a neighbour's Shadow (The Occultist: any player's Shadow).</td></tr>
+                    <tr><td><img class="grimoire-card-img" src="images/cards/ranks/ten/deathwick_10_spades.png" alt="10 of Spades"></td><td>10</td><td>REKINDLE</td><td class="grimoire-effect">Take the top 3 cards from The Dark and put them on top of your Candle.</td></tr>
+                    <tr><td><img class="grimoire-card-img" src="images/cards/ranks/jack/deathwick_jack_spades.png" alt="Jack of Spades"></td><td>J</td><td>MIRROR</td><td class="grimoire-effect">Choose a neighbour and swap your Shadow with their Shadow.</td></tr>
+                    <tr><td><img class="grimoire-card-img" src="images/cards/ranks/queen/deathwick_queen_spades.png" alt="Queen of Spades"></td><td>Q</td><td>MEDIUM</td><td class="grimoire-effect">Choose: take 1 card from The Dark to your hand, OR take the top 2 cards from The Dark and put them on top of your Candle.</td></tr>
+                    <tr><td><img class="grimoire-card-img" src="images/cards/ranks/king/deathwick_king_spades.png" alt="King of Spades"></td><td>K</td><td>PURGE</td><td class="grimoire-effect">Banish all ghosts in your Shadow (to the top of The Dark; Siphon if rank matches and not Spades—Siphoned Ghost to bottom of your Candle).</td></tr>
+                    <tr><td><span class="grimoire-jokers-wrap"><img class="grimoire-card-img" src="images/cards/ranks/joker/deathwick_joker.png" alt="Joker"><img class="grimoire-card-img" src="images/cards/ranks/joker/deathwick_joker2.png" alt="Joker 2"><img class="grimoire-card-img" src="images/cards/ranks/joker/deathwick_joker3.png" alt="Joker 3"><img class="grimoire-card-img" src="images/cards/ranks/joker/deathwick_joker4.png" alt="Joker 4"></span></td><td>JOKER</td><td>BOO!</td><td class="grimoire-effect">Each other player Burns from the top of their Candle until they reveal a number card (burned cards go to the top of The Dark; the number card becomes a ghost in their Shadow).</td></tr>
+                </tbody>
+            </table>
+            </div>
+
+            <h3 id="quick-ref">Quick reference (card effects)</h3>
+            <p class="grimoire-intro">Compact list for quick lookup.</p>
+            <div class="manual-ref-wrap">
+                <table class="manual-ref-table">
+                    <thead><tr><th>Rank</th><th>Name</th><th>Effect</th></tr></thead>
+                    <tbody>
+                        <tr><td>A</td><td>Sight</td><td class="manual-ref-effect">Choose a neighbour; reveal their hand (Watcher: both).</td></tr>
+                        <tr><td>2</td><td>Greed</td><td class="manual-ref-effect">Draw 2 to your hand.</td></tr>
+                        <tr><td>3</td><td>Scare</td><td class="manual-ref-effect">Choose a neighbour; they shuffle hand, discard 1 to The Dark (Sadist: 2 to The Dark).</td></tr>
+                        <tr><td>4</td><td>Drain</td><td class="manual-ref-effect">Choose a neighbour; take top of their Candle, put on top of yours.</td></tr>
+                        <tr><td>5</td><td>Salt</td><td class="manual-ref-effect">Reaction: cancel action targeting you (both to The Dark).</td></tr>
+                        <tr><td>6</td><td>Claim</td><td class="manual-ref-effect">Choose a neighbour; take 1 random from their hand and add to yours.</td></tr>
+                        <tr><td>7</td><td>Cleanse</td><td class="manual-ref-effect">Destroy 1 Ghost (to The Dark or Siphon to your Candle).</td></tr>
+                        <tr><td>8</td><td>Recall</td><td class="manual-ref-effect">Take a Ghost from any Shadow to your hand.</td></tr>
+                        <tr><td>9</td><td>Possess</td><td class="manual-ref-effect">Move a Ghost from your Shadow to a neighbour's Shadow.</td></tr>
+                        <tr><td>10</td><td>Rekindle</td><td class="manual-ref-effect">Top 3 from The Dark → top of your Candle.</td></tr>
+                        <tr><td>J</td><td>Mirror</td><td class="manual-ref-effect">Choose a neighbour and swap your Shadow with their Shadow.</td></tr>
+                        <tr><td>Q</td><td>Medium</td><td class="manual-ref-effect">1 from Dark to hand, OR top 2 from Dark → top of your Candle.</td></tr>
+                        <tr><td>K</td><td>Purge</td><td class="manual-ref-effect">Banish all Ghosts in your Shadow (to The Dark / Siphon).</td></tr>
+                        <tr><td>★</td><td>BOO!</td><td class="manual-ref-effect">Others Burn until number (to The Dark); number → Ghost in their Shadow.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="classes">
+            <h2>5. The Cursed (Classes)</h2>
+            <div class="classes-grid" id="manual-class-grid"></div>
+        </section>
+
+        <section id="faq">
+            <h2>6. FAQ &amp; Edge Cases</h2>
+            <p style="border: 1px solid var(--accent-color); padding: 10px; border-radius: 4px; background: #1a1a22;">
+                <strong>When in doubt:</strong> Use your best judgement in a way that <strong>favours the worst-case scenario</strong> (e.g. rule against the player who could gain, or in favour of the defender).
+            </p>
+            <h3>Siphon</h3>
+            <p><strong>Siphon</strong> is one of the rules: when you remove a Ghost from your Shadow in the right way, you can <strong>Heal</strong>—put that Ghost on the <strong>bottom of your Candle</strong> instead of sending it to The Dark. You get a card back; your Candle lasts longer.</p>
+            <ul class="faq-list">
+                <li><strong>When do I Siphon?</strong> When you <strong>Banish</strong> a Ghost: play a card from your hand that meets or beats the Ghost (value, and suit tier on a tie). If your card’s <strong>rank matches</strong> the Ghost’s rank (e.g. your 7<span class="suit-hearts">♥</span> on a 7<span class="suit-clubs">♣</span> Ghost), you Siphon—the Ghost goes to the bottom of your Candle. If the ranks don’t match, you still destroy the Ghost but it goes to the top of The Dark (no heal).</li>
+                <li><strong>Siphon when suits match (Cleanse 7):</strong> When you Banish a Ghost with a <strong>7 (Cleanse)</strong>, you can also Siphon if your card’s <strong>suit matches</strong> the Ghost’s suit (e.g. 7<span class="suit-hearts">♥</span> on a 3<span class="suit-hearts">♥</span> Ghost)—the Ghost goes to the bottom of your Candle. Spades <span class="suit-spades">♠</span> still cannot be Siphoned; only Hearts <span class="suit-hearts">♥</span>, Clubs <span class="suit-clubs">♣</span>, and Diamonds <span class="suit-diamonds">♦</span>.</li>
+                <li><strong>Same rank and same suit (e.g. 7<span class="suit-hearts">♥</span> on 7<span class="suit-hearts">♥</span>):</strong> In games with <strong>3 or more players</strong>, you use multiple decks, so two identical cards can exist. You can Banish a 7<span class="suit-hearts">♥</span> Ghost with your 7<span class="suit-hearts">♥</span> (equal value). Since rank matches—and suits match—you <strong>Siphon</strong>; the Ghost goes to the bottom of your Candle. Not if the Ghost is a Spade <span class="suit-spades">♠</span>.</li>
+                <li><strong>Face card ghost (e.g. from The Warlock’s Haunt):</strong> If someone Haunted you with a <strong>face card</strong> (J, Q, K—e.g. The Warlock using a face as strength 10), that ghost is in your Shadow. When you <strong>Banish</strong> it (with a 10, or by Casting the matching face card), if your card’s <strong>suit matches</strong> the ghost’s suit, you <strong>Siphon</strong>—the ghost goes to the bottom of your Candle. Spades <span class="suit-spades">♠</span> cannot be Siphoned.</li>
+                <li><strong>Spades <span class="suit-spades">♠</span> can never be Siphoned because they are cursed by the darkness.</strong> You can Banish a Spade ghost (destroy it), but it always goes to the top of The Dark. Only Hearts <span class="suit-hearts">♥</span>, Clubs <span class="suit-clubs">♣</span>, and Diamonds <span class="suit-diamonds">♦</span> can be Siphoned (whether by rank match or, with Cleanse, suit match).</li>
+                <li><strong>Do I still use my card when I Siphon?</strong> Yes. You discard the card you played; only the Ghost is healed to the bottom of your Candle.</li>
+                <li><strong>Panic and Joker:</strong> If you Panic and flip a Joker, you Siphon the Ghost (unless it’s a Spade).</li>
+            </ul>
+            <h3>Banish (how you remove Ghosts)</h3>
+            <ul class="manual-bullets">
+                <li><strong>Banish</strong> = play one card from your hand onto one Ghost in <em>your</em> Shadow.</li>
+                <li>Your card must have <strong>equal or higher value</strong> than the Ghost; on a tie, <strong>suit tier</strong> breaks it: Spades <span class="suit-spades">♠</span> &gt; Hearts <span class="suit-hearts">♥</span> &gt; Clubs <span class="suit-clubs">♣</span> &gt; Diamonds <span class="suit-diamonds">♦</span>.</li>
+                <li>The Ghost is destroyed. If <strong>rank matched</strong> (or, for Cleanse 7, <strong>suit matched</strong>) and the Ghost wasn’t a Spade, you <strong>Siphon</strong> it (Ghost goes to the bottom of your Candle—see Siphon above).</li>
+            </ul>
+            <h3>Salt (reaction)</h3>
+            <ul class="manual-bullets">
+                <li><strong>Salt (5)</strong> is a <strong>reaction</strong>, not a turn action: keep it in hand until a neighbour (or other player) targets you (e.g. with a Haunt), then you may reveal Salt to <strong>interrupt</strong> (your Salt and their card go to The Dark).</li>
+            </ul>
+            <ul class="faq-list">
+                <li><strong>When the defender uses Salt:</strong> The defender's Salt and the attacker's card both go to the top of The Dark. The <strong>attacker's turn ends</strong> immediately. The defender does <strong>not</strong> lose their turn—the interrupt happens during the attacker's turn.</li>
+                <li><strong>Counter-Salt:</strong> The attacker may respond with their own Salt to "counter" the interrupt. If they do, their Salt and the defender's Salt both go to the top of The Dark, and the defender may interrupt again with another Salt (if they have one). This can repeat as long as both players have Salt in hand. The <strong>last player to play Salt</strong> decides the outcome: if the defender played last, the action is cancelled (attacker's card and defender's Salt to the top of The Dark, attacker's turn ends). If the attacker played last (or the defender allows), the original action (e.g. Haunt) goes through.</li>
+            </ul>
+            <h3>Consumed by the Darkness</h3>
+            <ul class="manual-bullets">
+                <li>If your <strong>Candle is empty</strong> when you must <strong>Burn</strong> (e.g. at the start of your turn, one Burn per Ghost in your Shadow), you are <strong>Consumed by the Darkness</strong> and are eliminated immediately.</li>
+                <li>You Burn one card at a time; the first time you have no card to Burn, you lose.</li>
+                <li><strong>Empty Candle during your turn?</strong> If your Candle becomes empty <em>during</em> your turn (e.g. after an action or effect), agree before the game which ruling to use: <strong>Eliminated immediately</strong> (you cannot finish your turn), or <strong>Check at end of turn</strong> (you finish your action, then The Burden, then Am I Alive?). Most groups prefer the latter so the player gets a last turn.</li>
+                <li><strong>Standard ritual</strong> = check at end of turn; <strong>Dark ritual</strong> = eliminated immediately when Candle becomes empty. The digital version lets you pick either when starting a match.</li>
+            </ul>
+            <h3>Possession</h3>
+            <ul class="manual-bullets">
+                <li>At the <strong>end of your turn</strong> (after your one action and after discarding down to hand limit), check your <strong>Shadow</strong>.</li>
+                <li>If you have <strong>3 or more ghosts of the same suit</strong>, you are <strong>Possessed</strong> and lose immediately. You have your whole turn to Banish, Siphon, Recall, or otherwise reduce your Shadow before this check.</li>
+            </ul>
+            <h3>Other common questions</h3>
+            <ul class="faq-list">
+                <li><strong>What does “once per turn” mean?</strong> It depends on whose turn is relevant. For <strong>your own</strong> abilities (e.g. a class action like The Pyromaniac’s “Once per turn”), it means once per <strong>your</strong> turn—it resets at the start of your next turn. For <strong>reactions to another player</strong> (e.g. <strong>The Unseen</strong> cancelling a Haunt, or <strong>The Hex</strong> cancelling with a matching rank), it means once per <strong>that other player’s turn</strong>—so each different attacker has one chance per their turn to be cancelled; The Unseen can cancel once per attacker per round. See the Edge cases below for Haunt vs The Unseen / The Hex.</li>
+                <li><strong>When a Joker (BOO!) is played, how does the Burn work?</strong> Each other player Burns from the top of their Candle one card at a time. If they reveal a <strong>face card</strong> (J, Q, K or Joker), that card goes to the top of The Dark and they must Burn again. This repeats as many times as needed until they reveal a <strong>number card</strong> (A–10). That number card becomes a Ghost in their Shadow; the Burning then stops for that player. (If their Candle runs out before they hit a number, they are Consumed by the Darkness.)</li>
+                <li><strong>If two effects happen at once (e.g. death and “when a neighbour dies”), who resolves first?</strong> The active player’s triggers resolve first, then clockwise. If still unclear, favour the worst-case (e.g. defender).</li>
+                <li><strong>Concurrent Flames: do the two (or three) players take turns with each other?</strong> No. Each concurrent player takes one full turn (Burn, Draw, One Action, Discard) in parallel; they do not interrupt each other’s turn.</li>
+            </ul>
+            <h3>Edge cases</h3>
+            <ul class="faq-list">
+                <li><strong>Mirror (J) or Possess (9) vs The Gatekeeper.</strong> Blocked; card not spent.</li>
+                <li><strong>Haunt vs The Unseen.</strong> Once per <strong>that attacker's turn</strong>, when a neighbour would Haunt The Unseen, they may discard 1 card to The Dark to cancel the Haunt (both cards go to The Dark). One cancel per attacker's turn, not only once per round.</li>
+                <li><strong>Haunt vs The Hex.</strong> Once per <strong>that attacker's turn</strong>, when a neighbour plays a number card to Haunt The Hex, they may reveal a matching rank from hand to cancel it (both cards go to The Dark). One cancel per attacker's turn, not one per round.</li>
+                <li><strong>Hand limit (e.g. The Hoarder 8):</strong> Discard down at end of your turn. Effects that add cards can push you over until end of that turn.</li>
+                <li><strong>“Top of Candle” effects with no cards:</strong> Effect fizzles (e.g. Drain does nothing).</li>
+            </ul>
+        </section>
+
+        <section id="concurrent-flames-table">
+            <h2>Concurrent Flames table (6–22 players)</h2>
+            <p>When 6 or more players are in the game, the players listed below take their turns <strong>at the same time</strong> (each does Burn, Draw, One Action, Discard in parallel). After they finish, the round advances clockwise to the next group. In the digital version, the game adjusts when players leave the circle (elimination), so the active group may differ from this starting layout.</p>
+            <table class="concurrent-flames-table">
+                <thead><tr><th>Players</th><th>Concurrent flames (act simultaneously)</th></tr></thead>
+                <tbody>
+                    <tr><td>6</td><td>P1, P4</td></tr>
+                    <tr><td>7</td><td>P1, P4, P7</td></tr>
+                    <tr><td>8</td><td>P1, P4, P7</td></tr>
+                    <tr><td>9</td><td>P1, P4, P7</td></tr>
+                    <tr><td>10</td><td>P1, P4, P7, P10</td></tr>
+                    <tr><td>11</td><td>P1, P4, P7, P10</td></tr>
+                    <tr><td>12</td><td>P1, P4, P7, P10</td></tr>
+                    <tr><td>13</td><td>P1, P4, P7, P10, P13</td></tr>
+                    <tr><td>14</td><td>P1, P4, P7, P10, P13</td></tr>
+                    <tr><td>15</td><td>P1, P4, P7, P10, P13</td></tr>
+                    <tr><td>16</td><td>P1, P4, P7, P10, P13, P16</td></tr>
+                    <tr><td>17</td><td>P1, P4, P7, P10, P13, P16</td></tr>
+                    <tr><td>18</td><td>P1, P4, P7, P10, P13, P16</td></tr>
+                    <tr><td>19</td><td>P1, P4, P7, P10, P13, P16, P19</td></tr>
+                    <tr><td>20</td><td>P1, P4, P7, P10, P13, P16, P19</td></tr>
+                    <tr><td>21</td><td>P1, P4, P7, P10, P13, P16, P19</td></tr>
+                    <tr><td>22</td><td>P1, P4, P7, P10, P13, P16, P19, P22</td></tr>
+                </tbody>
+            </table>
+        </section>
+
+        <div id="grimoire-card-preview" class="grimoire-card-preview" role="dialog" aria-modal="true" aria-label="Card preview" aria-hidden="true">
+            <div class="grimoire-card-preview-backdrop"></div>
+            <img class="grimoire-card-preview-img" src="" alt="">
+        </div>
+
+        <footer>
+            <p>Sound effects: <a href="attribution.html">Sound effects attribution</a>.</p>
+            <p><strong>DEATHWICK</strong> &copy; 2026. All Rights Reserved.</p>
+        </footer>
+    </div>
+
+    <script src="js/data.js"></script>
+    <script src="js/manual.js"></script>
+</body>
+</html>

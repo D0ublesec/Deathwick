@@ -1,0 +1,112 @@
+/* Deathwick — Design tokens (ritual circle, flickering candles) */
+:root {
+    --bg-color: #060508;
+    --bg-elevated: #0c0a0e;
+    --bg-card: #120f14;
+    --text-color: #e8e4dc;
+    --text-muted: #7a756d;
+    --accent-color: #c94d28;
+    --accent-glow: rgba(201, 77, 40, 0.4);
+    --ice-color: #6eb5c0;
+    --ghost-color: #8a8a8a;
+    --life-color: #3d8b47;
+    --panic-color: #c73a2e;
+    --magic-color: #9b6ed4;
+    --target-color: #9b6ed4;
+    --target-glow: rgba(155, 110, 212, 0.45);
+    --class-color: #d4a03a;
+    --salt-color: #e8dcb8;
+    --border-color: #2a2520;
+    --border-focus: #3d352c;
+    --highlight: #e85d2c;
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 14px;
+    --shadow-card: 0 4px 16px rgba(0, 0, 0, 0.5);
+    --shadow-card-hover: 0 8px 28px rgba(0, 0, 0, 0.6);
+    --transition-fast: 0.15s ease;
+    --transition-normal: 0.25s ease;
+    --font-heading: 'Cormorant Garamond', 'Georgia', serif;
+    --font-body: 'DM Sans', 'Segoe UI', system-ui, sans-serif;
+    /* Ritual circle & candles */
+    --ritual-surface: #0f0d0a;
+    --ritual-ring: rgba(201, 77, 40, 0.25);
+    --ritual-rune: rgba(180, 160, 120, 0.15);
+    --flame-inner: #fff8b0;
+    --flame-mid: #ffb347;
+    --flame-outer: #e85d2c;
+    --flame-glow: rgba(255, 180, 80, 0.5);
+    --candle-wax: #e8e0c8;
+    --candle-wax-shadow: #a09878;
+    --dark-pit: #050408;
+    --dark-glow: rgba(80, 40, 60, 0.3);
+    /* Ritual theme: fire (default) vs blood — overridden by body.ritual-theme-blood */
+    --ritual-bg: #0a0806;
+    --ritual-bg-radial: rgba(60, 30, 15, 0.5);
+    --ritual-table-surface: #141210;
+    --ritual-table-light: #1c1814;
+    --ritual-table-gradient: #0e0c0a;
+    --ritual-ring-color: rgba(201, 77, 40, 0.3);
+    --ritual-sigil-color: rgba(180, 80, 50, 0.2);
+    /* Ritual table depth: 3D stone disc, lit from above */
+    --ritual-table-rim: #0a0806;
+    --ritual-table-highlight: rgba(255, 200, 120, 0.08);
+    --ritual-table-groove: rgba(0, 0, 0, 0.45);
+    --ritual-sigil-glow: rgba(201, 77, 40, 0.25);
+    --ritual-sigil-shadow: rgba(60, 20, 10, 0.6);
+    --ritual-candle-glow: rgba(255, 180, 90, 0.22);
+    /* Mobile & fold-friendly */
+    --touch-min: 44px;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-left: env(safe-area-inset-left, 0px);
+    --safe-right: env(safe-area-inset-right, 0px);
+}
+
+/* Blood theme — deep red, ritual sigil / blood circle */
+body.game-page.ritual-theme-blood {
+    --ritual-bg: #0c0505;
+    --ritual-bg-radial: rgba(80, 20, 20, 0.6);
+    --ritual-table-surface: #120a0a;
+    --ritual-table-light: #1a1212;
+    --ritual-table-gradient: #0f0606;
+    --ritual-ring-color: rgba(140, 30, 30, 0.5);
+    --ritual-rune: rgba(120, 40, 40, 0.25);
+    --ritual-sigil-color: rgba(100, 25, 25, 0.35);
+    --ritual-table-rim: #080404;
+    --ritual-table-highlight: rgba(200, 100, 80, 0.06);
+    --ritual-table-groove: rgba(0, 0, 0, 0.5);
+    --ritual-sigil-glow: rgba(140, 30, 30, 0.4);
+    --ritual-sigil-shadow: rgba(40, 5, 5, 0.7);
+    --ritual-candle-glow: rgba(180, 60, 50, 0.28);
+    --accent-color: #a82a2a;
+    --accent-glow: rgba(140, 40, 40, 0.4);
+    --flame-outer: #8b2020;
+    --flame-mid: #b03030;
+    --flame-glow: rgba(120, 40, 40, 0.5);
+    --dark-pit: #020102;
+    --dark-glow: rgba(60, 15, 20, 0.5);
+}
+
+/* Fire theme (default) — ember, warm candlelight, dark table */
+body.game-page.ritual-theme-fire {
+    --ritual-bg: #0a0806;
+    --ritual-bg-radial: rgba(60, 30, 15, 0.5);
+    --ritual-table-surface: #141210;
+    --ritual-table-light: #1c1814;
+    --ritual-table-gradient: #0e0c0a;
+    --ritual-ring-color: rgba(201, 77, 40, 0.3);
+}
+
+/* Dark ritual — stricter ruling + darker theme */
+body.game-page.dark-mode {
+    --bg-color: #030305;
+    --bg-elevated: #08060a;
+    --bg-card: #0a080c;
+    --border-color: #1a1815;
+    --border-focus: #252220;
+    --text-muted: #5a5650;
+    --accent-color: #a83d20;
+    --accent-glow: rgba(168, 61, 32, 0.3);
+    --ritual-ring: rgba(168, 61, 32, 0.2);
+}
