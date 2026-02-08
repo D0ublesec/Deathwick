@@ -62,6 +62,16 @@ nav a:hover {
     margin: 0 auto;
 }
 
+/* Content links: orange (accent) instead of default blue */
+#manual-view a {
+    color: var(--accent-color);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+#manual-view a:hover {
+    color: var(--highlight);
+}
+
 h1, h2, h3 {
     font-family: var(--font-heading);
     color: var(--accent-color);

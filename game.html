@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Deathwick — Play</title>
+    <title>Deathwick - Play</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect fill='%231a1612' stroke='%23666' width='20' height='28' x='6' y='2' rx='2'/><text x='16' y='20' font-size='12' fill='%23b8b4ac' text-anchor='middle' font-family='sans-serif'>F</text></svg>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,6 +15,7 @@
 
     <nav class="game-nav">
         <a href="index.html" onclick="showManual(); return false;">← Manual</a>
+        <a href="plans.html" class="game-nav-link">Plans</a>
         <div id="view-switcher-wrap" class="view-switcher-wrap">
             <span class="view-switcher-label">View:</span>
             <button type="button" class="view-switcher-btn active" id="view-btn-neighbours" onclick="setViewAllPlayers(false)">Neighbours</button>
@@ -151,7 +152,7 @@
 
     <div id="alert-modal" class="modal">
         <div class="modal-content alert-modal-content">
-            <h2 id="alert-modal-title" style="color:var(--accent-color)">—</h2>
+            <h2 id="alert-modal-title" style="color:var(--accent-color)">···</h2>
             <p id="alert-modal-msg"></p>
             <button type="button" class="game-btn" id="alert-modal-btn" onclick="closeAlertModal()">OK</button>
         </div>
@@ -170,7 +171,7 @@
 
     <div id="oracle-modal" class="modal" style="display:none;">
         <div class="modal-content">
-            <h2 style="color:var(--magic-color)">THE ORACLE — Precognition</h2>
+            <h2 style="color:var(--magic-color)">THE ORACLE - Precognition</h2>
             <p>Top card of your Candle:</p>
             <div id="oracle-card-slot" class="card-slot-inline"></div>
             <p style="margin-top:8px;">Put it on top or on the bottom?</p>
