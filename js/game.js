@@ -184,7 +184,7 @@
 
     function showManual() {
         saveGameState();
-        window.location.href = 'index.html';
+        window.location.href = 'manual.html';
     }
 
     function showClassDesc(cls) {
