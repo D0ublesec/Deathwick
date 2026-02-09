@@ -1111,7 +1111,7 @@
         var hintEl = document.getElementById('selection-hint');
         if (hintEl) {
             if (gameState.selectionMode === 'SELECT_GHOST') {
-                hintEl.textContent = gameState.selectionTarget != null ? 'Select a ghost (yours)' : 'Select a ghost';
+                hintEl.textContent = gameState.pendingDoomreader ? 'Select a ghost in your Shadow to change its suit.' : (gameState.selectionTarget != null ? 'Select a ghost (yours)' : 'Select a ghost');
                 hintEl.style.display = 'block';
             } else if (gameState.selectionMode === 'SELECT_TARGET') {
                 hintEl.textContent = 'Select target player';
@@ -1119,6 +1119,12 @@
             } else if (gameState.selectionMode === 'DISCARD_DOWN' && gameState.pendingDiscardDown) {
                 var pd = gameState.pendingDiscardDown;
                 hintEl.textContent = 'Discard down to ' + pd.handLimit + ': select ' + pd.needToDiscard + ' card(s) to discard';
+                hintEl.style.display = 'block';
+            } else if (gameState.selectionMode === 'PHANTOM_DISCARD') {
+                hintEl.textContent = 'Click a card in your hand to discard (cancel the Haunt).';
+                hintEl.style.display = 'block';
+            } else if (gameState.selectionMode === 'MIME_REDIRECT_DISCARD' && gameState.pendingMimeRedirect) {
+                hintEl.textContent = 'Click a card to discard (redirect Haunt to ' + gameState.pendingMimeRedirect.otherNeighbour.name + ').';
                 hintEl.style.display = 'block';
             } else {
                 hintEl.textContent = '';
@@ -1461,6 +1467,80 @@
         }
     }
 
+    function resolveMimeRedirect(allow) {
+        var pm = gameState.pendingMimeRedirect;
+        var mimeModal = document.getElementById('mime-modal');
+        if (mimeModal) mimeModal.style.display = 'none';
+        if (!pm) return;
+        if (allow) {
+            var mimeHauntContinuation = function () {
+                var cardCopy = { r: pm.card.r, s: pm.card.s, val: pm.card.val, isFace: pm.card.isFace };
+                if (pm.attacker.class && pm.attacker.class.name === 'THE WARLOCK' && (pm.card.isFace || pm.card.r === 'JOKER')) cardCopy.val = 10;
+                cardCopy.hauntedBy = pm.attacker.id;
+                if (!gameState.lastDamageTo) gameState.lastDamageTo = {};
+                gameState.lastDamageTo[pm.mime.id] = pm.attacker.id;
+                pm.mime.shadow.push(cardCopy);
+                pm.attacker.hand.splice(pm.handIdx, 1);
+                if (pm.mime.class && pm.mime.class.name === 'THE VOODOO DOLL') {
+                    gameState.lastDiscardByPlayerId = pm.attacker.id;
+                    if (pm.attacker.candle.length) gameState.discard.push(pm.attacker.candle.shift());
+                    log(pm.attacker.name + ' (THE VOODOO DOLL) also Burned 1.');
+                }
+                if (pm.attacker.class && pm.attacker.class.name === 'THE MEDDLER' && pm.mime.candle.length > 0) {
+                    var top = pm.mime.candle.shift();
+                    pm.mime.candle.push(top);
+                    log(pm.attacker.name + ' (THE MEDDLER) put ' + pm.mime.name + "'s top Candle on bottom.");
+                }
+                log(pm.attacker.name + ' Haunted ' + pm.mime.name + ' with ' + pm.card.r + pm.card.s);
+                if (typeof window.playSFX === 'function') window.playSFX('haunt');
+                clearTargetMode();
+                finishAction();
+            };
+            gameState.pendingMimeRedirect = null;
+            checkSaltInterrupt(pm.attacker, pm.mime, pm.card, mimeHauntContinuation);
+        } else {
+            gameState.selectionMode = 'MIME_REDIRECT_DISCARD';
+            log('Click a card in your hand to discard (redirect Haunt to ' + pm.otherNeighbour.name + ').');
+            updateUI();
+        }
+    }
+
+    function resolveMimeRedirectWithCard(discardIdx) {
+        var pm = gameState.pendingMimeRedirect;
+        if (!pm || !pm.mime || discardIdx < 0 || discardIdx >= pm.mime.hand.length) return;
+        var discarded = pm.mime.hand.splice(discardIdx, 1)[0];
+        gameState.lastDiscardByPlayerId = pm.mime.id;
+        gameState.discard.push(discarded);
+        log(pm.mime.name + ' (THE MIME) discarded 1 to redirect Haunt to ' + pm.otherNeighbour.name + '.');
+        gameState.pendingMimeRedirect = null;
+        gameState.selectionMode = null;
+        doHauntWithTarget(pm.otherNeighbour);
+        updateUI();
+    }
+
+    function resolveCryptkeeperBlock(useWall) {
+        var pb = gameState.pendingCryptkeeperBlock;
+        var ckModal = document.getElementById('cryptkeeper-modal');
+        if (ckModal) ckModal.style.display = 'none';
+        if (!pb) return;
+        if (useWall) {
+            var wallIdx = -1;
+            for (var w = 0; w < pb.t.shadow.length; w++) { if (pb.t.shadow[w].isWall) { wallIdx = w; break; } }
+            var wall = pb.t.shadow.splice(wallIdx, 1)[0];
+            gameState.lastDiscardByPlayerId = pb.t.id;
+            gameState.discard.push(pb.cardCopy);
+            gameState.discard.push(wall);
+            pb.p.hand.splice(pb.idx, 1);
+            log(pb.t.name + ' (THE CRYPTKEEPER) Wall blocked the Haunt! Ghost and Wall → The Dark.');
+            clearTargetMode();
+            finishAction();
+        } else {
+            pb.doRest();
+        }
+        gameState.pendingCryptkeeperBlock = null;
+        updateUI();
+    }
+
     function resolvePhantomCancelWithCard(discardIdx) {
         var pm = gameState.pendingPhantomCancel;
         if (!pm || !pm.target || discardIdx < 0 || discardIdx >= pm.target.hand.length) return;
@@ -1481,6 +1561,10 @@
     function selectCard(idx) {
         if (gameState.pendingPhantomCancel && gameState.selectionMode === 'PHANTOM_DISCARD') {
             resolvePhantomCancelWithCard(idx);
+            return;
+        }
+        if (gameState.pendingMimeRedirect && gameState.selectionMode === 'MIME_REDIRECT_DISCARD') {
+            resolveMimeRedirectWithCard(idx);
             return;
         }
         if (gameState.selectionMode === 'DISCARD_DOWN') {
@@ -1762,23 +1846,60 @@
             if (!t) return;
             log(jesterTarget.name + ' (THE MIME) redirected Haunt to ' + t.name + '.');
         }
+        if (t.class && t.class.name === 'THE MIME' && t.hand.length >= 1 && t.type === 'human' && n.left && n.right) {
+            var otherNeighbour = n.left === t ? n.right : n.left;
+            gameState.pendingMimeRedirect = { attacker: p, mime: t, card: c, handIdx: idx, otherNeighbour: otherNeighbour };
+            var mimeModal = document.getElementById('mime-modal');
+            var mimeMsg = document.getElementById('mime-msg');
+            if (mimeMsg) mimeMsg.textContent = 'Discard 1 card to redirect this Haunt to ' + otherNeighbour.name + '?';
+            if (mimeModal) mimeModal.style.display = 'flex';
+            return;
+        }
         var hauntContinuation = function () {
             var cardCopy = { r: c.r, s: c.s, val: c.val, isFace: c.isFace };
             if (p.class && p.class.name === 'THE WARLOCK' && (c.isFace || c.r === 'JOKER')) cardCopy.val = 10;
             cardCopy.hauntedBy = p.id;
             var architectHasWall = t.shadow.some(function (g) { return g.isWall; });
             if (t.class && t.class.name === 'THE CRYPTKEEPER' && architectHasWall) {
-                var wallIdx = -1;
-                for (var w = 0; w < t.shadow.length; w++) { if (t.shadow[w].isWall) { wallIdx = w; break; } }
-                var wall = t.shadow.splice(wallIdx, 1)[0];
-                gameState.lastDiscardByPlayerId = t.id;
-                gameState.discard.push(cardCopy);
-                gameState.discard.push(wall);
-                p.hand.splice(idx, 1);
-                log(t.name + ' (THE CRYPTKEEPER) Wall blocked the Haunt! Ghost and Wall → The Dark.');
-                clearTargetMode();
-                finishAction();
-                return;
+                if (t.type === 'ai') {
+                    var wallIdx = -1;
+                    for (var w = 0; w < t.shadow.length; w++) { if (t.shadow[w].isWall) { wallIdx = w; break; } }
+                    var wall = t.shadow.splice(wallIdx, 1)[0];
+                    gameState.lastDiscardByPlayerId = t.id;
+                    gameState.discard.push(cardCopy);
+                    gameState.discard.push(wall);
+                    p.hand.splice(idx, 1);
+                    log(t.name + ' (THE CRYPTKEEPER) Wall blocked the Haunt! Ghost and Wall → The Dark.');
+                    clearTargetMode();
+                    finishAction();
+                    return;
+                }
+                if (t.type === 'human') {
+                    var doRestOfHaunt = function () {
+                        if (!gameState.lastDamageTo) gameState.lastDamageTo = {};
+                        gameState.lastDamageTo[t.id] = p.id;
+                        t.shadow.push(cardCopy);
+                        p.hand.splice(idx, 1);
+                        if (t.class && t.class.name === 'THE VOODOO DOLL') {
+                            gameState.lastDiscardByPlayerId = p.id;
+                            if (p.candle.length) gameState.discard.push(p.candle.shift());
+                            log(p.name + ' (THE VOODOO DOLL) also Burned 1.');
+                        }
+                        if (p.class && p.class.name === 'THE MEDDLER' && t.candle.length > 0) {
+                            var top = t.candle.shift();
+                            t.candle.push(top);
+                            log(p.name + ' (THE MEDDLER) put ' + t.name + "'s top Candle on bottom.");
+                        }
+                        log(p.name + ' Haunted ' + t.name + ' with ' + c.r + c.s);
+                        if (typeof window.playSFX === 'function') window.playSFX('haunt');
+                        clearTargetMode();
+                        finishAction();
+                    };
+                    gameState.pendingCryptkeeperBlock = { p: p, t: t, cardCopy: cardCopy, idx: idx, c: c, doRest: doRestOfHaunt };
+                    var ckModal = document.getElementById('cryptkeeper-modal');
+                    if (ckModal) ckModal.style.display = 'flex';
+                    return;
+                }
             }
             if (!gameState.lastDamageTo) gameState.lastDamageTo = {};
             gameState.lastDamageTo[t.id] = p.id;
@@ -2172,6 +2293,19 @@
         }
         if (!t) return;
 
+        if (gameState.pendingDoomreader) {
+            if (ownerId !== p.id) return;
+            var ghost = t.shadow[idx];
+            if (!ghost || ghost.isWall) { showAlertModal('Choose a ghost (not a Wall) to change its suit.', 'THE DOOMREADER'); return; }
+            var suits = ['♠', '♥', '♣', '♦'];
+            ghost.s = suits[(suits.indexOf(ghost.s) + 1) % 4];
+            log(p.name + ' (THE DOOMREADER) changed Ghost Suit to ' + ghost.s);
+            gameState.pendingDoomreader = null;
+            gameState.selectionMode = null;
+            finishAction();
+            return;
+        }
+
         if (gameState.selectedIdxs.length === 1) {
             var c = p.hand[gameState.selectedIdxs[0]];
             var ghost = t.shadow[idx];
@@ -2477,15 +2611,17 @@
 
         if (p.class.name === 'THE DOOMREADER') {
             if (p.fatalistUsedThisTurn) { showAlertModal('THE DOOMREADER: Up to once per turn. Already used this turn.', 'Ability'); return; }
-            if (p.shadow.length === 0) return;
+            var ghostCount = p.shadow.filter(function (g) { return !g.isWall; }).length;
+            if (ghostCount === 0) { showAlertModal('No ghosts in your Shadow to change.', 'Ability'); return; }
             p.hand.splice(idx, 1);
+            gameState.lastDiscardByPlayerId = p.id;
             gameState.discard.push(c);
             p.fatalistUsedThisTurn = true;
-            var g = p.shadow[0];
-            var suits = ['♠', '♥', '♣', '♦'];
-            g.s = suits[(suits.indexOf(g.s) + 1) % 4];
-            log(p.name + ' changed Ghost Suit to ' + g.s);
-            finishAction();
+            gameState.pendingDoomreader = true;
+            gameState.selectionMode = 'SELECT_GHOST';
+            gameState.selectionTarget = p.id;
+            log('Select a ghost in your Shadow to change its suit.');
+            updateUI();
             return;
         }
         if (p.class.name === 'THE PYROMANIAC' && (c.s === '♥' || c.s === '♦')) {
@@ -2599,14 +2735,42 @@
             if (!t || t.hand.length === 0) { clearTargetMode(); updateUI(); return; }
             p.hand.splice(idx, 1);
             var give = c;
-            var takeIdx = Math.floor(Math.random() * t.hand.length);
-            var take = t.hand[takeIdx];
-            t.hand[takeIdx] = give;
-            p.hand.push(take);
-            log(p.name + ' Traded with ' + t.name + '.');
-            clearTargetMode();
-            finishAction();
+            gameState.pendingUsererSwap = { p: p, t: t, giveCard: give };
+            openUsererSwapModal(t);
         }
+    }
+
+    function openUsererSwapModal(target) {
+        var msg = document.getElementById('userer-swap-msg');
+        var container = document.getElementById('userer-swap-cards');
+        var modal = document.getElementById('userer-swap-modal');
+        if (!container || !modal) return;
+        if (msg) msg.textContent = 'Choose a card from ' + target.name + "'s hand to swap with your card.";
+        container.innerHTML = '';
+        for (var i = 0; i < target.hand.length; i++) {
+            (function (cardIdx) {
+                var el = mkCard(target.hand[cardIdx]);
+                el.style.cursor = 'pointer';
+                el.onclick = function () { resolveUsererSwap(cardIdx); };
+                container.appendChild(el);
+            })(i);
+        }
+        modal.style.display = 'flex';
+    }
+
+    function resolveUsererSwap(cardIdx) {
+        var pu = gameState.pendingUsererSwap;
+        var modal = document.getElementById('userer-swap-modal');
+        if (modal) modal.style.display = 'none';
+        if (!pu || cardIdx < 0 || cardIdx >= pu.t.hand.length) return;
+        var take = pu.t.hand.splice(cardIdx, 1)[0];
+        pu.t.hand.splice(cardIdx, 0, pu.giveCard);
+        pu.p.hand.push(take);
+        log(pu.p.name + ' (THE USERER) swapped a card with ' + pu.t.name + '.');
+        gameState.pendingUsererSwap = null;
+        clearTargetMode();
+        finishAction();
+        updateUI();
     }
 
     function actionPanic() {
@@ -2871,6 +3035,10 @@
     window.resolveSaltCounter = resolveSaltCounter;
     window.resolvePhantomCancel = resolvePhantomCancel;
     window.resolvePhantomCancelWithCard = resolvePhantomCancelWithCard;
+    window.resolveMimeRedirect = resolveMimeRedirect;
+    window.resolveMimeRedirectWithCard = resolveMimeRedirectWithCard;
+    window.resolveCryptkeeperBlock = resolveCryptkeeperBlock;
+    window.resolveUsererSwap = resolveUsererSwap;
     window.resolveOracle = resolveOracle;
     window.resolveSeerChoice = resolveSeerChoice;
     window.actionHaunt = actionHaunt;

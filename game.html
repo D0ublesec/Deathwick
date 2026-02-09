@@ -109,6 +109,28 @@
         </div>
     </div>
 
+    <div id="mime-modal" class="modal" style="z-index:3000;">
+        <div class="modal-content" style="border-color:var(--magic-color);">
+            <h2 style="color:var(--magic-color)">THE MIME</h2>
+            <p id="mime-msg">Discard 1 card to redirect this Haunt to your other neighbour?</p>
+            <div style="display:flex; gap:20px; justify-content:center;">
+                <button type="button" class="game-btn" style="background:#444;" onclick="resolveMimeRedirect(true)">ALLOW HAUNT</button>
+                <button type="button" class="game-btn" style="background:var(--magic-color); color:black;" onclick="resolveMimeRedirect(false)">DISCARD 1 TO REDIRECT</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="cryptkeeper-modal" class="modal" style="z-index:3000;">
+        <div class="modal-content" style="border-color:var(--salt-color);">
+            <h2 style="color:var(--salt-color)">THE CRYPTKEEPER</h2>
+            <p>Use a Wall to block this Haunt? (Wall and attacking card go to The Dark.)</p>
+            <div style="display:flex; gap:20px; justify-content:center;">
+                <button type="button" class="game-btn" style="background:#444;" onclick="resolveCryptkeeperBlock(false)">ALLOW HAUNT</button>
+                <button type="button" class="game-btn" style="background:var(--salt-color); color:black;" onclick="resolveCryptkeeperBlock(true)">USE WALL TO BLOCK</button>
+            </div>
+        </div>
+    </div>
+
     <div id="settings-modal" class="modal">
         <div class="modal-content" style="border-color:var(--border-color);">
             <h2 style="color:var(--accent-color)">SETTINGS</h2>
@@ -202,6 +224,14 @@
                 <button type="button" class="game-btn" onclick="resolveSeerChoice(false)">Leave on top</button>
                 <button type="button" class="game-btn" onclick="resolveSeerChoice(true)">Put on bottom</button>
             </div>
+        </div>
+    </div>
+
+    <div id="userer-swap-modal" class="modal" style="display:none;">
+        <div class="modal-content" style="border-color:var(--class-color);">
+            <h2 style="color:var(--class-color)">THE USERER</h2>
+            <p id="userer-swap-msg">Choose a card from their hand to swap with your card.</p>
+            <div id="userer-swap-cards" class="card-grid" style="margin-top:14px;"></div>
         </div>
     </div>
 
