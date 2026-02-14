@@ -37,6 +37,8 @@
             <h2 style="color:var(--accent-color)">SETUP RITUAL</h2>
             <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:14px; text-align:center;">When the game starts you'll choose the <strong>Empty Candle rule</strong>: <strong>Standard ritual</strong> (check at end of turn) or <strong>Dark ritual</strong> (eliminated immediately). <a href="manual.html#ritual-type" target="_blank" rel="noopener" style="color:var(--accent-color);">Manual → Ritual type</a></p>
             <div id="local-setup">
+                <p style="margin-bottom:6px; font-size:0.9rem;"><strong>Number of players:</strong> <span id="player-count-buttons"></span></p>
+                <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:10px;">Determines which classes appear in the random 3-card draw (2–6 players: 35 classes; 7+: 38 classes).</p>
                 <div id="player-setup-list" style="margin-bottom:10px;"></div>
                 <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;">
                     <button type="button" class="game-btn" onclick="addPlayerSlot()">+ ADD PLAYER</button>
@@ -68,8 +70,9 @@
 
     <div id="first-player-modal" class="modal" style="display:none; z-index:2600;">
         <div class="modal-content" style="border-color:var(--accent-color);">
-            <h2 style="color:var(--accent-color)">WHO STARTS FIRST?</h2>
-            <p style="margin-bottom:16px;">Choose which player takes the first turn. In an online game, only the host sees this.</p>
+            <h2 style="color:var(--accent-color)">DECIDE TURN ORDER</h2>
+            <p style="margin-bottom:8px;">Choose who goes first. This sets the full turn order. Class selection will then follow that order (first in turn order picks class first; last to pick sees everyone else’s choices—minor advantage).</p>
+            <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:14px;">In online play, agree at the table (e.g. last nightmare, ghost story, horror film) then select that player—or use Random. Only the host sees this in an online game.</p>
             <div id="first-player-options" style="display:flex; flex-direction:column; gap:10px; align-items:center;"></div>
             <button type="button" class="game-btn" style="margin-top:12px;" onclick="chooseFirstPlayerRandom()">RANDOM</button>
         </div>

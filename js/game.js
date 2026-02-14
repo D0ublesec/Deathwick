@@ -2,7 +2,7 @@
 (function () {
     var CLASSES = window.CLASSES;
     var SUITS = window.SUITS;
-    var EXTENDED_CLASS_NAMES = ['THE FUNERAL BELL', 'THE GATEKEEPER', 'THE OCCULTIST', 'THE GRAVEDIGGER', 'THE VULTURE', 'THE PLAGUE', 'THE REAPER', 'THE MIMIC', 'THE LICH', 'THE INQUISITOR', 'THE PYROMANIAC', 'THE USERER', 'THE HOARDER', 'THE SEALBINDER', 'THE MEDDLER', 'THE ORACLE', 'THE CROW', 'THE MIME'];
+    var EXTENDED_CLASS_NAMES = ['THE FUNERAL BELL', 'THE LICH', 'THE GRAVEDIGGER'];
     function getClassPool() {
         return gameState.players.length > 6 ? CLASSES : CLASSES.filter(function (c) { return EXTENDED_CLASS_NAMES.indexOf(c.name) < 0; });
     }
@@ -223,7 +223,7 @@
         if (modal) modal.style.display = 'none';
     }
 
-    var CHEATSHEET_TURN_NORMAL = '<li>Candle empty at end of turn → Consumed (lose).</li>';
+    var CHEATSHEET_TURN_NORMAL = '<li>Start of turn: fewer Candle cards than ghosts → Consumed immediately. Otherwise burn, then draw 1 (if Candle left); Candle empty at end of turn → Consumed.</li>';
     var CHEATSHEET_TURN_DARK = '<li>Candle empty at any moment → Consumed immediately (lose).</li>';
     var CHEATSHEET_REST = '<section class="cs-section"><h3>Actions</h3><ul class="cs-list"><li><strong>Haunt</strong> — Number card to a neighbour\'s Shadow.</li><li><strong>Banish</strong> — Match/beat a Ghost in your Shadow.</li><li><strong>Panic</strong> — Flip top of Candle vs Ghost.</li><li><strong>Séance</strong> — Pair → heal 4 from Dark.</li><li><strong>Cast</strong> (number cards) / <strong>Summon</strong> (face cards & Jokers) — Use card effect (see Grimoire).</li><li><strong>Flicker</strong> — Shuffle hand, draw 3.</li><li><strong>Ability</strong> — Class power.</li></ul></section>' +
         '<section class="cs-section"><h3>Targeting</h3><p>You can only target your two Neighbours (left/right) unless a card or class says otherwise (e.g. THE OCCULTIST 9 = any player).</p></section>' +
@@ -311,6 +311,7 @@
             addPlayerSlot();
             addPlayerSlot();
             updateSetupRemoveButtons();
+            renderPlayerCountButtons();
             var firstInput = list.querySelector('.setup-name-input');
             if (firstInput) {
                 try {
@@ -334,6 +335,7 @@
         list.appendChild(div);
         gameState.players.push({ type: defaultType });
         updateSetupRemoveButtons();
+        updatePlayerCountButtonsState();
     }
 
     function removePlayerSlot(btn) {
@@ -346,6 +348,60 @@
         list.removeChild(row);
         if (gameState.players.length > idx) gameState.players.splice(idx, 1);
         updateSetupRemoveButtons();
+        updatePlayerCountButtonsState();
+    }
+
+    function setPlayerCount(n) {
+        var list = document.getElementById('player-setup-list');
+        if (!list) return;
+        n = Math.max(2, Math.min(n, 12));
+        while (list.children.length < n) addPlayerSlot();
+        while (list.children.length > n) {
+            var lastRow = list.children[list.children.length - 1];
+            var btn = lastRow ? lastRow.querySelector('.setup-remove-btn') : null;
+            if (btn) removePlayerSlot(btn);
+            else if (lastRow) {
+                list.removeChild(lastRow);
+                if (gameState.players.length >= list.children.length) gameState.players.pop();
+                updateSetupRemoveButtons();
+            }
+        }
+        updatePlayerCountButtonsState();
+    }
+
+    function updatePlayerCountButtonsState() {
+        var list = document.getElementById('player-setup-list');
+        var container = document.getElementById('player-count-buttons');
+        if (!container || !list) return;
+        var n = list.children.length;
+        container.querySelectorAll('.player-count-btn').forEach(function (b) {
+            var val = b.dataset.count === '7plus' ? 7 : parseInt(b.dataset.count, 10);
+            b.classList.toggle('selected', (val === 7 && n >= 7) || (val < 7 && n === val));
+        });
+    }
+
+    function renderPlayerCountButtons() {
+        var container = document.getElementById('player-count-buttons');
+        if (!container) return;
+        container.innerHTML = '';
+        [2, 3, 4, 5, 6].forEach(function (n) {
+            var b = document.createElement('button');
+            b.type = 'button';
+            b.className = 'game-btn player-count-btn';
+            b.dataset.count = String(n);
+            b.textContent = n;
+            b.onclick = function () { setPlayerCount(n); };
+            container.appendChild(b);
+        });
+        var b7 = document.createElement('button');
+        b7.type = 'button';
+        b7.className = 'game-btn player-count-btn';
+        b7.dataset.count = '7plus';
+        b7.textContent = '7+';
+        b7.title = '7 or more players — all classes in the draw';
+        b7.onclick = function () { setPlayerCount(7); };
+        container.appendChild(b7);
+        updatePlayerCountButtonsState();
     }
 
     function updateSetupRemoveButtons() {
@@ -404,7 +460,7 @@
         }
         var setupModal = document.getElementById('setup-modal');
         if (setupModal) setupModal.style.display = 'none';
-        doDeckAndDealAndPickClasses();
+        showFirstPlayerModal();
     }
 
     function doDeckAndDealAndPickClasses() {
@@ -441,9 +497,11 @@
                 pl.hand.push(pl.candle.shift());
             }
         }
-        gameState.turnOrder = [];
-        for (var i = 0; i < gameState.players.length; i++) gameState.turnOrder.push(i);
-        pickClasses(0);
+        if (!gameState.turnOrder || gameState.turnOrder.length !== gameState.players.length) {
+            gameState.turnOrder = [];
+            for (var i = 0; i < gameState.players.length; i++) gameState.turnOrder.push(i);
+        }
+        pickClassesByTurnOrder(0);
     }
 
     function showDarkModeModal() {
@@ -458,10 +516,6 @@
         document.body.classList.toggle('dark-mode', gameState.darkMode);
         var dmModal = document.getElementById('dark-mode-modal');
         if (dmModal) dmModal.style.display = 'none';
-        if (gameState.isOnline && gameState.isHost) {
-            showFirstPlayerModal();
-            return;
-        }
         startTurn();
     }
 
@@ -497,7 +551,7 @@
         var modal = document.getElementById('first-player-modal');
         if (modal) modal.style.display = 'none';
         if (gameState.isOnline && gameState.isHost && typeof gameState.broadcastState === 'function') gameState.broadcastState();
-        startTurn();
+        doDeckAndDealAndPickClasses();
     }
 
     function chooseFirstPlayerRandom() {
@@ -508,6 +562,74 @@
     }
     window.chooseFirstPlayer = chooseFirstPlayer;
     window.chooseFirstPlayerRandom = chooseFirstPlayerRandom;
+
+    /** Class selection in turn order: first player picks first, last picks last (sees all previous picks). */
+    function pickClassesByTurnOrder(turnOrderIdx) {
+        if (turnOrderIdx >= gameState.players.length) {
+            showDarkModeModal();
+            return;
+        }
+        var playerId = gameState.turnOrder[turnOrderIdx];
+        var p = gameState.players[playerId];
+        if (!p) return;
+        var pool = getClassPool();
+        if (p.type === 'ai') {
+            p.class = pool[Math.floor(Math.random() * pool.length)];
+            if (p.class.name === 'THE VOODOO DOLL') p.voodooSuits = ['♣', '♦']; /* two lowest suits */
+            pickClassesByTurnOrder(turnOrderIdx + 1);
+            return;
+        }
+        if (p.isRemote && typeof window.onRequestRemoteClass === 'function') {
+            var c1 = pool[Math.floor(Math.random() * pool.length)];
+            var c2 = c1;
+            while (c2 === c1) c2 = pool[Math.floor(Math.random() * pool.length)];
+            var c3 = c1;
+            while (c3 === c1 || c3 === c2) c3 = pool[Math.floor(Math.random() * pool.length)];
+            window.onRequestRemoteClass(playerId, [c1, c2, c3], function (className) {
+                p.class = CLASSES.filter(function (c) { return c.name === className; })[0] || CLASSES[0];
+                pickClassesByTurnOrder(turnOrderIdx + 1);
+            });
+            return;
+        }
+        var modal = document.getElementById('class-modal');
+        var title = document.getElementById('class-select-title');
+        var opts = document.getElementById('class-options');
+        if (!modal || !opts) return;
+        modal.style.display = 'flex';
+        if (title) title.textContent = p.name + ': CHOOSE CLASS';
+        opts.innerHTML = '';
+        var c1 = pool[Math.floor(Math.random() * pool.length)];
+        var c2 = c1;
+        while (c2 === c1) c2 = pool[Math.floor(Math.random() * pool.length)];
+        var c3 = c1;
+        while (c3 === c1 || c3 === c2) c3 = pool[Math.floor(Math.random() * pool.length)];
+        [c1, c2, c3].forEach(function (c) {
+            var b = document.createElement('div');
+            b.className = 'class-box';
+            var classImgName = getClassImageFilename(c.name);
+            if (classImgName) {
+                var img = document.createElement('img');
+                img.className = 'class-card-img';
+                var classFolder = window.getClassSubfolder ? window.getClassSubfolder(classImgName) : '';
+                img.src = CLASS_IMAGES_BASE + (classFolder ? classFolder + '/' : '') + classImgName + CARD_IMAGE_EXT;
+                img.alt = c.name;
+                img.loading = 'lazy';
+                img.onerror = function () { img.style.display = 'none'; };
+                b.appendChild(img);
+            }
+            var textWrap = document.createElement('div');
+            textWrap.className = 'class-box-text';
+            textWrap.innerHTML = '<span class="class-title">' + c.name + '</span><small>' + c.desc + '</small>';
+            b.appendChild(textWrap);
+            b.onclick = function () {
+                p.class = c;
+                if (c.name === 'THE VOODOO DOLL') p.voodooSuits = ['♣', '♦']; /* two lowest suits (suit tier) */
+                modal.style.display = 'none';
+                pickClassesByTurnOrder(turnOrderIdx + 1);
+            };
+            opts.appendChild(b);
+        });
+    }
 
     function pickClasses(idx) {
         if (idx >= gameState.players.length) {
@@ -615,7 +737,6 @@
         p.phantomCancelUsedThisTurn = false;
         p.fatalistUsedThisTurn = false;
         gameState.funeralBellTriggeredThisTurn = false;
-        if (p.class && p.class.name === 'THE GRIMOIRE OF REJECTION') gameState.grimoireRejectionSetThisTurn = false;
         if (p.class && p.class.name === 'THE ORACLE' && p.candle.length > 0 && p.type === 'human') {
             var topCard = p.candle[0];
             var slot = document.getElementById('oracle-card-slot');
@@ -626,14 +747,6 @@
                 modal.style.display = 'flex';
             }
             return;
-        }
-        if (p.class && p.class.name === 'THE GRIMOIRE OF REJECTION' && p.type === 'ai' && !gameState.grimoireRejectionSetThisTurn) {
-            var grRanks = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'JOKER'].filter(function (r) { return r !== gameState.grimoireRejectionLastTurn; });
-            if (grRanks.length) {
-                gameState.grimoireRejectionRank = grRanks[Math.floor(Math.random() * grRanks.length)];
-                gameState.grimoireRejectionSetThisTurn = true;
-                log(p.name + ' (THE GRIMOIRE OF REJECTION) wrote down ' + gameState.grimoireRejectionRank + '.');
-            }
         }
         if (p.class && p.class.name === 'THE ORACLE' && p.candle.length > 0 && p.type === 'ai') {
             if (Math.random() < 0.5) {
@@ -679,12 +792,39 @@
         updateUI();
     }
 
+    /** Burns one card from the given player's Candle (Crow/Sufferer apply). Returns true if a card was burned, false if Candle empty. */
+    function burnOneFromCandle(burner) {
+        if (!burner.candle.length) return false;
+        var card = burner.candle.shift();
+        var isFace = card.isFace || card.r === 'J' || card.r === 'Q' || card.r === 'K';
+        var crowNeighbour = null;
+        var nBurn = getNeighbours(burner);
+        if (isFace && nBurn.left && nBurn.left.class && nBurn.left.class.name === 'THE CROW') crowNeighbour = nBurn.left;
+        if (isFace && nBurn.right && nBurn.right.class && nBurn.right.class.name === 'THE CROW') crowNeighbour = crowNeighbour || nBurn.right;
+        if (crowNeighbour) {
+            crowNeighbour.hand.push(card);
+            log(crowNeighbour.name + ' (THE CROW) took burned ' + card.r + card.s + '.');
+        } else {
+            gameState.discard.push(card);
+        }
+        if (burner.class && burner.class.name === 'THE SUFFERER' && burner.candle.length) {
+            burner.hand.push(burner.candle.shift());
+            log(burner.name + ' (THE SUFFERER) Drew 1 from Candle.');
+        }
+        return true;
+    }
+
     function continueStartOfTurnPhase() {
         var p = gameState.players[gameState.activeIdx];
         if (!p) return;
         var ghostCount = p.shadow.filter(function (g) { return !g.isWall; }).length;
         var burn = ghostCount;
         if (p.class && p.class.name === 'THE VESSEL' && burn > 0) burn = Math.max(0, burn - 1);
+        if (!gameState.darkMode && burn > 0 && p.candle.length < burn) {
+            if (handleDeath(p)) return;
+            endTurn();
+            return;
+        }
         for (var i = 0; i < burn; i++) {
             if (p.candle.length) {
                 var card = p.candle.shift();
@@ -704,22 +844,43 @@
                     log(p.name + ' (THE SUFFERER) Drew 1 from Candle.');
                 }
             } else {
-                if (handleDeath(p)) return;
-                endTurn();
-                return;
+                if (gameState.darkMode) {
+                    if (handleDeath(p)) return;
+                    endTurn();
+                    return;
+                }
+                break;
             }
         }
         if (burn > 0) {
             log(p.name + ' burned ' + burn + ' card' + (burn === 1 ? '' : 's') + '. Candle: ' + p.candle.length);
             if (typeof window.playSFX === 'function') window.playSFX('burn');
         }
+        if (p.class && p.class.name === 'THE VOODOO DOLL' && p.voodooSuits) {
+            for (var v = 0; v < p.shadow.length; v++) {
+                var g = p.shadow[v];
+                if (g.isWall || !g.s || p.voodooSuits.indexOf(g.s) < 0 || g.hauntedBy == null) continue;
+                var haunter = gameState.players[g.hauntedBy];
+                if (!haunter || haunter.isDead) continue;
+                if (burnOneFromCandle(haunter)) {
+                    log(haunter.name + ' (Voodoo reflection) Burned 1.');
+                    if (typeof window.playSFX === 'function') window.playSFX('burn');
+                } else {
+                    if (gameState.darkMode) {
+                        if (handleDeath(haunter)) return;
+                    }
+                }
+            }
+        }
         if (p.candle.length) {
             p.hand.push(p.candle.shift());
             if (typeof window.playSFX === 'function') window.playSFX('draw');
         } else {
-            if (handleDeath(p)) return;
-            endTurn();
-            return;
+            if (gameState.darkMode) {
+                if (handleDeath(p)) return;
+                endTurn();
+                return;
+            }
         }
     }
 
@@ -1039,6 +1200,8 @@
         var rankMap = { 'A': 'ace', '2': '2', '3': '3', '4': '4', '5': '5', '6': '6', '7': '7', '8': '8', '9': '9', '10': '10', 'J': 'jack', 'Q': 'queen', 'K': 'king' };
         var suitMap = { '♠': 'spades', '♥': 'hearts', '♣': 'clubs', '♦': 'diamonds' };
         var rank = rankMap[c.r];
+        if (c.r === 'A') rank = '6';
+        else if (c.r === '6') rank = 'ace';
         var suit = c.s ? suitMap[c.s] : '';
         if (!rank || !suit) return null;
         return 'deathwick_' + rank + '_' + suit;
@@ -1048,7 +1211,10 @@
         if (!c || c.isWall) return '';
         if (c.r === 'JOKER' || c.r === '★') return 'joker';
         var folderMap = { 'A': 'ace', '2': 'two', '3': 'three', '4': 'four', '5': 'five', '6': 'six', '7': 'seven', '8': 'eight', '9': 'nine', '10': 'ten', 'J': 'jack', 'Q': 'queen', 'K': 'king' };
-        return folderMap[c.r] || '';
+        var folder = folderMap[c.r] || '';
+        if (c.r === 'A') folder = 'six';
+        else if (c.r === '6') folder = 'ace';
+        return folder;
     }
     function getCardBackFilename() {
         return 'deathwick_back_portrait';
@@ -1666,7 +1832,7 @@
         var btnFlicker = document.getElementById('btn-flicker');
         var btnPanic = document.getElementById('btn-panic');
         var btnCancelTarget = document.getElementById('btn-cancel-target');
-        var canUseGrimoireWithoutCard = humanPlayer.class && humanPlayer.class.name === 'THE GRIMOIRE OF REJECTION' && !gameState.grimoireRejectionSetThisTurn;
+        var canUseGrimoireWithoutCard = humanPlayer.class && humanPlayer.class.name === 'THE GRIMOIRE OF REJECTION' && gameState.grimoireRejectionRank == null;
         if (btnHaunt) btnHaunt.disabled = inTargetMode || !isHumanTurn || !isSingle || gameState.turnPhase !== 'ACTION';
         if (btnBanish) btnBanish.disabled = inTargetMode || !isHumanTurn || !isSingle || gameState.turnPhase !== 'ACTION';
         if (btnCast) btnCast.disabled = inTargetMode || !isHumanTurn || !isSingle || gameState.turnPhase !== 'ACTION';
@@ -1733,18 +1899,12 @@
                 gameState.lastDamageTo[pm.mime.id] = pm.attacker.id;
                 pm.mime.shadow.push(cardCopy);
                 pm.attacker.hand.splice(pm.handIdx, 1);
-                if (pm.mime.class && pm.mime.class.name === 'THE VOODOO DOLL' && pm.mime.voodooSuits && pm.mime.voodooSuits.indexOf(pm.card.s) >= 0) {
-                    gameState.lastDiscardByPlayerId = pm.attacker.id;
-                    if (pm.attacker.candle.length) gameState.discard.push(pm.attacker.candle.shift());
-                    log(pm.attacker.name + ' (THE VOODOO DOLL) also Burned 1.');
-                }
                 if (pm.attacker.class && pm.attacker.class.name === 'THE MEDDLER' && pm.mime.candle.length > 0) {
                     var top = pm.mime.candle.shift();
                     pm.mime.candle.push(top);
                     log(pm.attacker.name + ' (THE MEDDLER) put ' + pm.mime.name + "'s top Candle on bottom.");
                 }
                 log(pm.attacker.name + ' Haunted ' + pm.mime.name + ' with ' + pm.card.r + pm.card.s);
-                if (typeof window.playSFX === 'function') window.playSFX('haunt');
                 if (checkPossessionInstantIfDark(pm.mime)) return;
                 clearTargetMode();
                 finishAction();
@@ -2134,11 +2294,6 @@
                         gameState.lastDamageTo[t.id] = p.id;
                         t.shadow.push(cardCopy);
                         p.hand.splice(idx, 1);
-                        if (t.class && t.class.name === 'THE VOODOO DOLL' && t.voodooSuits && t.voodooSuits.indexOf(cardCopy.s) >= 0) {
-                            gameState.lastDiscardByPlayerId = p.id;
-                            if (p.candle.length) gameState.discard.push(p.candle.shift());
-                            log(p.name + ' (THE VOODOO DOLL) also Burned 1.');
-                        }
                         if (p.class && p.class.name === 'THE MEDDLER' && t.candle.length > 0) {
                             var top = t.candle.shift();
                             t.candle.push(top);
@@ -2160,11 +2315,6 @@
             gameState.lastDamageTo[t.id] = p.id;
             t.shadow.push(cardCopy);
             p.hand.splice(idx, 1);
-            if (t.class && t.class.name === 'THE VOODOO DOLL' && t.voodooSuits && t.voodooSuits.indexOf(cardCopy.s) >= 0) {
-                gameState.lastDiscardByPlayerId = p.id;
-                if (p.candle.length) gameState.discard.push(p.candle.shift());
-                log(p.name + ' (THE VOODOO DOLL) also Burned 1.');
-            }
             if (p.class && p.class.name === 'THE MEDDLER' && t.candle.length > 0) {
                 var top = t.candle.shift();
                 t.candle.push(top);
@@ -2663,6 +2813,16 @@
         }
         if (!t) return;
 
+        /* Sight (6) targets a player to view their hand; if we ended up here (e.g. wrong mode or click on shadow), open hand picker for that player */
+        if (gameState.pendingAction === 'cast' && gameState.pendingCardIdx != null) {
+            var castCard = p.hand[gameState.pendingCardIdx];
+            if (castCard && castCard.r === '6') {
+                clearTargetMode();
+                viewHandForClaim(t);
+                return;
+            }
+        }
+
         if (gameState.pendingDoomreader) {
             if (ownerId !== p.id) return;
             var ghost = t.shadow[idx];
@@ -2882,14 +3042,14 @@
 
     function openGrimoireRejectionModal() {
         var p = gameState.players[gameState.activeIdx];
-        if (!p || !p.class || p.class.name !== 'THE GRIMOIRE OF REJECTION' || gameState.grimoireRejectionSetThisTurn) return;
+        if (!p || !p.class || p.class.name !== 'THE GRIMOIRE OF REJECTION') return;
+        if (gameState.grimoireRejectionRank != null) return;
         var container = document.getElementById('grimoire-rank-buttons');
         if (!container) return;
         container.innerHTML = '';
         var ranks = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'JOKER'];
         for (var ri = 0; ri < ranks.length; ri++) {
             var r = ranks[ri];
-            if (r === gameState.grimoireRejectionLastTurn) continue;
             (function (rank) {
                 var btn = document.createElement('button');
                 btn.type = 'button';
@@ -2905,11 +3065,11 @@
 
     function setGrimoireRejection(rank) {
         gameState.grimoireRejectionRank = rank;
-        gameState.grimoireRejectionSetThisTurn = true;
         closeGrimoireRejectionModal();
         var p = gameState.players[gameState.activeIdx];
         if (p) log(p.name + ' (THE GRIMOIRE OF REJECTION) wrote down ' + rank + '.');
         updateUI();
+        finishAction();
     }
 
     function closeGrimoireRejectionModal() {
@@ -3106,8 +3266,8 @@
     function actionClass() {
         var p = gameState.players[gameState.activeIdx];
         if (p.class && p.class.name === 'THE GRIMOIRE OF REJECTION') {
-            if (!gameState.grimoireRejectionSetThisTurn) { openGrimoireRejectionModal(); return; }
-            showAlertModal('THE GRIMOIRE OF REJECTION: Already set this turn.', 'Ability');
+            if (gameState.grimoireRejectionRank == null) { openGrimoireRejectionModal(); return; }
+            showAlertModal('THE GRIMOIRE OF REJECTION: Cannot change the written name until it has been consumed.', 'Ability');
             return;
         }
         if (gameState.selectedIdxs.length !== 1) return;
@@ -3328,7 +3488,6 @@
     function finishAction() {
         var finisher = gameState.players[gameState.activeIdx];
         gameState.lastDiscardByPlayerId = finisher ? finisher.id : null;
-        if (finisher && finisher.class && finisher.class.name === 'THE GRIMOIRE OF REJECTION') gameState.grimoireRejectionLastTurn = gameState.grimoireRejectionRank;
         gameState.selectedIdxs = [];
         gameState.turnPhase = 'END';
         updateUI();
@@ -3460,19 +3619,47 @@
             var aiGhostCount = ai.shadow.filter(function (g) { return !g.isWall; }).length;
             var burn = aiGhostCount;
             if (ai.class && ai.class.name === 'THE VESSEL' && burn > 0) burn = Math.max(0, burn - 1);
+            if (!gameState.darkMode && burn > 0 && ai.candle.length < burn) {
+                if (handleDeath(ai)) return;
+                endTurn();
+                return;
+            }
             for (var i = 0; i < burn; i++) {
                 if (ai.candle.length) { gameState.lastDiscardByPlayerId = ai.id; gameState.discard.push(ai.candle.shift()); }
                 else {
-                    if (handleDeath(ai)) return;
-                    endTurn();
-                    return;
+                    if (gameState.darkMode) {
+                        if (handleDeath(ai)) return;
+                        endTurn();
+                        return;
+                    }
+                    break;
                 }
             }
             if (burn > 0) log('AI Burned ' + burn + ' card' + (burn === 1 ? '' : 's') + '. Candle: ' + ai.candle.length);
+            if (ai.class && ai.class.name === 'THE VOODOO DOLL' && ai.voodooSuits) {
+                for (var v = 0; v < ai.shadow.length; v++) {
+                    var g = ai.shadow[v];
+                    if (g.isWall || !g.s || ai.voodooSuits.indexOf(g.s) < 0 || g.hauntedBy == null) continue;
+                    var haunter = gameState.players[g.hauntedBy];
+                    if (!haunter || haunter.isDead) continue;
+                    if (burnOneFromCandle(haunter)) {
+                        log(haunter.name + ' (Voodoo reflection) Burned 1.');
+                    } else if (gameState.darkMode) {
+                        if (handleDeath(haunter)) return;
+                    }
+                }
+            }
             if (ai.candle.length) ai.hand.push(ai.candle.shift());
             updateUI();
             aiTimer = setTimeout(function () {
                 if (gameState.isGameOver) return;
+                if (ai.class && ai.class.name === 'THE GRIMOIRE OF REJECTION' && gameState.grimoireRejectionRank == null && Math.random() < 0.25) {
+                    var grRanks = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'JOKER'];
+                    gameState.grimoireRejectionRank = grRanks[Math.floor(Math.random() * grRanks.length)];
+                    log(ai.name + ' (THE GRIMOIRE OF REJECTION) wrote down ' + gameState.grimoireRejectionRank + '.');
+                    finishAction();
+                    return;
+                }
                 var targets = getNeighbours(ai);
                 var t = Math.random() > 0.5 ? targets.left : targets.right;
                 var numCard = null;
@@ -3525,6 +3712,7 @@
         if (classModal) classModal.style.display = 'none';
         if (setupModal) setupModal.style.display = 'flex';
         gameState.players.forEach(function (p) { p.class = null; });
+        updatePlayerCountButtonsState();
     }
 
     function setViewAllPlayers(showAll) {

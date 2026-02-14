@@ -4,19 +4,37 @@
     var getClassImageFilename = window.getClassImageFilename;
     if (!CLASSES) return;
 
+    var EXTENDED_CLASS_NAMES = ['THE FUNERAL BELL', 'THE LICH', 'THE GRAVEDIGGER'];
+    var POOL_20 = CLASSES.filter(function (c) { return EXTENDED_CLASS_NAMES.indexOf(c.name) < 0; });
+
     var CLASS_IMAGES_BASE = 'images/cards/classes/';
     var CARD_IMAGE_EXT = '.png';
 
     var STORAGE_KEY = 'finalflicker_manual_picked';
+    var manualPoolSize = 20;
 
-    var manualClassPool = CLASSES.slice();
+    var manualClassPool = POOL_20.slice();
     var currentManualPair = [];
     var pickedClasses = [];
 
     function updatePoolStatus() {
         var el = document.getElementById('pool-status');
-        if (el) el.textContent = manualClassPool.length + ' Classes Available.';
+        if (el) el.textContent = 'Drawing from ' + manualClassPool.length + ' classes (' + (manualPoolSize === 20 ? '2–6 player' : '7+ player') + ' pool).';
     }
+
+    function updatePoolButtons() {
+        var btn20 = document.getElementById('manual-pool-20');
+        var btn38 = document.getElementById('manual-pool-38');
+        if (btn20) btn20.classList.toggle('selected', manualPoolSize === 20);
+        if (btn38) btn38.classList.toggle('selected', manualPoolSize === 38);
+    }
+
+    window.setManualClassPool = function (size) {
+        manualPoolSize = size === 38 ? 38 : 20;
+        manualClassPool = (manualPoolSize === 38 ? CLASSES : POOL_20).slice();
+        updatePoolStatus();
+        updatePoolButtons();
+    };
 
     function saveToStorage() {
         try {
@@ -118,7 +136,7 @@
     };
 
     window.resetPoolManual = function () {
-        manualClassPool = CLASSES.slice();
+        manualClassPool = (manualPoolSize === 38 ? CLASSES : POOL_20).slice();
         pickedClasses = [];
         try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
         updatePoolStatus();
@@ -199,6 +217,8 @@
     populateManual();
     updatePoolStatus();
     loadFromStorage();
+    updatePoolStatus();
+    updatePoolButtons();
 
     (function initCardPreview() {
         var preview = document.getElementById('grimoire-card-preview');

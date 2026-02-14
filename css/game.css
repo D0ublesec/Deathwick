@@ -1915,6 +1915,18 @@ body.game-page {
     color: #000;
 }
 
+#player-count-buttons {
+    display: inline-flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+#player-count-buttons .player-count-btn {
+    min-width: 36px;
+}
+#player-count-buttons .player-count-btn.selected {
+    box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--accent-color);
+}
+
 
 /* Modals */
 .modal {

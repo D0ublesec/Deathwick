@@ -544,6 +544,18 @@ th {
     margin-bottom: 10px;
 }
 
+.setup-list ul, .setup-list ol {
+    margin-top: 6px;
+    margin-bottom: 8px;
+    padding-left: 24px;
+}
+.setup-list ul li::marker {
+    color: var(--text-muted);
+}
+.setup-list li > ul:first-child, .setup-list li > ol:first-child {
+    margin-top: 4px;
+}
+
 #layout-tool, #class-tool {
     background: var(--bg-elevated);
     border: 2px solid var(--accent-color);
@@ -571,6 +583,10 @@ th {
 
 .tool-btn.secondary {
     background: #444;
+}
+
+.tool-btn.selected {
+    box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--accent-color);
 }
 
 .diagram-display {
