@@ -1639,7 +1639,7 @@ body.game-page {
     border: 1px solid var(--accent-color);
     border-radius: var(--radius-sm);
     box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-    z-index: 200;
+    z-index: 3100;
     pointer-events: none;
     font-size: 0.8rem;
     line-height: 1.35;
@@ -2378,7 +2378,9 @@ body.game-page.ritual-theme-blood #theme-btn-blood {
     .nav-player-banner { font-size: 0.75rem; gap: 4px; }
     .game-nav { padding: 8px 10px; gap: 8px; }
     .top-right-btn { padding: 6px 10px; font-size: 0.7rem; }
-    #game-board { padding: 4px; gap: 4px; }
+    #game-board { padding: 4px; gap: 4px; padding-top: 12vh; }
+    /* Ritual table: push down on mobile so it isn't stuck at top */
+    #game-board #ritual-table { margin-top: 4vh; }
     /* 3–4 player mobile: keep same padding all sides so no card leaves screen */
     #game-board:has(.ritual-table[data-player-count="3"]),
     #game-board:has(.ritual-table[data-player-count="4"]) {

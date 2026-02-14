@@ -34,13 +34,15 @@
 
     function getRadius(displayCount, isNarrow) {
         var base = 32 + displayCount * 2.5;
+        if (displayCount >= 6) base = 38 + displayCount * 2.8;
         var r = isNarrow ? base * 1.05 : Math.max(MIN_RADIUS, base);
         var n = displayCount + 1;
-        var minChord = 44;
+        var minChord = displayCount >= 6 ? 38 : 44;
         var sinHalf = Math.sin(Math.PI / n);
         var rNoOverlap = sinHalf > 0.001 ? minChord / (2 * sinHalf) : r;
         r = Math.max(r, rNoOverlap);
-        return Math.min(r, 48);
+        var cap = displayCount >= 6 ? 56 : 48;
+        return Math.min(r, cap);
     }
 
     /** Get (zoneLeft, zoneTop) for this seat. For 7+ uses circle. */

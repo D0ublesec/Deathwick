@@ -45,6 +45,7 @@
         viewPreferenceSet: false
     };
     var saltCallback = null;
+    var readyCallback = null;
     var aiTimer = null;
     var previousDiscardLength = 0;
 
@@ -696,6 +697,32 @@
         });
     }
 
+    function countHumanPlayers() {
+        var n = 0;
+        for (var i = 0; i < gameState.players.length; i++) {
+            if (gameState.players[i].type === 'human') n++;
+        }
+        return n;
+    }
+
+    function showReadyPrompt(player, message, onReady) {
+        var msgEl = document.getElementById('ready-msg');
+        var modal = document.getElementById('ready-modal');
+        if (msgEl) msgEl.textContent = message || ('Pass the device to ' + player.name + '. They should click when ready.');
+        if (modal) modal.style.display = 'flex';
+        readyCallback = onReady;
+    }
+
+    function resolveReady() {
+        var modal = document.getElementById('ready-modal');
+        if (modal) modal.style.display = 'none';
+        if (readyCallback) {
+            var fn = readyCallback;
+            readyCallback = null;
+            fn();
+        }
+    }
+
     function startTurn() {
         if (gameState.isGameOver) return;
         if (aiTimer) {
@@ -715,6 +742,14 @@
         gameState.selectionMode = null;
 
         if (p.type === 'human') {
+            var humanCount = countHumanPlayers();
+            if (humanCount > 1) {
+                showReadyPrompt(p, "Pass the device to " + p.name + ". They should click when ready.", function () {
+                    runStartOfTurnPhase();
+                    if (!gameState.isGameOver) updateUI();
+                });
+                return;
+            }
             runStartOfTurnPhase();
             if (!gameState.isGameOver) updateUI();
         } else {
@@ -1299,6 +1334,8 @@
         for (var i = 0; i < gameState.players.length; i++) {
             if (gameState.players[i].type === 'human') { humanPlayer = gameState.players[i]; break; }
         }
+        var active = getActivePlayer();
+        if (active && active.type === 'human') humanPlayer = active;
         var pid = fromPlayerId != null ? fromPlayerId : (gameState.lastDiscardByPlayerId != null ? gameState.lastDiscardByPlayerId : (humanPlayer && humanPlayer.id));
         var seat = null;
         if (pid != null) {
@@ -1313,7 +1350,7 @@
             fly.style.left = centerX + '%';
             fly.style.top = centerY + '%';
         } else if (pid != null && table.getBoundingClientRect) {
-            var others = getOtherPlayersClockwise();
+            var others = getOtherPlayersClockwise(humanPlayer);
             var idx = -1;
             for (var j = 0; j < others.length; j++) { if (others[j].id === pid) { idx = j; break; } }
             if (idx >= 0) {
@@ -1336,16 +1373,24 @@
         }, 420);
     }
 
-    function getOtherPlayersClockwise() {
+    /** Returns all living players except the one in the "you" seat, in clockwise order. Pass the player we show as "you" so the table rotates: everyone else appears around the table. */
+    function getOtherPlayersClockwise(youPlayer) {
         var active = gameState.players.filter(function (pl) { return !pl.isDead; });
-        var humanIdx = -1;
-        for (var i = 0; i < active.length; i++) {
-            if (active[i].type === 'human') { humanIdx = i; break; }
+        var excludeIdx = -1;
+        if (youPlayer != null) {
+            for (var k = 0; k < active.length; k++) { if (active[k].id === youPlayer.id) { excludeIdx = k; break; } }
         }
-        if (humanIdx === -1) return [];
+        if (excludeIdx === -1) {
+            var humanIdx = -1;
+            for (var i = 0; i < active.length; i++) {
+                if (active[i].type === 'human') { humanIdx = i; break; }
+            }
+            if (humanIdx === -1) return [];
+            excludeIdx = humanIdx;
+        }
         var out = [];
         for (var j = 1; j < active.length; j++) {
-            out.push(active[(humanIdx + j) % active.length]);
+            out.push(active[(excludeIdx + j) % active.length]);
         }
         return out;
     }
@@ -1492,6 +1537,7 @@
         for (var i = 0; i < gameState.players.length; i++) {
             if (gameState.players[i].type === 'human') { humanPlayer = gameState.players[i]; break; }
         }
+        if (p.type === 'human') humanPlayer = p;
         if (!humanPlayer) humanPlayer = p;
 
         var hintEl = document.getElementById('selection-hint');
@@ -1636,7 +1682,7 @@
             zoneYou.style.setProperty('--zone-rotate', '0deg');
         }
 
-        var otherPlayersAll = getOtherPlayersClockwise();
+        var otherPlayersAll = getOtherPlayersClockwise(humanPlayer);
         var T = otherPlayersAll.length;
         var showViewSwitcher = T >= 6;
         if (showViewSwitcher && !gameState.viewPreferenceSet) {
@@ -2060,6 +2106,31 @@
                 }
                 return;
             }
+            if (countHumanPlayers() > 1) {
+                if (saltModal) saltModal.style.display = 'none';
+                showReadyPrompt(attacker, 'Pass the device back to ' + attacker.name + ' to counter with Salt.', function () {
+                    if (defBtns) defBtns.style.display = 'none';
+                    if (counterBtns) counterBtns.style.display = 'flex';
+                    if (counterBtns) counterBtns.style.justifyContent = 'center';
+                    if (saltMsg) saltMsg.innerHTML = 'Counter with Salt? (Your haunt will go through if you do.)';
+                    if (saltModal) saltModal.style.display = 'flex';
+                    saltCounterCallback = function (counter) {
+                        if (saltModal) saltModal.style.display = 'none';
+                        if (!counter) {
+                            doSaltCancel(attacker, card);
+                            return;
+                        }
+                        var counterCard = attacker.hand.splice(attackerSaltIdx, 1)[0];
+                        gameState.lastDiscardByPlayerId = attacker.id;
+                        gameState.discard.push(counterCard);
+                        log(attacker.name + ' countered with Salt.');
+                        if (typeof window.playSFX === 'function') window.playSFX('salt');
+                        updateUI();
+                        showDefenderSaltPrompt(attacker, target, card, onContinue);
+                    };
+                });
+                return;
+            }
             if (defBtns) defBtns.style.display = 'none';
             if (counterBtns) counterBtns.style.display = 'flex';
             if (counterBtns) counterBtns.style.justifyContent = 'center';
@@ -2091,7 +2162,21 @@
             onContinue();
             return;
         }
-        showDefenderSaltPrompt(attacker, target, card, onContinue);
+        var defenderHasSalt = target.hand.some(function (c) { return c.r === '5'; });
+        if (!defenderHasSalt) {
+            onContinue();
+            return;
+        }
+        var humanCount = countHumanPlayers();
+        if (humanCount > 1) {
+            showReadyPrompt(target, "Pass the device to " + target.name + " to decide on Salt.", function () {
+                showDefenderSaltPrompt(attacker, target, card, function () {
+                    showReadyPrompt(attacker, "Pass the device back to " + attacker.name + ". Click when ready.", onContinue);
+                });
+            });
+        } else {
+            showDefenderSaltPrompt(attacker, target, card, onContinue);
+        }
     }
 
     function resolveSalt(choice) {
@@ -2177,7 +2262,10 @@
             var valid = getValidTargets();
             if (!valid.some(function (pl) { return pl && pl.id === t.id; })) return;
             if (c.r === '6') {
-                clearTargetMode();
+                if (t.hand.length === 0) {
+                    showAlertModal(t.name + ' has no cards in hand.', 'Sight');
+                    return;
+                }
                 viewHandForClaim(t);
                 return;
             }
@@ -2650,7 +2738,15 @@
             if (h2) h2.textContent = 'SIGHT REVEALED';
             modal.style.display = 'none';
         }
-        finishAction();
+        if (gameState.pendingClaimTarget != null) {
+            gameState.pendingClaimTarget = null;
+            gameState.pendingClaimCardIdx = null;
+            gameState.pendingClaimTaken = 0;
+            clearTargetMode();
+            updateUI();
+        } else {
+            finishAction();
+        }
     }
     (function () {
         var modal = document.getElementById('hand-view-modal');
@@ -3737,6 +3833,7 @@
     window.endIntermission = endIntermission;
     window.resolveSalt = resolveSalt;
     window.resolveSaltCounter = resolveSaltCounter;
+    window.resolveReady = resolveReady;
     window.resolvePhantomCancel = resolvePhantomCancel;
     window.resolvePhantomCancelWithCard = resolvePhantomCancelWithCard;
     window.resolveMimeRedirect = resolveMimeRedirect;

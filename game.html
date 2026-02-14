@@ -104,6 +104,14 @@
         </div>
     </div>
 
+    <div id="ready-modal" class="modal" style="display:none; z-index:2900;">
+        <div class="modal-content" style="border-color:var(--accent-color);">
+            <h2 style="color:var(--accent-color)">PASS THE DEVICE</h2>
+            <p id="ready-msg" style="margin-bottom:16px;">Pass the device to the player. They should click when ready.</p>
+            <button type="button" class="game-btn magic" id="ready-modal-btn" onclick="resolveReady()">I'M READY</button>
+        </div>
+    </div>
+
     <div id="salt-modal" class="modal" style="z-index:3000;">
         <div class="modal-content" style="border-color:var(--salt-color);">
             <h2 style="color:var(--salt-color)">SALT REACTION</h2>
