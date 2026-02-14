@@ -1715,13 +1715,19 @@
                 var shadowBoxHtml = twoPlayerShadow
                     ? '<div class="table-shadow-box"><div class="shadow-half shadow-half-left"><span class="shadow-sublabel">Shadow</span><div class="shadow-zone table-shadow-zone nb-shadow-zone seat-shadow-single-' + o + '" data-player-id="' + other.id + '" data-side="single"></div></div></div>'
                     : '<div class="table-shadow-box"><div class="shadow-half shadow-half-left"><span class="shadow-sublabel">Left</span><div class="shadow-zone table-shadow-zone nb-shadow-zone seat-shadow-left-' + o + '" data-player-id="' + other.id + '" data-side="left"></div></div><div class="shadow-divider" aria-hidden="true"></div><div class="shadow-half shadow-half-right"><span class="shadow-sublabel">Right</span><div class="shadow-zone table-shadow-zone nb-shadow-zone seat-shadow-right-' + o + '" data-player-id="' + other.id + '" data-side="right"></div></div></div>';
-                zone.innerHTML = '<div class="ritual-zone-row">' +
+                zone.innerHTML = '<div class="ritual-zone-header-row">' +
+                    '<div class="ritual-zone-header-left" aria-hidden="true"></div>' +
+                    '<div class="ritual-zone-header-center"></div>' +
+                    '<div class="ritual-zone-header-right" aria-hidden="true"></div>' +
+                    '</div>' +
+                    '<div class="ritual-zone-row">' +
                     '<div class="ritual-zone-left">' +
                     '<div class="ritual-zone-deck" aria-hidden="true"><div class="deck-stack"></div></div>' +
                     otherClassImg +
                     '</div>' +
                     '<div class="ritual-zone-shadow">' + shadowBoxHtml + '</div>' +
                     '<div class="ritual-zone-candle"><span class="candle-label">Candle</span><div class="candle-visual" style="--candle-pct:' + Math.max(0, Math.min(100, (other.candle.length / 27) * 100)) + '"><div class="candle-flame"></div><div class="candle-wax"></div></div></div>' +
+                    '</div>' +
                     '</div>' +
                     '<div class="ritual-zone-hand"><span class="hand-label-zone">Hand</span><div class="nb-hand-zone nb-hand-fan"></div><span class="hand-count-zone">' + other.hand.length + '</span></div>';
                 var leftZone = twoPlayerShadow ? zone.querySelector('.seat-shadow-single-' + o) : zone.querySelector('.seat-shadow-left-' + o);
@@ -1774,11 +1780,10 @@
                         zone.onclick = (function (tgt) { return function (e) { e.stopPropagation(); targetPlayerSelected(tgt); }; })(other);
                     }
                 }
-                tableZonesContainer.appendChild(zone);
 
-                /* Minimal seat: name + class only (hand and shadow are in the table zone so they don't overlap) */
+                /* Seat (name + class) in header center so it is centred over the shadow */
                 var seat = document.createElement('div');
-                seat.className = 'ritual-seat ritual-seat-other ritual-seat-minimal';
+                seat.className = 'ritual-seat ritual-seat-other ritual-seat-minimal ritual-seat-in-zone';
                 if (displayCount >= 3) seat.classList.add('seat-many');
                 if (displayCount >= 5) seat.classList.add('seat-crowded');
                 if (displayCount >= 4) seat.classList.add('seat-compact');
@@ -1786,9 +1791,6 @@
                 seat.classList.toggle('active-turn', concurrentIds.indexOf(other.id) >= 0);
                 seat.classList.toggle('concurrent-flame', concurrentIds.indexOf(other.id) >= 0 && gameState.turnOrder.length >= 6);
                 seat.dataset.playerId = String(other.id);
-                seat.style.left = seatLeft + '%';
-                seat.style.top = seatTop + '%';
-                seat.style.setProperty('--seat-rotate', zoneRotateDeg + 'deg');
                 var validTargets = gameState.selectionMode === 'SELECT_TARGET' ? getValidTargets() : [];
                 var isTargetable = validTargets.some(function (pl) { return pl.id === other.id; });
                 if (isTargetable) {
@@ -1800,7 +1802,9 @@
                 seat.innerHTML = '<div class="seat-header"><span class="seat-name">' + other.name + '</span><span class="seat-class clickable-class' + (other.class ? '' : ' empty') + '" data-class-name="' + clsName + '">' + clsName + '</span>' + concurrentBadge + '</div>';
                 var seatClassEl = seat.querySelector('.seat-class');
                 if (other.class && seatClassEl) seatClassEl.onclick = (function (cls) { return function (e) { e.stopPropagation(); showClassDesc(cls); }; })(other.class);
-                otherContainer.appendChild(seat);
+                zone.querySelector('.ritual-zone-header-center').appendChild(seat);
+
+                tableZonesContainer.appendChild(zone);
             }
         }
 

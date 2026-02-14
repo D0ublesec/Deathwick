@@ -243,6 +243,11 @@ body.game-page {
         0 0 0 1px rgba(0,0,0,0.5),
         0 10px 50px rgba(0,0,0,0.55),
         0 0 60px var(--ritual-sigil-glow);
+    /* Other players: name up/down = translateY (positive = lower); hand = margin-top (shadow row stays fixed). */
+    --ritual-name-margin-top: 35px;
+    --ritual-hand-margin-top: -33px;
+    /* The Dark: lower % = higher on table (e.g. 46% = up). */
+    --ritual-dark-top: 46%;
 }
 
 /* Canvas-drawn oval table surface (matches oval shape; drawn in game.js) */
@@ -273,6 +278,29 @@ body.game-page {
     align-items: center;
     transform: translate(-50%, -50%);
     gap: 0;
+}
+
+/* Other players: grid so name is centred over shadow (column 2); only name and hand move with vertical vars. */
+.ritual-zone-other {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    grid-template-rows: auto auto auto;
+    gap: 10px 10px;
+    align-items: start;
+    justify-items: center;
+}
+.ritual-zone-other > .ritual-zone-header-row {
+    display: grid;
+    grid-template-columns: subgrid;
+    grid-column: 1 / -1;
+    align-items: center;
+    width: 100%;
+}
+.ritual-zone-other > .ritual-zone-row {
+    display: grid;
+    grid-template-columns: subgrid;
+    grid-column: 1 / -1;
+    width: 100%;
 }
 /* Other players: normal column order — shadow row first (toward player / on table), hand second (toward center). No column-reverse so shadow stays on table, not behind The Dark. */
 /* One row on table: left (deck + class) | shadow (centre) | candle (right); rotated toward centre */
@@ -403,61 +431,28 @@ body.game-page {
  * Zone/seat positions (where the block sits) = js/ritual-layout.js
  */
 
-/*
- * 2-PLAYER: P2 zone — column-reverse so hand appears BELOW the shadow.
- * ADJUST: change gap (0 = hand tight to shadow; 6px/8px = more space). !important forces override.
- */
-.ritual-table[data-player-count="2"] .ritual-zone-other {
-    flex-direction: column-reverse !important;
-    gap: 0 !important;
-}
+/* P2 in 2p uses same layout as P3 in 4p (player opposite P1): standard grid, no 2p-only overrides. */
 
+/* Hand: only name and hand move up/down (vars on .ritual-table); shadow row stays fixed. */
 .ritual-zone-other .ritual-zone-hand {
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-top: 28px;
+    margin-top: var(--ritual-hand-margin-top, 2px);
     transform: rotate(calc(-1 * var(--zone-rotate, 0deg)));
     transform-origin: 50% 0%;
     z-index: 0;
+    grid-column: 2;
+    justify-self: center;
+}
+/* Name only: translateY moves name without resizing header row (positive = name lower). */
+.ritual-zone-other .ritual-seat-in-zone {
+    position: static;
+    transform: translateY(var(--ritual-name-margin-top, 0));
 }
 .ritual-zone-other .ritual-zone-row {
     z-index: 1;
     position: relative;
-}
-/* P2 hand: zero margin + translateY to pull hand toward shadow. ADJUST: change 24px (larger = hand closer to shadow). */
-.ritual-table[data-player-count="2"] .ritual-zone-other .ritual-zone-hand {
-    margin-top: 0 !important;
-    margin-bottom: 0 !important;
-    transform: translateY(105px) rotate(calc(-1 * var(--zone-rotate, 0deg))) !important;
-}
-/* 3-player: gap so hand doesn’t cover P2/P3 shadows */
-/* ADJUST 3-PLAYER: gap (px) between shadow row and hand for P2 and P3. */
-.ritual-table[data-player-count="3"] .ritual-zone-other .ritual-zone-hand {
-    margin-top: 34px;
-}
-/* ADJUST 4-PLAYER: base gap, then right/top/left overrides (P2, P3, P4). */
-.ritual-table[data-player-count="4"] .ritual-zone-other .ritual-zone-hand {
-    margin-top: 32px;
-}
-.ritual-table[data-player-count="4"] .ritual-zone-other[data-zone-position="right"] .ritual-zone-hand {
-    margin-top: 36px;
-}
-.ritual-table[data-player-count="4"] .ritual-zone-other[data-zone-position="top"] .ritual-zone-hand {
-    margin-top: 36px;
-}
-.ritual-table[data-player-count="4"] .ritual-zone-other[data-zone-position="left"] .ritual-zone-hand {
-    margin-top: 36px;
-    align-self: flex-start;  /* ADJUST: remove to center hand; flex-start keeps hand to one side */
-}
-/* ADJUST 5+ PLAYER: gap (px) between shadow row and hand for 5-10 player games. */
-.ritual-table[data-player-count="5"] .ritual-zone-other .ritual-zone-hand,
-.ritual-table[data-player-count="6"] .ritual-zone-other .ritual-zone-hand,
-.ritual-table[data-player-count="7"] .ritual-zone-other .ritual-zone-hand,
-.ritual-table[data-player-count="8"] .ritual-zone-other .ritual-zone-hand,
-.ritual-table[data-player-count="9"] .ritual-zone-other .ritual-zone-hand,
-.ritual-table[data-player-count="10"] .ritual-zone-other .ritual-zone-hand {
-    margin-top: 26px;
 }
 .ritual-zone-hand .hand-label-zone {
     font-size: 0.5rem;
@@ -747,11 +742,11 @@ body.game-page {
     75% { transform: scale(1.03) translateX(0); opacity: 0.97; filter: brightness(1.08); }
 }
 
-/* Center zone: The Dark. ADJUST: top 50% = centre; higher % = closer to P1 (e.g. 52–54). */
+/* Center zone: The Dark. ADJUST: --ritual-dark-top (lower % = higher on table). */
 .ritual-center-zone {
     position: absolute;
     left: 50%;
-    top: 52%;
+    top: var(--ritual-dark-top, 52%);
     transform: translate(-50%, -50%);
     width: min(16vw, 100px);
     height: min(16vw, 100px);
@@ -762,10 +757,9 @@ body.game-page {
     pointer-events: none;
 }
 
-/* 2-player: The Dark slightly closer to P1 (bottom). Change top to move (e.g. 50 = centre, 54 = closer to P1). */
 .ritual-table[data-player-count="2"] .ritual-center-zone {
     left: 50%;
-    top: 52%;
+    top: var(--ritual-dark-top, 52%);
 }
 
 .ritual-center {
