@@ -1543,7 +1543,7 @@
         var hintEl = document.getElementById('selection-hint');
         if (hintEl) {
             if (gameState.selectionMode === 'SELECT_GHOST') {
-                hintEl.textContent = gameState.pendingDoomreader ? 'Select a ghost in your Shadow to change its suit.' : (gameState.selectionTarget != null ? 'Select a ghost (yours)' : 'Select a ghost');
+                hintEl.textContent = gameState.pendingDoomreader ? 'Select a ghost in your Shadow to swap with a ranked card from The Dark.' : (gameState.selectionTarget != null ? 'Select a ghost (yours)' : 'Select a ghost');
                 hintEl.style.display = 'block';
             } else if (gameState.selectionMode === 'SELECT_TARGET') {
                 hintEl.textContent = 'Select target player';
@@ -1590,6 +1590,8 @@
                 playerClassCardOnTable.classList.remove('clickable-class-card');
             }
         }
+        var playerDeckBack = document.getElementById('player-deck-card-back');
+        if (playerDeckBack) playerDeckBack.src = CARD_BACKS_BASE + getCardBackFilename() + CARD_IMAGE_EXT;
         if (playerStatus) playerStatus.innerHTML = humanPlayer.isSalted ? ' <span class="status-badge status-salt">SALTED</span>' : '';
 
         var seatYou = document.getElementById('seat-you');
@@ -1768,7 +1770,7 @@
                     '</div>' +
                     '<div class="ritual-zone-row">' +
                     '<div class="ritual-zone-left">' +
-                    '<div class="ritual-zone-deck" aria-hidden="true"><div class="deck-stack"></div></div>' +
+                    '<div class="ritual-zone-deck" aria-hidden="true"><div class="deck-stack"><img class="deck-card-back" src="' + CARD_BACKS_BASE + getCardBackFilename() + CARD_IMAGE_EXT + '" alt="" aria-hidden="true"></div></div>' +
                     otherClassImg +
                     '</div>' +
                     '<div class="ritual-zone-shadow">' + shadowBoxHtml + '</div>' +
@@ -2921,13 +2923,12 @@
         if (gameState.pendingDoomreader) {
             if (ownerId !== p.id) return;
             var ghost = t.shadow[idx];
-            if (!ghost || ghost.isWall) { showAlertModal('Choose a ghost (not a Wall) to change its suit.', 'THE DOOMREADER'); return; }
-            var suits = ['♠', '♥', '♣', '♦'];
-            ghost.s = suits[(suits.indexOf(ghost.s) + 1) % 4];
-            log(p.name + ' (THE DOOMREADER) changed Ghost Suit to ' + ghost.s);
-            gameState.pendingDoomreader = null;
-            gameState.selectionMode = null;
-            finishAction();
+            if (!ghost || ghost.isWall) { showAlertModal('Choose a ghost (not a Wall) to swap with a ranked card from The Dark.', 'THE DOOMREADER'); return; }
+            var numberCardsInDark = gameState.discard.filter(function (c) { return c && !c.isWall && c.r !== 'JOKER' && c.r !== '★' && !c.isFace; });
+            if (numberCardsInDark.length === 0) { showAlertModal('No ranked card (A–10) in The Dark to swap with.', 'THE DOOMREADER'); return; }
+            gameState.pendingExchangeGhostOwnerId = ownerId;
+            gameState.pendingExchangeGhostIdx = idx;
+            openExchangeDarkModal();
             return;
         }
 
@@ -3306,13 +3307,28 @@
         var container = document.getElementById('exchange-dark-cards');
         if (!container) return;
         container.innerHTML = '';
+        var isDoomreader = !!gameState.pendingDoomreader;
+        var titleEl = document.getElementById('exchange-dark-modal-title');
+        var descEl = document.getElementById('exchange-dark-modal-desc');
+        if (titleEl && descEl) {
+            if (isDoomreader) {
+                titleEl.textContent = 'THE DOOMREADER — Pick a ranked card from The Dark';
+                descEl.textContent = 'Choose any ranked card (A–10) to swap with the ghost you selected. Face cards and Jokers are not valid.';
+            } else {
+                titleEl.textContent = 'EXCHANGE — Pick a number card from The Dark';
+                descEl.textContent = 'Choose any number card (A–10) to swap with your ghost. Face cards and Jokers are not valid.';
+            }
+        }
         for (var i = 0; i < gameState.discard.length; i++) {
             var c = gameState.discard[i];
             if (!c || c.isWall || c.r === 'JOKER' || c.r === '★' || c.isFace) continue;
             (function (discardIdx) {
                 var el = mkCard(c);
                 el.style.cursor = 'pointer';
-                el.onclick = function () { resolveExchangeWithCard(discardIdx); };
+                el.onclick = function () {
+                    if (gameState.pendingDoomreader) resolveDoomreaderWithCard(discardIdx);
+                    else resolveExchangeWithCard(discardIdx);
+                };
                 container.appendChild(el);
             })(i);
         }
@@ -3320,6 +3336,10 @@
     }
 
     function closeExchangeDarkModal() {
+        if (gameState.pendingDoomreader) {
+            gameState.pendingDoomreader = null;
+            gameState.selectionMode = null;
+        }
         gameState.pendingExchangeGhostOwnerId = null;
         gameState.pendingExchangeGhostIdx = null;
         document.getElementById('exchange-dark-modal').style.display = 'none';
@@ -3327,6 +3347,39 @@
         updateUI();
     }
     window.closeExchangeDarkModal = closeExchangeDarkModal;
+
+    function resolveDoomreaderWithCard(discardIdx) {
+        var p = gameState.players[gameState.activeIdx];
+        var ownerId = gameState.pendingExchangeGhostOwnerId;
+        var ghostIdx = gameState.pendingExchangeGhostIdx;
+        var t = null;
+        for (var i = 0; i < gameState.players.length; i++) {
+            if (gameState.players[i].id === ownerId) { t = gameState.players[i]; break; }
+        }
+        if (!t || !t.shadow[ghostIdx] || discardIdx < 0 || discardIdx >= gameState.discard.length) {
+            closeExchangeDarkModal();
+            return;
+        }
+        var chosenCard = gameState.discard[discardIdx];
+        if (chosenCard.isFace || chosenCard.r === 'JOKER' || chosenCard.r === '★') {
+            closeExchangeDarkModal();
+            return;
+        }
+        var ghost = t.shadow[ghostIdx];
+        gameState.discard.splice(discardIdx, 1);
+        gameState.lastDiscardByPlayerId = p.id;
+        gameState.discard.push(ghost);
+        chosenCard.hauntedBy = ghost.hauntedBy;
+        t.shadow[ghostIdx] = chosenCard;
+        gameState.pendingDoomreader = null;
+        gameState.pendingExchangeGhostOwnerId = null;
+        gameState.pendingExchangeGhostIdx = null;
+        gameState.selectionMode = null;
+        document.getElementById('exchange-dark-modal').style.display = 'none';
+        log(p.name + ' (THE DOOMREADER) swapped a ghost with a ranked card from The Dark.');
+        updateUI();
+        finishAction();
+    }
 
     function resolveExchangeWithCard(discardIdx) {
         var p = gameState.players[gameState.activeIdx];
@@ -3380,7 +3433,7 @@
             gameState.pendingDoomreader = true;
             gameState.selectionMode = 'SELECT_GHOST';
             gameState.selectionTarget = p.id;
-            log('Select a ghost in your Shadow to change its suit.');
+            log('Select a ghost in your Shadow to swap with a ranked card from The Dark.');
             updateUI();
             return;
         }

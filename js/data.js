@@ -3,7 +3,7 @@ window.CLASSES = [
     { name: "THE CLOWN", desc: "Ghosts you Haunt cannot be Banished by Numbers, only Face or Cleanse (7)." },
     { name: "THE CRYPTKEEPER", desc: "Play a card face-down in your Shadow as a Wall (costs your whole turn—your one action). When someone Haunts you, you may discard one Wall: that ghost and the Wall both go to The Dark (the ghost never lands on your Shadow)." },
     { name: "THE CROW", desc: "If a neighbour Burns a Face card (to the top of The Dark), you may add it to your hand instead." },
-    { name: "THE DOOMREADER", desc: "Up to once per turn, you may discard 1 card to The Dark to change the suit of a Ghost in your Shadow." },
+    { name: "THE DOOMREADER", desc: "Up to once per turn, you may discard 1 card to The Dark to swap any card in your Shadow (that you choose) with any ranked card (A–10) from The Dark." },
     { name: "THE EXORCIST", desc: "Your 7 (Cleanse) destroys 2 Ghosts from your Shadow. You may Siphon only one (to the bottom of your Candle); the other goes to the top of The Dark." },
     { name: "THE EXTORTIONER", desc: "When you play a 6 (Sight), take 2 cards from that neighbour's hand instead of 1." },
     { name: "THE FUNERAL BELL", desc: "When a player dies, each other remaining player Burns 1 card. You are not affected." },
