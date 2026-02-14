@@ -1200,8 +1200,6 @@
         var rankMap = { 'A': 'ace', '2': '2', '3': '3', '4': '4', '5': '5', '6': '6', '7': '7', '8': '8', '9': '9', '10': '10', 'J': 'jack', 'Q': 'queen', 'K': 'king' };
         var suitMap = { '♠': 'spades', '♥': 'hearts', '♣': 'clubs', '♦': 'diamonds' };
         var rank = rankMap[c.r];
-        if (c.r === 'A') rank = '6';
-        else if (c.r === '6') rank = 'ace';
         var suit = c.s ? suitMap[c.s] : '';
         if (!rank || !suit) return null;
         return 'deathwick_' + rank + '_' + suit;
@@ -1211,10 +1209,7 @@
         if (!c || c.isWall) return '';
         if (c.r === 'JOKER' || c.r === '★') return 'joker';
         var folderMap = { 'A': 'ace', '2': 'two', '3': 'three', '4': 'four', '5': 'five', '6': 'six', '7': 'seven', '8': 'eight', '9': 'nine', '10': 'ten', 'J': 'jack', 'Q': 'queen', 'K': 'king' };
-        var folder = folderMap[c.r] || '';
-        if (c.r === 'A') folder = 'six';
-        else if (c.r === '6') folder = 'ace';
-        return folder;
+        return folderMap[c.r] || '';
     }
     function getCardBackFilename() {
         return 'deathwick_back_portrait';
