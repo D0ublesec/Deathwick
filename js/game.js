@@ -2,6 +2,10 @@
 (function () {
     var CLASSES = window.CLASSES;
     var SUITS = window.SUITS;
+    var EXTENDED_CLASS_NAMES = ['THE FUNERAL BELL', 'THE GATEKEEPER', 'THE OCCULTIST', 'THE GRAVEDIGGER', 'THE VULTURE', 'THE PLAGUE', 'THE REAPER', 'THE MIMIC', 'THE LICH', 'THE INQUISITOR', 'THE PYROMANIAC', 'THE USERER', 'THE HOARDER', 'THE SEALBINDER', 'THE MEDDLER', 'THE ORACLE', 'THE CROW', 'THE MIME'];
+    function getClassPool() {
+        return gameState.players.length > 6 ? CLASSES : CLASSES.filter(function (c) { return EXTENDED_CLASS_NAMES.indexOf(c.name) < 0; });
+    }
     var RANKS = window.RANKS;
     var getVal = window.getVal;
     var CARD_IMAGES_BASE = 'images/cards/';
@@ -22,6 +26,7 @@
         concurrentSlot: 0,
         activeIdx: 0,
         selectedIdxs: [],
+        selectedDarkTop: false,
         turnPhase: 'SETUP',
         selectionMode: null,
         pendingAction: null,
@@ -62,6 +67,7 @@
                 };
                 if (p.usedMimic) out.usedMimic = true;
                 if (p.usedLichRevive) out.usedLichRevive = true;
+                if (p.voodooSuits) out.voodooSuits = p.voodooSuits.slice();
                 return out;
             }),
             discard: gameState.discard.slice(),
@@ -110,6 +116,7 @@
             };
             if (p.usedMimic) pl.usedMimic = true;
             if (p.usedLichRevive) pl.usedLichRevive = true;
+            if (p.voodooSuits) pl.voodooSuits = p.voodooSuits.slice();
             if (p.isRemote) pl.isRemote = true;
             return pl;
         });
@@ -157,6 +164,7 @@
                 };
                 if (p.usedMimic) pl.usedMimic = true;
                 if (p.usedLichRevive) pl.usedLichRevive = true;
+                if (p.voodooSuits) pl.voodooSuits = p.voodooSuits.slice();
                 return pl;
             });
             gameState.discard = snap.discard || [];
@@ -217,14 +225,17 @@
 
     var CHEATSHEET_TURN_NORMAL = '<li>Candle empty at end of turn → Consumed (lose).</li>';
     var CHEATSHEET_TURN_DARK = '<li>Candle empty at any moment → Consumed immediately (lose).</li>';
-    var CHEATSHEET_REST = '<section class="cs-section"><h3>Actions</h3><ul class="cs-list"><li><strong>Haunt</strong> — Number card to a neighbour\'s Shadow.</li><li><strong>Banish</strong> — Match/beat a Ghost in your Shadow.</li><li><strong>Panic</strong> — Flip top of Candle vs Ghost.</li><li><strong>Séance</strong> — Pair → heal 4 from Dark.</li><li><strong>Cast / Summon</strong> — Card effect (see Grimoire).</li><li><strong>Flicker</strong> — Shuffle hand, draw 3.</li><li><strong>Ability</strong> — Class power.</li></ul></section>' +
+    var CHEATSHEET_REST = '<section class="cs-section"><h3>Actions</h3><ul class="cs-list"><li><strong>Haunt</strong> — Number card to a neighbour\'s Shadow.</li><li><strong>Banish</strong> — Match/beat a Ghost in your Shadow.</li><li><strong>Panic</strong> — Flip top of Candle vs Ghost.</li><li><strong>Séance</strong> — Pair → heal 4 from Dark.</li><li><strong>Cast</strong> (number cards) / <strong>Summon</strong> (face cards & Jokers) — Use card effect (see Grimoire).</li><li><strong>Flicker</strong> — Shuffle hand, draw 3.</li><li><strong>Ability</strong> — Class power.</li></ul></section>' +
         '<section class="cs-section"><h3>Targeting</h3><p>You can only target your two Neighbours (left/right) unless a card or class says otherwise (e.g. THE OCCULTIST 9 = any player).</p></section>' +
-        '<section class="cs-section"><h3>Grimoire</h3><table class="cs-table"><tr><td>A</td><td>Sight</td><td>Choose a neighbour; reveal their hand (Watcher: both).</td></tr><tr><td>2</td><td>Greed</td><td>Draw 2 to your hand.</td></tr><tr><td>3</td><td>Scare</td><td>Choose a neighbour; they shuffle hand, discard 1 to The Dark (Sadist: 2 to The Dark).</td></tr><tr><td>4</td><td>Drain</td><td>Choose a neighbour; take top of their Candle, put on top of yours.</td></tr><tr><td>5</td><td>Salt</td><td>Reaction: cancel action targeting you (both to The Dark).</td></tr><tr><td>6</td><td>Claim</td><td>Choose a neighbour; take 1 random from their hand and add to yours.</td></tr><tr><td>7</td><td>Cleanse</td><td>Destroy 1 Ghost (to The Dark or Siphon to your Candle).</td></tr><tr><td>8</td><td>Recall</td><td>Take a Ghost from any Shadow to your hand.</td></tr><tr><td>9</td><td>Possess</td><td>Move a Ghost from your Shadow to a neighbour\'s Shadow.</td></tr><tr><td>10</td><td>Rekindle</td><td>Top 3 from The Dark → top of your Candle.</td></tr><tr><td>J</td><td>Mirror</td><td>Choose a neighbour and swap your Shadow with their Shadow.</td></tr><tr><td>Q</td><td>Medium</td><td>1 from Dark to hand, OR top 2 from Dark → top of your Candle.</td></tr><tr><td>K</td><td>Purge</td><td>Banish all Ghosts in your Shadow (to The Dark / Siphon).</td></tr><tr><td>★</td><td>BOO!</td><td>Others Burn until number (to The Dark); number → Ghost in their Shadow.</td></tr></table></section>';
+        '<section class="cs-section"><h3>Grimoire</h3><table class="cs-table"><tr><td>A or 1</td><td>Exchange</td><td>Swap a ghost in your Shadow with any number card (A–10) from The Dark.</td></tr><tr><td>2</td><td>Greed</td><td>Draw 2 to your hand.</td></tr><tr><td>3</td><td>Scare</td><td>Choose a neighbour; they shuffle hand, discard 1 to The Dark (Sadist: 2 to The Dark).</td></tr><tr><td>4</td><td>Drain</td><td>Choose a neighbour; take top of their Candle, put on top of yours.</td></tr><tr><td>5</td><td>Salt</td><td>Reaction: cancel action targeting you (both to The Dark).</td></tr><tr><td>6</td><td>Sight</td><td>View a neighbour\'s hand and take one card (Watcher: view both, take 1 from either).</td></tr><tr><td>7</td><td>Cleanse</td><td>Destroy 1 Ghost (to The Dark or Siphon to your Candle).</td></tr><tr><td>8</td><td>Recall</td><td>Take a Ghost from any Shadow to your hand.</td></tr><tr><td>9</td><td>Possess</td><td>Move a Ghost from your Shadow to a neighbour\'s Shadow.</td></tr><tr><td>10</td><td>Rekindle</td><td>Top 3 from The Dark to your Candle, then shuffle Candle.</td></tr><tr><td>J</td><td>Mirror</td><td>Choose a neighbour and swap your Shadow with their Shadow.</td></tr><tr><td>Q</td><td>Medium</td><td>1 from Dark to hand (no Joker), OR top 2 from Dark → Candle then shuffle.</td></tr><tr><td>K</td><td>Purge</td><td>Banish all Ghosts in your Shadow (to The Dark / Siphon).</td></tr><tr><td>★</td><td>BOO!</td><td>Others Burn until number (to The Dark); number → Ghost in their Shadow.</td></tr></table></section>';
 
     function getCheatsheetHTML(darkMode) {
         var candleRule = darkMode ? CHEATSHEET_TURN_DARK : CHEATSHEET_TURN_NORMAL;
+        var possessionLine = darkMode
+            ? '<li>3 Ghosts same suit → Possessed (lose). In Dark ritual: checked <strong>as soon as</strong> you get the 3rd (Haunt, BOO!, etc.), not only at end of turn.</li>'
+            : '<li>3 Ghosts same suit in Shadow → Possessed (lose).</li>';
         return '<section class="cs-section"><h3>Win</h3><p>Be the last player with a lit Candle.</p></section>' +
-            '<section class="cs-section"><h3>Turn order</h3><ol class="cs-list"><li>Burn 1 card per Ghost in your Shadow.</li><li>Draw 1.</li><li>Do <strong>one</strong> action.</li><li>Discard down to 5.</li>' + candleRule + '<li>3 Ghosts same suit in Shadow → Possessed (lose).</li></ol></section>' +
+            '<section class="cs-section"><h3>Turn order</h3><ol class="cs-list"><li>Burn 1 card per Ghost in your Shadow.</li><li>Draw 1.</li><li>Do <strong>one</strong> action.</li><li>Discard down to 5.</li>' + candleRule + possessionLine + '</ol></section>' +
             CHEATSHEET_REST;
     }
 
@@ -410,9 +421,12 @@
                     });
                 }
             }
-            var jokerVariant = (d * 2) % 4 + 1;
+        }
+        var nPlayers = gameState.players.length;
+        var totalJokers = nPlayers <= 8 ? 2 * Math.ceil(nPlayers / 2) : 9 + Math.floor((nPlayers - 9) / 2);
+        for (var j = 0; j < totalJokers; j++) {
+            var jokerVariant = (j % 4) + 1;
             deck.push({ s: '★', r: 'JOKER', val: 99, isFace: false, jokerVariant: jokerVariant });
-            deck.push({ s: '★', r: 'JOKER', val: 99, isFace: false, jokerVariant: jokerVariant === 4 ? 1 : jokerVariant + 1 });
         }
         for (var k = deck.length - 1; k > 0; k--) {
             var j = Math.floor(Math.random() * (k + 1));
@@ -444,8 +458,56 @@
         document.body.classList.toggle('dark-mode', gameState.darkMode);
         var dmModal = document.getElementById('dark-mode-modal');
         if (dmModal) dmModal.style.display = 'none';
+        if (gameState.isOnline && gameState.isHost) {
+            showFirstPlayerModal();
+            return;
+        }
         startTurn();
     }
+
+    function showFirstPlayerModal() {
+        var container = document.getElementById('first-player-options');
+        var modal = document.getElementById('first-player-modal');
+        if (!container || !modal) return;
+        container.innerHTML = '';
+        for (var i = 0; i < gameState.players.length; i++) {
+            (function (playerIndex) {
+                var p = gameState.players[playerIndex];
+                var label = (p.name && p.name.trim()) ? p.name.trim() : ('Player ' + (playerIndex + 1));
+                var btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'game-btn';
+                btn.textContent = label + ' starts';
+                btn.onclick = function () { chooseFirstPlayer(playerIndex); };
+                container.appendChild(btn);
+            })(i);
+        }
+        modal.style.display = 'flex';
+    }
+
+    function chooseFirstPlayer(playerIndex) {
+        var n = gameState.players.length;
+        if (playerIndex < 0 || playerIndex >= n) return;
+        var newOrder = [];
+        for (var i = 0; i < n; i++) newOrder.push((playerIndex + i) % n);
+        gameState.turnOrder = newOrder;
+        gameState.turnIdx = 0;
+        gameState.concurrentSlot = 0;
+        gameState.activeIdx = gameState.players[gameState.turnOrder[0]].id;
+        var modal = document.getElementById('first-player-modal');
+        if (modal) modal.style.display = 'none';
+        if (gameState.isOnline && gameState.isHost && typeof gameState.broadcastState === 'function') gameState.broadcastState();
+        startTurn();
+    }
+
+    function chooseFirstPlayerRandom() {
+        var n = gameState.players.length;
+        if (n === 0) return;
+        var idx = Math.floor(Math.random() * n);
+        chooseFirstPlayer(idx);
+    }
+    window.chooseFirstPlayer = chooseFirstPlayer;
+    window.chooseFirstPlayerRandom = chooseFirstPlayerRandom;
 
     function pickClasses(idx) {
         if (idx >= gameState.players.length) {
@@ -453,17 +515,19 @@
             return;
         }
         var p = gameState.players[idx];
+        var pool = getClassPool();
         if (p.type === 'ai') {
-            p.class = CLASSES[Math.floor(Math.random() * CLASSES.length)];
+            p.class = pool[Math.floor(Math.random() * pool.length)];
+            if (p.class.name === 'THE VOODOO DOLL') p.voodooSuits = ['♣', '♦']; /* two lowest suits */
             pickClasses(idx + 1);
             return;
         }
         if (p.isRemote && typeof window.onRequestRemoteClass === 'function') {
-            var c1 = CLASSES[Math.floor(Math.random() * CLASSES.length)];
+            var c1 = pool[Math.floor(Math.random() * pool.length)];
             var c2 = c1;
-            while (c2 === c1) c2 = CLASSES[Math.floor(Math.random() * CLASSES.length)];
+            while (c2 === c1) c2 = pool[Math.floor(Math.random() * pool.length)];
             var c3 = c1;
-            while (c3 === c1 || c3 === c2) c3 = CLASSES[Math.floor(Math.random() * CLASSES.length)];
+            while (c3 === c1 || c3 === c2) c3 = pool[Math.floor(Math.random() * pool.length)];
             window.onRequestRemoteClass(idx, [c1, c2, c3], function (className) {
                 p.class = CLASSES.filter(function (c) { return c.name === className; })[0] || CLASSES[0];
                 pickClasses(idx + 1);
@@ -477,11 +541,11 @@
         modal.style.display = 'flex';
         if (title) title.textContent = p.name + ': CHOOSE CLASS';
         opts.innerHTML = '';
-        var c1 = CLASSES[Math.floor(Math.random() * CLASSES.length)];
+        var c1 = pool[Math.floor(Math.random() * pool.length)];
         var c2 = c1;
-        while (c2 === c1) c2 = CLASSES[Math.floor(Math.random() * CLASSES.length)];
+        while (c2 === c1) c2 = pool[Math.floor(Math.random() * pool.length)];
         var c3 = c1;
-        while (c3 === c1 || c3 === c2) c3 = CLASSES[Math.floor(Math.random() * CLASSES.length)];
+        while (c3 === c1 || c3 === c2) c3 = pool[Math.floor(Math.random() * pool.length)];
         [c1, c2, c3].forEach(function (c) {
             var b = document.createElement('div');
             b.className = 'class-box';
@@ -502,6 +566,7 @@
             b.appendChild(textWrap);
             b.onclick = function () {
                 p.class = c;
+                if (c.name === 'THE VOODOO DOLL') p.voodooSuits = ['♣', '♦']; /* two lowest suits (suit tier) */
                 modal.style.display = 'none';
                 pickClasses(idx + 1);
             };
@@ -537,6 +602,13 @@
     }
 
     function runStartOfTurnPhase() {
+        if (gameState.players.length === 2) {
+            var hasWitness = gameState.players.some(function (pl) { return pl.class && pl.class.name === 'THE WITNESS'; });
+            if (hasWitness) {
+                gameOver('No winner—THE WITNESS in a 2-player game.');
+                return;
+            }
+        }
         var p = gameState.players[gameState.activeIdx];
         if (!p) return;
         p.occultistPossessBonusUsedThisTurn = false;
@@ -705,18 +777,20 @@
                 } else if (left && !right) {
                     for (var l = 0; l < ghostsToPass.length; l++) left.shadow.push(ghostsToPass[l]);
                     log(p.name + '\'s ' + ghostsToPass.length + ' ghost(s) passed to ' + left.name + '.');
+                    if (checkPossessionInstantIfDark(left)) return true;
                 } else if (!left && right) {
                     for (var r = 0; r < ghostsToPass.length; r++) right.shadow.push(ghostsToPass[r]);
                     log(p.name + '\'s ' + ghostsToPass.length + ' ghost(s) passed to ' + right.name + '.');
+                    if (checkPossessionInstantIfDark(right)) return true;
                 } else {
                     var half = Math.floor(ghostsToPass.length / 2);
                     var extra = ghostsToPass.length % 2;
                     for (var hl = 0; hl < half; hl++) left.shadow.push(ghostsToPass[hl]);
                     for (var hr = half; hr < half + half; hr++) right.shadow.push(ghostsToPass[hr]);
+                    var recipient = null;
                     if (extra === 1) {
                         var aliveForMin = gameState.players.filter(function (pl) { return !pl.isDead; });
                         var minGhosts = Infinity;
-                        var recipient = null;
                         for (var mi = 0; mi < aliveForMin.length; mi++) {
                             var count = aliveForMin[mi].shadow.filter(function (g) { return !g.isWall; }).length;
                             if (count < minGhosts) { minGhosts = count; recipient = aliveForMin[mi]; }
@@ -727,11 +801,21 @@
                     } else {
                         log(p.name + '\'s ghosts passed evenly to ' + left.name + ' and ' + right.name + '.');
                     }
+                    if (checkPossessionInstantIfDark(left)) return true;
+                    if (checkPossessionInstantIfDark(right)) return true;
+                    if (recipient && checkPossessionInstantIfDark(recipient)) return true;
                 }
             }
         }
         var alive = gameState.players.filter(function (pl) { return !pl.isDead; });
         if (alive.length >= 2) {
+            if (gameState.players.length === 2) {
+                var hasWitness = alive.some(function (pl) { return pl.class && pl.class.name === 'THE WITNESS'; });
+                if (hasWitness) {
+                    gameOver('No winner—THE WITNESS in a 2-player game.');
+                    return true;
+                }
+            }
             var witnessPlayer = null;
             for (var wi = 0; wi < alive.length; wi++) {
                 if (alive[wi].class && alive[wi].class.name === 'THE WITNESS') { witnessPlayer = alive[wi]; break; }
@@ -836,13 +920,75 @@
         sDiv.classList.add('shadow-cols-' + cols);
     }
 
+    function attachShadowReveal(zoneEl, player) {
+        if (!zoneEl || zoneEl.dataset.revealAttached === '1') return;
+        zoneEl.dataset.revealAttached = '1';
+        var tooltip = document.getElementById('shadow-reveal-tooltip');
+        var modal = document.getElementById('shadow-view-modal');
+        var modalTitle = document.getElementById('shadow-view-title');
+        var modalCards = document.getElementById('shadow-view-cards');
+        var shadowZones = zoneEl.querySelectorAll('.table-shadow-zone, .shadow-zone.table-shadow-zone');
+        for (var i = 0; i < shadowZones.length; i++) {
+            (function (zone) {
+                var sideLabelEl = zone.closest('.shadow-from-neighbour') || zone.closest('.shadow-half');
+                var label = sideLabelEl ? (sideLabelEl.querySelector('.shadow-sublabel') || {}).textContent || '' : '';
+                zone.addEventListener('mouseenter', function (e) {
+                    if (!tooltip) return;
+                    var cards = zone.querySelectorAll('.g-card:not(.wall-card)');
+                    var parts = [];
+                    for (var j = 0; j < cards.length; j++) {
+                        var mid = cards[j].querySelector('.mid');
+                        var tl = cards[j].querySelector('.tl');
+                        if (mid && tl) parts.push((tl.textContent || '').trim() + (mid.textContent || '').trim());
+                    }
+                    tooltip.innerHTML = '<strong>' + (player.name || '') + '</strong> ' + (label ? '— ' + label : '') + (parts.length ? '<div class="shadow-reveal-cards">' + parts.join(', ') + '</div>' : '<div class="shadow-reveal-cards">(empty)</div>');
+                    tooltip.classList.add('visible');
+                    tooltip.style.left = Math.min(e.clientX + 12, document.documentElement.clientWidth - 290) + 'px';
+                    tooltip.style.top = (e.clientY + 12) + 'px';
+                });
+                zone.addEventListener('mouseleave', function () {
+                    if (tooltip) tooltip.classList.remove('visible');
+                });
+                zone.addEventListener('click', function (e) {
+                    if (gameState.selectionMode === 'SELECT_TARGET') return;
+                    if (e.target.closest('.g-card.targetable')) return;
+                    if (!modal || !modalTitle || !modalCards) return;
+                    modalTitle.textContent = (player.name || '') + (label ? ' — ' + label : '') + ' (Shadow)';
+                    modalCards.innerHTML = '';
+                    var cards = zone.querySelectorAll('.g-card');
+                    for (var j = 0; j < cards.length; j++) {
+                        var clone = cards[j].cloneNode(true);
+                        clone.classList.remove('targetable', 'small');
+                        clone.onclick = null;
+                        modalCards.appendChild(clone);
+                    }
+                    modal.style.display = 'flex';
+                    modal.setAttribute('aria-hidden', 'false');
+                });
+            })(shadowZones[i]);
+        }
+    }
+
+    function closeShadowViewModal() {
+        var modal = document.getElementById('shadow-view-modal');
+        if (modal) {
+            modal.style.display = 'none';
+            modal.setAttribute('aria-hidden', 'true');
+        }
+    }
+    window.closeShadowViewModal = closeShadowViewModal;
+    (function () {
+        var modal = document.getElementById('shadow-view-modal');
+        if (modal) modal.addEventListener('click', function (e) { if (e.target === modal) closeShadowViewModal(); });
+    })();
+
     var CARD_EFFECTS = {
-        'A': { name: 'Sight', effect: 'Choose a neighbour; reveal their hand to you (The Watcher: both neighbours).' },
+        'A': { name: 'Exchange (A or 1)', effect: 'Choose a ghost in your Shadow; swap it with any number card (A–10) from The Dark (change suit to avoid possession or lower rank to banish).' },
         '2': { name: 'Greed', effect: 'Draw 2 cards to your hand.' },
         '3': { name: 'Scare', effect: 'Choose a neighbour. They shuffle their hand and blindly discard 1 to The Dark (The Sadist: 2 to The Dark; you pick which).' },
         '4': { name: 'Drain', effect: 'Choose a neighbour. Take the top card of their Candle; put it on top of your Candle.' },
         '5': { name: 'Salt', effect: 'Reaction: cancel an action targeting you (your Salt and their card go to the top of The Dark).' },
-        '6': { name: 'Claim', effect: 'Choose a neighbour. Take 1 random card from their hand and add it to your hand.' },
+        '6': { name: 'Sight', effect: 'Choose a neighbour; view their hand and take one card of your choice to your hand (The Watcher: view both neighbours and take 1 from either).' },
         '7': { name: 'Cleanse', effect: 'Destroy 1 Ghost from your Shadow (to the top of The Dark, or to the bottom of your Candle if Siphon).' },
         '8': { name: 'Recall', effect: 'Take a Ghost from any Shadow and add it to your hand.' },
         '9': { name: 'Possess', effect: 'Move a Ghost from your Shadow to a neighbour\'s Shadow.' },
@@ -864,6 +1010,8 @@
         var tip = document.getElementById('card-effect-tooltip');
         if (!tip || !info) return;
         if (ev) ev.stopPropagation();
+        var shadowTip = document.getElementById('shadow-reveal-tooltip');
+        if (shadowTip) shadowTip.classList.remove('visible');
         var rankSuitEl = tip.querySelector('.card-effect-rank-suit');
         if (rankSuitEl && card) {
             var rankSuit = (card.r === 'JOKER' || card.r === '★') ? 'JOKER' : (card.r || '') + (card.s || '');
@@ -1068,15 +1216,65 @@
         return ids;
     }
 
+    function drawTableSurface() {
+        var table = document.getElementById('ritual-table');
+        var canvas = document.getElementById('ritual-table-canvas');
+        if (!table || !canvas) return;
+        var w = table.clientWidth;
+        var h = table.clientHeight;
+        if (w <= 0 || h <= 0) return;
+        var dpr = typeof window !== 'undefined' && window.devicePixelRatio ? window.devicePixelRatio : 1;
+        canvas.width = w * dpr;
+        canvas.height = h * dpr;
+        canvas.style.width = w + 'px';
+        canvas.style.height = h + 'px';
+        var ctx = canvas.getContext('2d');
+        if (!ctx) return;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.clearRect(0, 0, w, h);
+        var cx = w / 2;
+        var cy = h / 2;
+        var rx = w / 2;
+        var ry = h / 2;
+        ctx.beginPath();
+        ctx.ellipse(cx, cy, rx, ry, 0, 0, 2 * Math.PI);
+        ctx.closePath();
+        ctx.clip();
+        var root = typeof document !== 'undefined' && document.documentElement;
+        var style = root && window.getComputedStyle ? window.getComputedStyle(root) : null;
+        var surface = (style && style.getPropertyValue('--ritual-table-surface')) ? style.getPropertyValue('--ritual-table-surface').trim() : '#141210';
+        var light = (style && style.getPropertyValue('--ritual-table-light')) ? style.getPropertyValue('--ritual-table-light').trim() : '#1c1814';
+        var rim = (style && style.getPropertyValue('--ritual-table-rim')) ? style.getPropertyValue('--ritual-table-rim').trim() : '#0a0806';
+        var grad = ctx.createRadialGradient(cx, cy * 0.6, 0, cx, cy, rx * 0.9);
+        grad.addColorStop(0, light);
+        grad.addColorStop(0.4, surface);
+        grad.addColorStop(0.85, rim);
+        grad.addColorStop(1, rim);
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, w, h);
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+    }
+
     function updateUI() {
+        var table = document.getElementById('ritual-table');
+        if (table) drawTableSurface();
         var pileEl = document.getElementById('ritual-discard-pile');
         if (pileEl) {
             pileEl.innerHTML = '';
             var n = gameState.discard.length;
+            if (n === 0) gameState.selectedDarkTop = false;
             if (n > 0) {
                 var lastCard = gameState.discard[n - 1];
                 if (lastCard && !lastCard.isWall) {
-                    pileEl.appendChild(mkCard(lastCard));
+                    var cardEl = mkCard(lastCard);
+                    cardEl.classList.add('clickable-dark-top');
+                    if (gameState.selectedDarkTop) cardEl.classList.add('selected');
+                    cardEl.onclick = function () {
+                        gameState.selectedDarkTop = !gameState.selectedDarkTop;
+                        if (gameState.selectedDarkTop) gameState.selectedIdxs = [];
+                        updateUI();
+                    };
+                    pileEl.appendChild(cardEl);
                 }
             }
             if (gameState.turnPhase !== 'SETUP' && gameState.discard.length > previousDiscardLength) {
@@ -1095,6 +1293,33 @@
             darkPreviewCard.innerHTML = '';
             if (showPreview && topCard) {
                 darkPreviewCard.appendChild(mkCard(topCard));
+            }
+        }
+        var selectedPreviewWrap = document.getElementById('selected-card-preview-wrap');
+        var selectedPreview = document.getElementById('selected-card-preview');
+        var selectedPreviewInner = document.getElementById('selected-card-preview-inner');
+        if (selectedPreviewWrap && selectedPreview && selectedPreviewInner) {
+            var previewCard = null;
+            if (gameState.selectedDarkTop && gameState.discard.length > 0) {
+                var top = gameState.discard[gameState.discard.length - 1];
+                if (top && !top.isWall) previewCard = top;
+            }
+            /* No preview when player selects their own hand card — only for top of The Dark */
+            selectedPreviewWrap.classList.toggle('visible', !!previewCard);
+            selectedPreviewWrap.setAttribute('aria-hidden', previewCard ? 'false' : 'true');
+            selectedPreviewInner.innerHTML = '';
+            if (previewCard) selectedPreviewInner.appendChild(mkCard(previewCard));
+            if (!selectedPreviewWrap._closeBound) {
+                selectedPreviewWrap._closeBound = true;
+                function closePreview() {
+                    gameState.selectedDarkTop = false;
+                    gameState.selectedIdxs = [];
+                    updateUI();
+                }
+                var backdrop = document.getElementById('selected-card-preview-backdrop');
+                var closeBtn = document.getElementById('selected-card-preview-close');
+                if (backdrop) backdrop.addEventListener('click', closePreview);
+                if (closeBtn) closeBtn.addEventListener('click', closePreview);
             }
         }
         var p = getActivePlayer();
@@ -1141,17 +1366,21 @@
             playerClass.className = 'seat-class clickable-class' + (humanPlayer.class ? '' : ' empty');
             playerClass.onclick = humanPlayer.class ? (function (cls) { return function () { showClassDesc(cls); }; })(humanPlayer.class) : null;
         }
-        var playerClassImg = document.getElementById('player-class-img');
-        if (playerClassImg) {
+        var playerClassCardOnTable = document.getElementById('player-class-card-on-table');
+        if (playerClassCardOnTable) {
             if (humanPlayer.class && getClassImageFilename(humanPlayer.class.name)) {
                 var name = getClassImageFilename(humanPlayer.class.name);
                 var folder = window.getClassSubfolder ? window.getClassSubfolder(name) : '';
-                playerClassImg.src = CLASS_IMAGES_BASE + (folder ? folder + '/' : '') + name + CARD_IMAGE_EXT;
-                playerClassImg.alt = humanPlayer.class.name;
-                playerClassImg.style.display = '';
+                playerClassCardOnTable.src = CLASS_IMAGES_BASE + (folder ? folder + '/' : '') + name + CARD_IMAGE_EXT;
+                playerClassCardOnTable.alt = humanPlayer.class.name;
+                playerClassCardOnTable.style.display = '';
+                playerClassCardOnTable.classList.add('clickable-class-card');
+                playerClassCardOnTable.onclick = (function (cls) { return function (e) { e.stopPropagation(); showClassDesc(cls); }; })(humanPlayer.class);
             } else {
-                playerClassImg.src = '';
-                playerClassImg.style.display = 'none';
+                playerClassCardOnTable.src = '';
+                playerClassCardOnTable.style.display = 'none';
+                playerClassCardOnTable.onclick = null;
+                playerClassCardOnTable.classList.remove('clickable-class-card');
             }
         }
         if (playerStatus) playerStatus.innerHTML = humanPlayer.isSalted ? ' <span class="status-badge status-salt">SALTED</span>' : '';
@@ -1169,10 +1398,13 @@
         var hDiv = document.getElementById('player-hand');
         if (hDiv) {
             hDiv.innerHTML = '';
-            for (var i = 0; i < humanPlayer.hand.length; i++) {
+            var handLen = humanPlayer.hand.length;
+            for (var i = 0; i < handLen; i++) {
                 var c = humanPlayer.hand[i];
                 var el = mkCardWithInfo(c);
                 if (gameState.selectedIdxs.indexOf(i) >= 0) el.classList.add('selected');
+                var rotateDeg = handLen <= 1 ? 0 : (i - (handLen - 1) / 2) * 8;
+                el.style.setProperty('--hand-rotate', rotateDeg + 'deg');
                 (function (idx) {
                     el.onclick = function (e) {
                         if (e.target.classList.contains('card-info-btn')) return;
@@ -1237,6 +1469,11 @@
             fillShadowZone('player-shadow-left', fromLeft);
             fillShadowZone('player-shadow-right', fromRight);
         }
+        var zoneYou = document.getElementById('table-zone-you');
+        if (zoneYou && humanPlayer) {
+            attachShadowReveal(zoneYou, humanPlayer);
+            zoneYou.style.setProperty('--zone-rotate', '0deg');
+        }
 
         var otherPlayersAll = getOtherPlayersClockwise();
         var T = otherPlayersAll.length;
@@ -1264,102 +1501,72 @@
 
         var tableEl = document.getElementById('ritual-table');
         if (tableEl) tableEl.dataset.playerCount = String(gameState.players.length);
+        var tableZonesContainer = document.getElementById('ritual-table-zones');
         var otherContainer = document.getElementById('ritual-other-seats');
-        if (otherContainer) {
+        if (tableZonesContainer && otherContainer) {
+            /* Remove any table zones for other players (keep table-zone-you) */
+            var zonesToRemove = tableZonesContainer.querySelectorAll('.ritual-zone-other');
+            for (var zi = 0; zi < zonesToRemove.length; zi++) zonesToRemove[zi].remove();
             otherContainer.innerHTML = '';
             var concurrentIds = getConcurrentTurnPlayerIds();
             var isNarrow = typeof window !== 'undefined' && window.innerWidth <= 640;
-            var minRadius = 30;
-            /* Full circle for 3+; radius large enough so adjacent seats never touch (chord >= seat width + gap) */
-            var baseRadius = displayCount === 1 ? 30 : (displayCount <= 2 ? 32 : (displayCount <= 3 ? 42 : (displayCount === 8 ? 46 : (displayCount === 5 ? 50 : (displayCount === 6 ? 54 : 36 + displayCount * 2.5)))));
-            var radius = isNarrow
-                ? (displayCount >= 4 ? baseRadius * 1.05 : (displayCount === 3 ? baseRadius * 1.1 : (displayCount === 2 ? 42 : baseRadius * 0.95)))
-                : Math.max(minRadius, baseRadius);
-            /* Minimum radius so chord between adjacent seats is >= 36% (no overlap/touch); chord = 2*r*sin(π/(N+1)) */
-            if (displayCount >= 3) {
-                var n = displayCount + 1;
-                var minChord = 36;
-                var sinHalf = Math.sin(Math.PI / n);
-                var radiusForNoOverlap = sinHalf > 0.001 ? minChord / (2 * sinHalf) : radius;
-                radius = Math.max(radius, radiusForNoOverlap);
-            }
-            /* Cap radius so no seat extends off-screen (with game-board padding, 44% keeps seats in bounds) */
-            var maxRadiusInBounds = 44;
-            radius = displayCount >= 8 ? Math.min(radius, 40) : Math.min(radius, maxRadiusInBounds);
-            var useFullCircle = displayCount >= 3 || displayCount === 8;
-            /* Slight vertical nudge so top seat is not cut off (6+ players) */
-            var topNudge = (displayCount >= 5 && useFullCircle) ? 3 : 0;
+            var getLayout = (typeof getRitualLayout !== 'undefined' && getRitualLayout.getOtherPlayerLayout) ? getRitualLayout.getOtherPlayerLayout : null;
             for (var o = 0; o < displayCount; o++) {
                 var other = otherPlayers[o];
                 if (other.isDead) continue;
-                var angle;
-                if (displayCount === 1) {
-                    /* 2-player: opponent opposite you (top of table), not beside */
-                    angle = Math.PI / 2;
-                } else if (displayCount === 2) {
-                    /* Right neighbour (o=0) on right, left neighbour (o=1) on left — always beside you */
-                    angle = o * Math.PI;
-                } else if (useFullCircle) {
-                    /* Symmetric circle with "you" at bottom; right (o=0) and left neighbours always beside you */
-                    angle = (3 * Math.PI / 2) + (o + 1) * (2 * Math.PI / (displayCount + 1));
-                    angle = angle % (2 * Math.PI);
-                    if (angle < 0) angle += 2 * Math.PI;
+                var layout = getLayout ? getLayout(displayCount, o, isNarrow) : null;
+                var zoneLeft, zoneTop, seatLeft, seatTop, zoneRotateDeg, isLeftOrRight, isTopPlayer, twoPlayerShadow;
+                if (layout) {
+                    zoneLeft = layout.zoneLeft;
+                    zoneTop = layout.zoneTop;
+                    seatLeft = layout.seatLeft;
+                    seatTop = layout.seatTop;
+                    zoneRotateDeg = layout.zoneRotateDeg;
+                    isLeftOrRight = layout.isLeftOrRight;
+                    isTopPlayer = layout.isTopPlayer;
+                    twoPlayerShadow = layout.twoPlayerShadow;
                 } else {
-                    angle = (o / Math.max(1, displayCount - 1)) * Math.PI;
+                    zoneLeft = 50;
+                    zoneTop = 50;
+                    seatLeft = 50;
+                    seatTop = 50;
+                    zoneRotateDeg = 0;
+                    isLeftOrRight = false;
+                    isTopPlayer = false;
+                    twoPlayerShadow = displayCount === 1;
                 }
-                var leftPct = 50 + radius * Math.cos(angle);
-                var topPct = 50 - radius * Math.sin(angle) + topNudge;
-                /* 2-player: place opponent higher so The Dark doesn't overlap; keep enough clearance from top */
-                if (displayCount === 1) {
-                    topPct = 14;
+                var zone = document.createElement('div');
+                zone.className = 'ritual-zone ritual-zone-other';
+                if (isLeftOrRight) zone.classList.add('zone-side');
+                if (layout && layout.zonePosition) zone.dataset.zonePosition = layout.zonePosition;
+                zone.dataset.playerId = String(other.id);
+                zone.style.left = zoneLeft + '%';
+                zone.style.top = zoneTop + '%';
+                zone.style.setProperty('--zone-rotate', zoneRotateDeg + 'deg');
+                var otherClassImg = '';
+                if (other.class && getClassImageFilename(other.class.name)) {
+                    var oClassName = getClassImageFilename(other.class.name);
+                    var oClassFolder = window.getClassSubfolder ? window.getClassSubfolder(oClassName) : '';
+                    otherClassImg = '<div class="ritual-zone-class-card"><img class="class-card-on-table" src="' + CLASS_IMAGES_BASE + (oClassFolder ? oClassFolder + '/' : '') + oClassName + CARD_IMAGE_EXT + '" alt=""></div>';
+                } else {
+                    otherClassImg = '<div class="ritual-zone-class-card"><img class="class-card-on-table" alt="" src=""></div>';
                 }
-                /* 6 players: P2/P3 and P5/P6 stacked vertically; add gap between top of lower (P2,P6) and bottom of upper (P3,P5) */
-                if (displayCount === 5) {
-                    if (o === 0) topPct += 5;  /* P2 lower right: move down */
-                    else if (o === 1) topPct -= 5;  /* P3 upper right: move up */
-                    else if (o === 3) topPct -= 5;  /* P5 upper left: move up */
-                    else if (o === 4) topPct += 5;  /* P6 lower left: move down */
-                }
-                var seat = document.createElement('div');
-                seat.className = 'ritual-seat ritual-seat-other';
-                if (displayCount >= 3) seat.classList.add('seat-many');
-                if (displayCount >= 8) seat.classList.add('seat-crowded');
-                if (isNarrow && displayCount >= 5) seat.classList.add('seat-mobile-many');
-                seat.classList.toggle('active-turn', concurrentIds.indexOf(other.id) >= 0);
-                seat.classList.toggle('concurrent-flame', concurrentIds.indexOf(other.id) >= 0 && gameState.turnOrder.length >= 6);
-                seat.dataset.playerId = String(other.id);
-                seat.style.left = leftPct + '%';
-                seat.style.top = topPct + '%';
-                var validTargets = gameState.selectionMode === 'SELECT_TARGET' ? getValidTargets() : [];
-                var isTargetable = validTargets.some(function (pl) { return pl.id === other.id; });
-                if (isTargetable) {
-                    seat.classList.add('targetable');
-                    seat.onclick = (function (tgt) { return function () { targetPlayerSelected(tgt); }; })(other);
-                }
-                var clsName = other.class ? other.class.name : '';
-                var classImgName = other.class ? getClassImageFilename(other.class.name) : null;
-                var classFolder = classImgName && window.getClassSubfolder ? window.getClassSubfolder(classImgName) : '';
-                var classImgHtml = classImgName ? '<img class="class-card-img seat-class-img" src="' + CLASS_IMAGES_BASE + (classFolder ? classFolder + '/' : '') + classImgName + CARD_IMAGE_EXT + '" alt="">' : '';
-                var concurrentBadge = (concurrentIds.indexOf(other.id) >= 0 && gameState.turnOrder.length >= 6) ? ' <span class="concurrent-badge" title="Concurrent flame">🔥</span>' : '';
-                var twoPlayerShadow = displayCount === 1;
-                seat.innerHTML = '<div class="seat-header"><span class="seat-name">' + other.name + '</span>' + classImgHtml + '<span class="seat-class clickable-class' + (other.class ? '' : ' empty') + '" data-class-name="' + clsName + '">' + clsName + '</span>' + concurrentBadge + '</div>' +
-                    '<div class="seat-candle-wrap"><div class="candle-visual" style="--candle-pct:' + Math.max(0, Math.min(100, (other.candle.length / 27) * 100)) + '"><div class="candle-flame"></div><div class="candle-wax"></div></div></div>' +
-                    '<div class="seat-hand-label">Hand</div><div class="nb-hand-zone seat-hand-' + o + '"></div>' +
-                    '<div class="seat-shadow-label">Shadow</div><div class="nb-shadow-split-wrap' + (twoPlayerShadow ? ' shadow-single' : '') + '">' +
-                    (twoPlayerShadow
-                        ? '<div class="shadow-from-neighbour shadow-single-zone"><div class="nb-shadow-zone seat-shadow-zone seat-shadow-single-' + o + '"></div></div>'
-                        : '<div class="shadow-from-neighbour"><span class="shadow-sublabel">Left</span><div class="nb-shadow-zone seat-shadow-zone seat-shadow-left-' + o + '"></div></div><div class="shadow-from-neighbour"><span class="shadow-sublabel">Right</span><div class="nb-shadow-zone seat-shadow-zone seat-shadow-right-' + o + '"></div></div>'
-                    ) +
-                    '</div>';
-                var handZone = seat.querySelector('.nb-hand-zone');
+                var shadowBoxHtml = twoPlayerShadow
+                    ? '<div class="table-shadow-box"><div class="shadow-half shadow-half-left"><span class="shadow-sublabel">Shadow</span><div class="shadow-zone table-shadow-zone nb-shadow-zone seat-shadow-single-' + o + '" data-player-id="' + other.id + '" data-side="single"></div></div></div>'
+                    : '<div class="table-shadow-box"><div class="shadow-half shadow-half-left"><span class="shadow-sublabel">Left</span><div class="shadow-zone table-shadow-zone nb-shadow-zone seat-shadow-left-' + o + '" data-player-id="' + other.id + '" data-side="left"></div></div><div class="shadow-divider" aria-hidden="true"></div><div class="shadow-half shadow-half-right"><span class="shadow-sublabel">Right</span><div class="shadow-zone table-shadow-zone nb-shadow-zone seat-shadow-right-' + o + '" data-player-id="' + other.id + '" data-side="right"></div></div></div>';
+                zone.innerHTML = '<div class="ritual-zone-row">' +
+                    '<div class="ritual-zone-left">' +
+                    '<div class="ritual-zone-deck" aria-hidden="true"><div class="deck-stack"></div></div>' +
+                    otherClassImg +
+                    '</div>' +
+                    '<div class="ritual-zone-shadow">' + shadowBoxHtml + '</div>' +
+                    '<div class="ritual-zone-candle"><span class="candle-label">Candle</span><div class="candle-visual" style="--candle-pct:' + Math.max(0, Math.min(100, (other.candle.length / 27) * 100)) + '"><div class="candle-flame"></div><div class="candle-wax"></div></div></div>' +
+                    '</div>' +
+                    '<div class="ritual-zone-hand"><span class="hand-label-zone">Hand</span><div class="nb-hand-zone nb-hand-fan"></div><span class="hand-count-zone">' + other.hand.length + '</span></div>';
+                var leftZone = twoPlayerShadow ? zone.querySelector('.seat-shadow-single-' + o) : zone.querySelector('.seat-shadow-left-' + o);
+                var rightZone = twoPlayerShadow ? null : zone.querySelector('.seat-shadow-right-' + o);
                 var nOther = getNeighbours(other);
                 var leftId = nOther.left ? nOther.left.id : null;
-                var rightId = nOther.right ? nOther.right.id : null;
-                var leftZone = twoPlayerShadow ? seat.querySelector('.seat-shadow-single-' + o) : seat.querySelector('.seat-shadow-left-' + o);
-                var rightZone = twoPlayerShadow ? null : seat.querySelector('.seat-shadow-right-' + o);
-                for (var h = 0; h < other.hand.length; h++) {
-                    handZone.appendChild(mkCardBack(true));
-                }
                 for (var s = 0; s < other.shadow.length; s++) {
                     var sc = other.shadow[s];
                     var el;
@@ -1371,20 +1578,65 @@
                         el = mkCard(sc, true);
                         el.classList.add('small');
                     }
-                    /* Only allow clicking other players' ghosts when selectionTarget is null (e.g. Recall); Banish/Cleanse/Possess/Panic are own-shadow only */
                     if (gameState.selectionMode === 'SELECT_GHOST' && !sc.isWall && gameState.selectionTarget == null) {
                         el.classList.add('targetable');
-                        el.onclick = (function (ownerId, ghostIdx) {
-                            return function () { ghostSelected(ownerId, ghostIdx); };
-                        })(other.id, s);
+                        el.onclick = (function (ownerId, ghostIdx) { return function () { ghostSelected(ownerId, ghostIdx); }; })(other.id, s);
                     }
-                    var zone = (leftZone && rightZone) ? ((sc.hauntedBy === leftId) ? leftZone : rightZone) : leftZone;
-                    (zone || leftZone).appendChild(el);
+                    var targetZone = (leftZone && rightZone) ? ((sc.hauntedBy === leftId) ? leftZone : rightZone) : leftZone;
+                    (targetZone || leftZone).appendChild(el);
                 }
                 requestAnimationFrame(function () {
                     if (leftZone) updateShadowColumns(leftZone);
                     if (rightZone) updateShadowColumns(rightZone);
                 });
+                attachShadowReveal(zone, other);
+                var classCardImg = zone.querySelector('.ritual-zone-class-card .class-card-on-table');
+                if (classCardImg && other.class) {
+                    classCardImg.classList.add('clickable-class-card');
+                    classCardImg.onclick = (function (cls) { return function (e) { e.stopPropagation(); showClassDesc(cls); }; })(other.class);
+                }
+                var nbHandZone = zone.querySelector('.nb-hand-fan');
+                if (nbHandZone) {
+                    var handLen = other.hand.length;
+                    for (var h = 0; h < handLen; h++) {
+                        var backEl = mkCardBack(true);
+                        var rotateDeg = handLen <= 1 ? 0 : (h - (handLen - 1) / 2) * 8;
+                        backEl.style.setProperty('--hand-rotate', rotateDeg + 'deg');
+                        nbHandZone.appendChild(backEl);
+                    }
+                }
+                if (gameState.selectionMode === 'SELECT_TARGET') {
+                    var zoneValidTargets = getValidTargets();
+                    if (zoneValidTargets.some(function (pl) { return pl.id === other.id; })) {
+                        zone.classList.add('targetable');
+                        zone.style.cursor = 'pointer';
+                        zone.onclick = (function (tgt) { return function (e) { e.stopPropagation(); targetPlayerSelected(tgt); }; })(other);
+                    }
+                }
+                tableZonesContainer.appendChild(zone);
+
+                /* Minimal seat: name + class only (hand and shadow are in the table zone so they don't overlap) */
+                var seat = document.createElement('div');
+                seat.className = 'ritual-seat ritual-seat-other ritual-seat-minimal';
+                if (displayCount >= 3) seat.classList.add('seat-many');
+                if (displayCount >= 5) seat.classList.add('seat-crowded');
+                if (displayCount >= 4) seat.classList.add('seat-compact');
+                if (isNarrow && displayCount >= 5) seat.classList.add('seat-mobile-many');
+                seat.classList.toggle('active-turn', concurrentIds.indexOf(other.id) >= 0);
+                seat.classList.toggle('concurrent-flame', concurrentIds.indexOf(other.id) >= 0 && gameState.turnOrder.length >= 6);
+                seat.dataset.playerId = String(other.id);
+                seat.style.left = seatLeft + '%';
+                seat.style.top = seatTop + '%';
+                seat.style.setProperty('--seat-rotate', zoneRotateDeg + 'deg');
+                var validTargets = gameState.selectionMode === 'SELECT_TARGET' ? getValidTargets() : [];
+                var isTargetable = validTargets.some(function (pl) { return pl.id === other.id; });
+                if (isTargetable) {
+                    seat.classList.add('targetable');
+                    seat.onclick = (function (tgt) { return function () { targetPlayerSelected(tgt); }; })(other);
+                }
+                var clsName = other.class ? other.class.name : '';
+                var concurrentBadge = (concurrentIds.indexOf(other.id) >= 0 && gameState.turnOrder.length >= 6) ? ' <span class="concurrent-badge" title="Concurrent flame">🔥</span>' : '';
+                seat.innerHTML = '<div class="seat-header"><span class="seat-name">' + other.name + '</span><span class="seat-class clickable-class' + (other.class ? '' : ' empty') + '" data-class-name="' + clsName + '">' + clsName + '</span>' + concurrentBadge + '</div>';
                 var seatClassEl = seat.querySelector('.seat-class');
                 if (other.class && seatClassEl) seatClassEl.onclick = (function (cls) { return function (e) { e.stopPropagation(); showClassDesc(cls); }; })(other.class);
                 otherContainer.appendChild(seat);
@@ -1481,7 +1733,7 @@
                 gameState.lastDamageTo[pm.mime.id] = pm.attacker.id;
                 pm.mime.shadow.push(cardCopy);
                 pm.attacker.hand.splice(pm.handIdx, 1);
-                if (pm.mime.class && pm.mime.class.name === 'THE VOODOO DOLL') {
+                if (pm.mime.class && pm.mime.class.name === 'THE VOODOO DOLL' && pm.mime.voodooSuits && pm.mime.voodooSuits.indexOf(pm.card.s) >= 0) {
                     gameState.lastDiscardByPlayerId = pm.attacker.id;
                     if (pm.attacker.candle.length) gameState.discard.push(pm.attacker.candle.shift());
                     log(pm.attacker.name + ' (THE VOODOO DOLL) also Burned 1.');
@@ -1493,6 +1745,7 @@
                 }
                 log(pm.attacker.name + ' Haunted ' + pm.mime.name + ' with ' + pm.card.r + pm.card.s);
                 if (typeof window.playSFX === 'function') window.playSFX('haunt');
+                if (checkPossessionInstantIfDark(pm.mime)) return;
                 clearTargetMode();
                 finishAction();
             };
@@ -1576,6 +1829,7 @@
             return;
         }
         if (gameState.turnPhase !== 'ACTION') return;
+        gameState.selectedDarkTop = false;
         var pos = gameState.selectedIdxs.indexOf(idx);
         if (pos >= 0) gameState.selectedIdxs.splice(pos, 1);
         else gameState.selectedIdxs.push(idx);
@@ -1763,9 +2017,9 @@
             var c = p.hand[idx];
             var valid = getValidTargets();
             if (!valid.some(function (pl) { return pl && pl.id === t.id; })) return;
-            if (c.r === 'A') {
+            if (c.r === '6') {
                 clearTargetMode();
-                viewHand(t);
+                viewHandForClaim(t);
                 return;
             }
             if (c.r === '2' && p.class && p.class.name === 'THE RAVENOUS' && t && t.hand.length > 0) {
@@ -1880,7 +2134,7 @@
                         gameState.lastDamageTo[t.id] = p.id;
                         t.shadow.push(cardCopy);
                         p.hand.splice(idx, 1);
-                        if (t.class && t.class.name === 'THE VOODOO DOLL') {
+                        if (t.class && t.class.name === 'THE VOODOO DOLL' && t.voodooSuits && t.voodooSuits.indexOf(cardCopy.s) >= 0) {
                             gameState.lastDiscardByPlayerId = p.id;
                             if (p.candle.length) gameState.discard.push(p.candle.shift());
                             log(p.name + ' (THE VOODOO DOLL) also Burned 1.');
@@ -1892,6 +2146,7 @@
                         }
                         log(p.name + ' Haunted ' + t.name + ' with ' + c.r + c.s);
                         if (typeof window.playSFX === 'function') window.playSFX('haunt');
+                        if (checkPossessionInstantIfDark(t)) return;
                         clearTargetMode();
                         finishAction();
                     };
@@ -1905,7 +2160,7 @@
             gameState.lastDamageTo[t.id] = p.id;
             t.shadow.push(cardCopy);
             p.hand.splice(idx, 1);
-            if (t.class && t.class.name === 'THE VOODOO DOLL') {
+            if (t.class && t.class.name === 'THE VOODOO DOLL' && t.voodooSuits && t.voodooSuits.indexOf(cardCopy.s) >= 0) {
                 gameState.lastDiscardByPlayerId = p.id;
                 if (p.candle.length) gameState.discard.push(p.candle.shift());
                 log(p.name + ' (THE VOODOO DOLL) also Burned 1.');
@@ -1917,6 +2172,7 @@
             }
             log(p.name + ' Haunted ' + t.name + ' with ' + c.r + c.s);
             if (typeof window.playSFX === 'function') window.playSFX('haunt');
+            if (checkPossessionInstantIfDark(t)) return;
             clearTargetMode();
             finishAction();
         };
@@ -2017,18 +2273,13 @@
             return;
         }
         if (c.r === 'A') {
-            var n = getNeighbours(p);
-            if (!n.left && !n.right) { showAlertModal('No neighbour to target.', 'Cast'); return; }
-            if (p.class && p.class.name === 'THE WATCHER') {
-                p.hand.splice(idx, 1);
-                gameState.lastDiscardByPlayerId = p.id;
-                gameState.discard.push(c);
-                viewHandAllNeighbours(p);
-                return;
-            }
+            var ghosts = p.shadow.filter(function (g) { return !g.isWall; });
+            if (ghosts.length === 0) { showAlertModal('No ghost in your Shadow to Exchange.', 'Cast'); return; }
+            if (gameState.discard.length === 0) { showAlertModal('The Dark is empty.', 'Exchange'); return; }
             gameState.pendingAction = 'cast';
             gameState.pendingCardIdx = idx;
-            gameState.selectionMode = 'SELECT_TARGET';
+            gameState.selectionMode = 'SELECT_GHOST';
+            gameState.selectionTarget = p.id;
             updateUI();
             return;
         }
@@ -2051,6 +2302,11 @@
         if (['4', '6', 'J'].indexOf(c.r) >= 0) {
             var n = getNeighbours(p);
             if (!n.left && !n.right) { showAlertModal('No neighbour to target.', 'Cast'); return; }
+            if (c.r === '6' && p.class && p.class.name === 'THE WATCHER') {
+                if (!n.left && !n.right) { showAlertModal('No neighbour to target.', 'Cast'); return; }
+                viewHandAllNeighboursForClaim(p, idx);
+                return;
+            }
             gameState.pendingAction = 'cast';
             gameState.pendingCardIdx = idx;
             gameState.selectionMode = 'SELECT_TARGET';
@@ -2113,6 +2369,103 @@
         log(p.name + ' used Sight on ' + target.name + '.');
     }
 
+    function viewHandForClaim(target) {
+        var p = gameState.players[gameState.activeIdx];
+        var cardIdx = gameState.pendingCardIdx;
+        var c = cardIdx != null && p.hand[cardIdx] ? p.hand[cardIdx] : null;
+        if (!c || c.r !== '6' || !target) return;
+        gameState.pendingClaimTarget = target;
+        gameState.pendingClaimCardIdx = cardIdx;
+        gameState.pendingClaimTaken = gameState.pendingClaimTaken || 0;
+        var need = (p.class && p.class.name === 'THE EXTORTIONER') ? 2 : 1;
+        var d = document.getElementById('hand-view-area');
+        var modal = document.getElementById('hand-view-modal');
+        var h2 = modal ? modal.querySelector('h2') : null;
+        if (h2) h2.textContent = need > 1 && gameState.pendingClaimTaken > 0 ? 'Sight — pick one more card to take' : 'Sight — pick a card to take';
+        if (d) d.innerHTML = '';
+        for (var i = 0; i < target.hand.length; i++) {
+            (function (idx) {
+                var el = mkCard(target.hand[idx]);
+                el.classList.add('clickable-claim-card');
+                el.style.cursor = 'pointer';
+                el.onclick = function () {
+                    if (!target.hand[idx]) return;
+                    var stolen = target.hand.splice(idx, 1)[0];
+                    p.hand.push(stolen);
+                    gameState.pendingClaimTaken++;
+                    if (gameState.pendingClaimCardIdx != null && p.hand[gameState.pendingClaimCardIdx]) {
+                        var six = p.hand.splice(gameState.pendingClaimCardIdx, 1)[0];
+                        gameState.lastDiscardByPlayerId = p.id;
+                        gameState.discard.push(six);
+                        gameState.pendingClaimCardIdx = null;
+                    }
+                    if (need > 1 && gameState.pendingClaimTaken < need && target.hand.length > 0) {
+                        viewHandForClaim(target);
+                        return;
+                    }
+                    var takenCount = gameState.pendingClaimTaken;
+                    gameState.pendingClaimTarget = null;
+                    gameState.pendingClaimTaken = 0;
+                    if (modal) modal.style.display = 'none';
+                    var h2r = modal ? modal.querySelector('h2') : null;
+                    if (h2r) h2r.textContent = 'SIGHT REVEALED';
+                    log(p.name + ' used Sight: took ' + takenCount + ' card(s) from ' + target.name + (p.class && p.class.name === 'THE EXTORTIONER' ? ' (THE EXTORTIONER).' : '.'));
+                    clearTargetMode();
+                    finishAction();
+                };
+                d.appendChild(el);
+            })(i);
+        }
+        if (modal) modal.style.display = 'flex';
+    }
+
+    function viewHandAllNeighboursForClaim(p, cardIdx) {
+        var c = p.hand[cardIdx];
+        if (!c || c.r !== '6') return;
+        var n = getNeighbours(p);
+        var d = document.getElementById('hand-view-area');
+        var modal = document.getElementById('hand-view-modal');
+        var h2 = modal ? modal.querySelector('h2') : null;
+        if (h2) h2.textContent = "Sight (THE WATCHER) — pick one card to take";
+        if (d) d.innerHTML = '';
+        function addHandLabel(name) {
+            var lab = document.createElement('p');
+            lab.style.marginTop = '12px';
+            lab.style.marginBottom = '4px';
+            lab.textContent = name + "'s hand:";
+            d.appendChild(lab);
+        }
+        function addClickableCard(owner, idx) {
+            var el = mkCard(owner.hand[idx]);
+            el.classList.add('clickable-claim-card');
+            el.style.cursor = 'pointer';
+            el.onclick = function () {
+                if (!owner.hand[idx]) return;
+                var stolen = owner.hand.splice(idx, 1)[0];
+                p.hand.push(stolen);
+                p.hand.splice(p.hand.indexOf(c), 1);
+                gameState.lastDiscardByPlayerId = p.id;
+                gameState.discard.push(c);
+                gameState.pendingClaimTarget = null;
+                if (modal) modal.style.display = 'none';
+                if (h2) h2.textContent = 'SIGHT REVEALED';
+                log(p.name + ' (THE WATCHER) used Sight: took 1 card from ' + owner.name + '.');
+                clearTargetMode();
+                finishAction();
+            };
+            d.appendChild(el);
+        }
+        if (n.left) {
+            addHandLabel(n.left.name);
+            for (var i = 0; i < n.left.hand.length; i++) addClickableCard(n.left, i);
+        }
+        if (n.right && n.right !== n.left) {
+            addHandLabel(n.right.name);
+            for (var j = 0; j < n.right.hand.length; j++) addClickableCard(n.right, j);
+        }
+        if (modal) modal.style.display = 'flex';
+    }
+
     function viewHandAllNeighbours(p) {
         var n = getNeighbours(p);
         if (!n.left && !n.right) { finishAction(); return; }
@@ -2150,6 +2503,10 @@
         }
         finishAction();
     }
+    (function () {
+        var modal = document.getElementById('hand-view-modal');
+        if (modal) modal.addEventListener('click', function (e) { if (e.target === modal) closeHandView(); });
+    })();
 
     function executeCast(p, c, target, ghostIdx) {
         if (isGrimoireRejected(c)) {
@@ -2249,6 +2606,7 @@
                     }
                 }
                 log(p.name + ' used Possess on ' + target.name + '.');
+                if (target && checkPossessionInstantIfDark(target)) { gameState.selectionMode = null; finishAction(); return; }
                 break;
             case 'J':
                 var tmp = p.shadow;
@@ -2260,7 +2618,13 @@
                 for (var rk = 0; rk < 3 && gameState.discard.length; rk++) {
                     p.candle.unshift(gameState.discard.pop());
                 }
-                log(p.name + ' Rekindle: Top 3 from The Dark to top of Candle. Candle: ' + p.candle.length);
+                for (var sh = p.candle.length - 1; sh > 0; sh--) {
+                    var j = Math.floor(Math.random() * (sh + 1));
+                    var tmp = p.candle[sh];
+                    p.candle[sh] = p.candle[j];
+                    p.candle[j] = tmp;
+                }
+                log(p.name + ' Rekindle: Top 3 from The Dark to Candle, then shuffled. Candle: ' + p.candle.length);
                 if (typeof window.playSFX === 'function') window.playSFX('draw');
                 break;
             case 'K':
@@ -2270,15 +2634,21 @@
                 log(p.name + ' used Purge.');
                 if (typeof window.playSFX === 'function') window.playSFX('banish');
                 break;
-            case 'JOKER':
+            case 'JOKER': {
+                var jokerFoes = [];
                 for (var ji = 0; ji < gameState.players.length; ji++) {
                     var foe = gameState.players[ji];
                     if (foe.isDead || foe.id === p.id) continue;
-                    resolveJoker(foe);
+                    jokerFoes.push(foe);
                 }
-                break;
+                gameState.pendingJokerAttacker = p;
+                gameState.pendingJokerFoes = jokerFoes;
+                gameState.pendingJokerFoeIndex = 0;
+                runNextJokerTarget();
+                return;
+            }
             default:
-                log('Cast ' + c.r);
+                log((c.isFace || c.r === 'JOKER' || c.r === '★' ? 'Summon ' : 'Cast ') + c.r);
         }
         gameState.selectionMode = null;
         finishAction();
@@ -2304,6 +2674,20 @@
             gameState.selectionMode = null;
             finishAction();
             return;
+        }
+
+        if (gameState.pendingAction === 'cast' && gameState.pendingCardIdx != null && ownerId === p.id) {
+            var aceCard = p.hand[gameState.pendingCardIdx];
+            if (aceCard && aceCard.r === 'A') {
+                var ghostA = t.shadow[idx];
+                if (!ghostA || ghostA.isWall) { showAlertModal('Choose a ghost (not a Wall) to Exchange.', 'Exchange'); return; }
+                var numberCardsInDark = gameState.discard.filter(function (c) { return c && !c.isWall && c.r !== 'JOKER' && c.r !== '★' && !c.isFace; });
+                if (numberCardsInDark.length === 0) { showAlertModal('No number card in The Dark to swap with.', 'Exchange'); return; }
+                gameState.pendingExchangeGhostOwnerId = ownerId;
+                gameState.pendingExchangeGhostIdx = idx;
+                openExchangeDarkModal();
+                return;
+            }
         }
 
         if (gameState.selectedIdxs.length === 1) {
@@ -2460,6 +2844,7 @@
                 if (other && !other.isDead && other.id !== plagueOwner.id) {
                     other.shadow.push(ghost);
                     log(p.name + ' Banished ' + ghost.r + ghost.s + ' but PLAGUE: moved to ' + other.name + '.');
+                    if (checkPossessionInstantIfDark(other)) return;
                 } else {
                     gameState.lastDiscardByPlayerId = p.id;
                     gameState.discard.push(ghost);
@@ -2537,6 +2922,61 @@
         if (n > 0 && typeof window.playSFX === 'function') window.playSFX('draw');
     }
 
+    function runNextJokerTarget() {
+        var attacker = gameState.pendingJokerAttacker;
+        var foes = gameState.pendingJokerFoes;
+        var idx = gameState.pendingJokerFoeIndex;
+        if (!foes || idx >= foes.length) {
+            gameState.pendingJokerAttacker = null;
+            gameState.pendingJokerFoes = null;
+            gameState.pendingJokerFoeIndex = 0;
+            gameState.selectionMode = null;
+            finishAction();
+            return;
+        }
+        var foe = foes[idx];
+        gameState.pendingJokerFoeIndex = idx + 1;
+        if (attacker.class && attacker.class.name === 'THE SILENCE') {
+            resolveJoker(foe);
+            setTimeout(runNextJokerTarget, 0);
+            return;
+        }
+        if (foe.type !== 'human') {
+            resolveJoker(foe);
+            setTimeout(runNextJokerTarget, 0);
+            return;
+        }
+        var saltIdx = -1;
+        for (var i = 0; i < foe.hand.length; i++) { if (foe.hand[i].r === '5') { saltIdx = i; break; } }
+        if (saltIdx === -1) {
+            resolveJoker(foe);
+            setTimeout(runNextJokerTarget, 0);
+            return;
+        }
+        var saltMsg = document.getElementById('salt-msg');
+        var saltModal = document.getElementById('salt-modal');
+        var defBtns = document.getElementById('salt-defender-buttons');
+        var counterBtns = document.getElementById('salt-counter-buttons');
+        if (counterBtns) counterBtns.style.display = 'none';
+        if (defBtns) defBtns.style.display = 'flex';
+        if (saltMsg) saltMsg.innerHTML = attacker.name + ' played <strong>BOO! (Joker)</strong>.<br>Use Salt to avoid the Burn?';
+        if (saltModal) saltModal.style.display = 'flex';
+        saltCallback = function (useSalt) {
+            if (saltModal) saltModal.style.display = 'none';
+            if (useSalt) {
+                var saltCard = foe.hand.splice(saltIdx, 1)[0];
+                gameState.lastDiscardByPlayerId = foe.id;
+                gameState.discard.push(saltCard);
+                log(foe.name + ' used Salt; BOO! has no effect on them.');
+                if (typeof window.playSFX === 'function') window.playSFX('salt');
+            } else {
+                resolveJoker(foe);
+            }
+            updateUI();
+            setTimeout(runNextJokerTarget, 0);
+        };
+    }
+
     function resolveJoker(target) {
         if (!target || target.isDead) return;
         var burned = 0;
@@ -2546,6 +2986,7 @@
                 target.shadow.push(top);
                 log('BOO!: ' + target.name + ' hit by ' + top.r + top.s + '. Burned ' + burned + '.');
                 if (typeof window.playSFX === 'function') window.playSFX('haunt');
+                if (checkPossessionInstantIfDark(target)) return;
                 return;
             }
             gameState.discard.push(top);
@@ -2566,6 +3007,8 @@
             return;
         }
         for (var i = 0; i < gameState.discard.length; i++) {
+            var card = gameState.discard[i];
+            if (card.r === 'JOKER' || card.r === '★') continue; /* Queen cannot pick a Joker */
             (function (idx) {
                 var el = mkCard(gameState.discard[idx]);
                 el.onclick = function () {
@@ -2592,9 +3035,71 @@
         for (var i = 0; i < 2 && gameState.discard.length; i++) {
             p.candle.unshift(gameState.discard.pop());
         }
+        for (var sh = p.candle.length - 1; sh > 0; sh--) {
+            var j = Math.floor(Math.random() * (sh + 1));
+            var tmp = p.candle[sh];
+            p.candle[sh] = p.candle[j];
+            p.candle[j] = tmp;
+        }
         document.getElementById('queen-modal').style.display = 'none';
-        log(p.name + ' Rekindled 2 to top of Candle. Candle: ' + p.candle.length);
+        log(p.name + ' Rekindled 2 to Candle and shuffled. Candle: ' + p.candle.length);
         if (typeof window.playSFX === 'function') window.playSFX('draw');
+        finishAction();
+    }
+
+    function openExchangeDarkModal() {
+        var container = document.getElementById('exchange-dark-cards');
+        if (!container) return;
+        container.innerHTML = '';
+        for (var i = 0; i < gameState.discard.length; i++) {
+            var c = gameState.discard[i];
+            if (!c || c.isWall || c.r === 'JOKER' || c.r === '★' || c.isFace) continue;
+            (function (discardIdx) {
+                var el = mkCard(c);
+                el.style.cursor = 'pointer';
+                el.onclick = function () { resolveExchangeWithCard(discardIdx); };
+                container.appendChild(el);
+            })(i);
+        }
+        document.getElementById('exchange-dark-modal').style.display = 'flex';
+    }
+
+    function closeExchangeDarkModal() {
+        gameState.pendingExchangeGhostOwnerId = null;
+        gameState.pendingExchangeGhostIdx = null;
+        document.getElementById('exchange-dark-modal').style.display = 'none';
+        clearTargetMode();
+        updateUI();
+    }
+    window.closeExchangeDarkModal = closeExchangeDarkModal;
+
+    function resolveExchangeWithCard(discardIdx) {
+        var p = gameState.players[gameState.activeIdx];
+        var ownerId = gameState.pendingExchangeGhostOwnerId;
+        var ghostIdx = gameState.pendingExchangeGhostIdx;
+        var cardIdx = gameState.pendingCardIdx;
+        if (ownerId == null || ghostIdx == null || cardIdx == null || !p.hand[cardIdx] || p.hand[cardIdx].r !== 'A') return;
+        var t = null;
+        for (var i = 0; i < gameState.players.length; i++) {
+            if (gameState.players[i].id === ownerId) { t = gameState.players[i]; break; }
+        }
+        if (!t || !t.shadow[ghostIdx] || discardIdx < 0 || discardIdx >= gameState.discard.length) return;
+        var chosenCard = gameState.discard[discardIdx];
+        if (chosenCard.isFace || chosenCard.r === 'JOKER' || chosenCard.r === '★') return;
+        var ghostA = t.shadow[ghostIdx];
+        gameState.discard.splice(discardIdx, 1);
+        gameState.lastDiscardByPlayerId = p.id;
+        gameState.discard.push(ghostA);
+        chosenCard.hauntedBy = ghostA.hauntedBy;
+        t.shadow[ghostIdx] = chosenCard;
+        var aceCard = p.hand.splice(cardIdx, 1)[0];
+        gameState.lastDiscardByPlayerId = p.id;
+        gameState.discard.push(aceCard);
+        gameState.pendingExchangeGhostOwnerId = null;
+        gameState.pendingExchangeGhostIdx = null;
+        document.getElementById('exchange-dark-modal').style.display = 'none';
+        log(p.name + ' used Exchange: swapped a ghost with ' + chosenCard.r + chosenCard.s + ' from The Dark.');
+        clearTargetMode();
         finishAction();
     }
 
@@ -2806,6 +3311,7 @@
         } else if (c.isFace) {
             p.shadow.push(c);
             log(p.name + ' Hubris! Face card failed.');
+            if (checkPossessionInstantIfDark(p)) { finishAction(); return; }
         } else if (c.val >= g.val) {
             gameState.lastDiscardByPlayerId = p.id;
             gameState.discard.push(c);
@@ -2814,6 +3320,7 @@
         } else {
             p.shadow.push(c);
             log(p.name + ' Panic Failed!');
+            if (checkPossessionInstantIfDark(p)) { finishAction(); return; }
         }
         finishAction();
     }
@@ -2920,6 +3427,15 @@
         return cnt['♠'] >= 3 || cnt['♥'] >= 3 || cnt['♣'] >= 3 || cnt['♦'] >= 3;
     }
 
+    /** In Dark Ritual, 3+ ghosts same suit = Possessed immediately (not just at end of turn). */
+    function checkPossessionInstantIfDark(player) {
+        if (!gameState.darkMode || !player || player.isDead) return false;
+        if (!checkPossession(player.shadow)) return false;
+        log(player.name + ' POSSESSED! (Dark ritual: 3 same suit—instant.)');
+        handleDeath(player);
+        return true;
+    }
+
     function gameOver(msg) {
         gameState.isGameOver = true;
         if (aiTimer) clearTimeout(aiTimer);
@@ -2992,6 +3508,7 @@
                             log(ai.name + ' (THE MEDDLER) put ' + t.name + "'s top Candle on bottom.");
                         }
                         log('AI Haunted ' + t.name);
+                        if (checkPossessionInstantIfDark(t)) return;
                         finishAction();
                     });
                 } else {
@@ -3095,6 +3612,7 @@
     window.toggleLog = toggleLog;
 
     window.addEventListener('resize', function () {
+        drawTableSurface();
         var zones = ['player-shadow-left', 'player-shadow-right'];
         for (var z = 0; z < zones.length; z++) {
             var sDiv = document.getElementById(zones[z]);
@@ -3108,6 +3626,7 @@
         }
     });
     document.addEventListener('DOMContentLoaded', function () {
+        drawTableSurface();
         var muteBtn = document.getElementById('btn-mute');
         if (muteBtn && typeof window.toggleMute === 'function') {
             muteBtn.addEventListener('click', function (e) {

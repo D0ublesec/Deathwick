@@ -66,12 +66,30 @@
         </div>
     </div>
 
+    <div id="first-player-modal" class="modal" style="display:none; z-index:2600;">
+        <div class="modal-content" style="border-color:var(--accent-color);">
+            <h2 style="color:var(--accent-color)">WHO STARTS FIRST?</h2>
+            <p style="margin-bottom:16px;">Choose which player takes the first turn. In an online game, only the host sees this.</p>
+            <div id="first-player-options" style="display:flex; flex-direction:column; gap:10px; align-items:center;"></div>
+            <button type="button" class="game-btn" style="margin-top:12px;" onclick="chooseFirstPlayerRandom()">RANDOM</button>
+        </div>
+    </div>
+
     <div id="queen-modal" class="modal">
         <div class="modal-content">
             <h2 style="color:var(--magic-color)">THE MEDIUM'S TRANCE</h2>
             <button type="button" class="game-btn" onclick="queenExhume()">EXHUME (Pick 1 from Dark)</button>
             <button type="button" class="game-btn" onclick="queenRekindle()">REKINDLE (Top 2 from Dark → top of Candle)</button>
             <div id="exhume-area" class="card-grid"></div>
+        </div>
+    </div>
+
+    <div id="exchange-dark-modal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <h2 style="color:var(--accent-color)">EXCHANGE — Pick a number card from The Dark</h2>
+            <p style="margin-bottom:12px;">Choose any number card (A–10) to swap with your ghost. Face cards and Jokers are not valid.</p>
+            <div id="exchange-dark-cards" class="card-grid"></div>
+            <button type="button" class="game-btn" style="margin-top:12px;" onclick="closeExchangeDarkModal()">CANCEL</button>
         </div>
     </div>
     
@@ -260,78 +278,46 @@
         </div>
 
         <div id="ritual-table" class="ritual-table">
-            <!-- Ambient candles in pentagram pattern — 3 per point (clusters) -->
-            <div class="ritual-candles" aria-hidden="true">
-                <!-- Thin lines connecting candle clusters (ritual light) -->
-                <svg class="ritual-candle-lines" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-                    <!-- Outer pentagon: clusters 1→2→3→4→5→1 -->
-                    <path class="ritual-line ritual-line-outer" d="M 50 15 L 83.2 39.1 L 70.6 78.4 L 29.4 78.4 L 16.8 39.1 Z" />
-                    <!-- Inner pentagon: clusters 6→7→8→9→10→6 -->
-                    <path class="ritual-line ritual-line-inner" d="M 62.9 32.4 L 70.9 56.7 L 50 72 L 29.1 56.7 L 37.1 32.4 Z" />
-                </svg>
-                <!-- data-candle labels for dev: tell me which numbers to remove -->
-                <div class="ambient-candle" data-candle="1"><div class="ambient-flame-wrap"><div class="ambient-flame"></div></div><div class="ambient-wax"></div></div>
-                <div class="ambient-candle" data-candle="2"><div class="ambient-flame-wrap"><div class="ambient-flame"></div></div><div class="ambient-wax"></div></div>
-                <div class="ambient-candle" data-candle="3"><div class="ambient-flame-wrap"><div class="ambient-flame"></div></div><div class="ambient-wax"></div></div>
-                <div class="ambient-candle" data-candle="4"><div class="ambient-flame-wrap"><div class="ambient-flame"></div></div><div class="ambient-wax"></div></div>
-                <div class="ambient-candle" data-candle="5"><div class="ambient-flame-wrap"><div class="ambient-flame"></div></div><div class="ambient-wax"></div></div>
-                <div class="ambient-candle" data-candle="6"><div class="ambient-flame-wrap"><div class="ambient-flame"></div></div><div class="ambient-wax"></div></div>
-                <div class="ambient-candle" data-candle="7"><div class="ambient-flame-wrap"><div class="ambient-flame"></div></div><div class="ambient-wax"></div></div>
-                <div class="ambient-candle" data-candle="8"><div class="ambient-flame-wrap"><div class="ambient-flame"></div></div><div class="ambient-wax"></div></div>
-                <div class="ambient-candle" data-candle="9"><div class="ambient-flame-wrap"><div class="ambient-flame"></div></div><div class="ambient-wax"></div></div>
-                <div class="ambient-candle" data-candle="10"><div class="ambient-flame-wrap"><div class="ambient-flame"></div></div><div class="ambient-wax"></div></div>
-                <div class="ambient-candle" data-candle="11"><div class="ambient-flame-wrap"><div class="ambient-flame"></div></div><div class="ambient-wax"></div></div>
-                <div class="ambient-candle" data-candle="12"><div class="ambient-flame-wrap"><div class="ambient-flame"></div></div><div class="ambient-wax"></div></div>
-                <div class="ambient-candle" data-candle="13"><div class="ambient-flame-wrap"><div class="ambient-flame"></div></div><div class="ambient-wax"></div></div>
-                <div class="ambient-candle" data-candle="14"><div class="ambient-flame-wrap"><div class="ambient-flame"></div></div><div class="ambient-wax"></div></div>
-                <div class="ambient-candle" data-candle="15"><div class="ambient-flame-wrap"><div class="ambient-flame"></div></div><div class="ambient-wax"></div></div>
-                <div class="ambient-candle" data-candle="16"><div class="ambient-flame-wrap"><div class="ambient-flame"></div></div><div class="ambient-wax"></div></div>
-                <div class="ambient-candle" data-candle="17"><div class="ambient-flame-wrap"><div class="ambient-flame"></div></div><div class="ambient-wax"></div></div>
-                <div class="ambient-candle" data-candle="18"><div class="ambient-flame-wrap"><div class="ambient-flame"></div></div><div class="ambient-wax"></div></div>
-                <div class="ambient-candle" data-candle="19"><div class="ambient-flame-wrap"><div class="ambient-flame"></div></div><div class="ambient-wax"></div></div>
-                <div class="ambient-candle" data-candle="20"><div class="ambient-flame-wrap"><div class="ambient-flame"></div></div><div class="ambient-wax"></div></div>
-                <div class="ambient-candle" data-candle="21"><div class="ambient-flame-wrap"><div class="ambient-flame"></div></div><div class="ambient-wax"></div></div>
-                <div class="ambient-candle" data-candle="22"><div class="ambient-flame-wrap"><div class="ambient-flame"></div></div><div class="ambient-wax"></div></div>
-                <div class="ambient-candle" data-candle="23"><div class="ambient-flame-wrap"><div class="ambient-flame"></div></div><div class="ambient-wax"></div></div>
-                <div class="ambient-candle" data-candle="24"><div class="ambient-flame-wrap"><div class="ambient-flame"></div></div><div class="ambient-wax"></div></div>
-                <div class="ambient-candle" data-candle="25"><div class="ambient-flame-wrap"><div class="ambient-flame"></div></div><div class="ambient-wax"></div></div>
-                <div class="ambient-candle" data-candle="26"><div class="ambient-flame-wrap"><div class="ambient-flame"></div></div><div class="ambient-wax"></div></div>
-                <div class="ambient-candle" data-candle="27"><div class="ambient-flame-wrap"><div class="ambient-flame"></div></div><div class="ambient-wax"></div></div>
-                <div class="ambient-candle" data-candle="28"><div class="ambient-flame-wrap"><div class="ambient-flame"></div></div><div class="ambient-wax"></div></div>
-                <div class="ambient-candle" data-candle="29"><div class="ambient-flame-wrap"><div class="ambient-flame"></div></div><div class="ambient-wax"></div></div>
-                <div class="ambient-candle" data-candle="30"><div class="ambient-flame-wrap"><div class="ambient-flame"></div></div><div class="ambient-wax"></div></div>
+            <canvas id="ritual-table-canvas" class="ritual-table-canvas" aria-hidden="true"></canvas>
+            <!-- Table zones: each player's candle and shadow ON the table (in front of them) -->
+            <div id="ritual-table-zones" class="ritual-table-zones">
+                <div id="table-zone-you" class="ritual-zone ritual-zone-you" data-player-id="0" data-angle="0">
+                    <!-- Row: left (deck + class) | shadow (centre) | candle (right) -->
+                    <div class="ritual-zone-row">
+                        <div class="ritual-zone-left">
+                            <div class="ritual-zone-deck" aria-hidden="true">
+                                <div class="deck-stack"></div>
+                            </div>
+                            <div class="ritual-zone-class-card">
+                                <img id="player-class-card-on-table" class="class-card-on-table" alt="" src="">
+                            </div>
+                        </div>
+                        <div class="ritual-zone-shadow">
+                            <div class="table-shadow-box">
+                                <div class="shadow-half shadow-half-left">
+                                    <span class="shadow-sublabel" id="player-shadow-left-label">From Left</span>
+                                    <div class="shadow-zone table-shadow-zone" id="player-shadow-left"></div>
+                                </div>
+                                <div class="shadow-divider" aria-hidden="true"></div>
+                                <div class="shadow-half shadow-half-right">
+                                    <span class="shadow-sublabel" id="player-shadow-right-label">From Right</span>
+                                    <div class="shadow-zone table-shadow-zone" id="player-shadow-right"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="ritual-zone-candle">
+                            <span class="candle-label">Candle</span>
+                            <div id="player-candle" class="candle-visual" style="--candle-pct: 100">
+                                <div class="candle-flame"></div>
+                                <div class="candle-wax"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div id="ritual-other-seats" class="ritual-other-seats"></div>
 
-            <div id="seat-you" class="ritual-seat ritual-seat-you">
-                <div class="seat-header">
-                    <span id="player-name" class="seat-name">YOU</span>
-                    <img id="player-class-img" class="class-card-img seat-class-img" alt="" src="">
-                    <span id="player-class" class="seat-class"></span>
-                    <span id="player-status"></span>
-                </div>
-                <div class="seat-candle-wrap">
-                    <div id="player-candle" class="candle-visual" style="--candle-pct: 100">
-                        <div class="candle-flame"></div>
-                        <div class="candle-wax"></div>
-                    </div>
-                </div>
-                <div class="seat-shadow-label">Your Shadow</div>
-                <div class="shadow-split-wrap">
-                    <div class="shadow-from-neighbour">
-                        <span class="shadow-sublabel" id="player-shadow-left-label">From Left</span>
-                        <div class="shadow-zone" id="player-shadow-left"></div>
-                    </div>
-                    <div class="shadow-from-neighbour">
-                        <span class="shadow-sublabel" id="player-shadow-right-label">From Right</span>
-                        <div class="shadow-zone" id="player-shadow-right"></div>
-                    </div>
-                </div>
-                <div class="seat-hand-label">Your Hand</div>
-                <div class="hand-zone" id="player-hand"></div>
-            </div>
-
-            <!-- The Dark: after seat-you so it always draws on top; discard pile in centre of circle -->
+            <!-- The Dark: discard pile in centre of circle -->
             <div class="ritual-center-zone" aria-hidden="true">
                 <div id="ritual-center" class="ritual-center">
                     <div class="dark-ritual-symbol" aria-hidden="true">
@@ -340,6 +326,17 @@
                     <div class="ritual-center-label">THE DARK</div>
                 </div>
             </div>
+        </div>
+
+        <!-- Your seat: hand beneath the table -->
+        <div id="seat-you" class="ritual-seat ritual-seat-you">
+            <div class="seat-header">
+                <span id="player-name" class="seat-name">YOU</span>
+                <span id="player-class" class="seat-class"></span>
+                <span id="player-status"></span>
+            </div>
+            <div class="seat-hand-label">Your Hand</div>
+            <div class="hand-zone" id="player-hand"></div>
         </div>
 
         <div id="controls-bar">
@@ -358,6 +355,16 @@
     
     <div id="possession-warning">POSSESSION IMMINENT</div>
 
+    <div id="shadow-view-modal" class="modal" aria-hidden="true">
+        <div class="modal-content shadow-view-content">
+            <h2 id="shadow-view-title" style="color:var(--ghost-color);">Shadow</h2>
+            <div id="shadow-view-cards" class="card-grid"></div>
+            <button type="button" class="game-btn" onclick="closeShadowViewModal()">Close</button>
+        </div>
+    </div>
+
+    <div id="shadow-reveal-tooltip" class="shadow-reveal-tooltip" aria-hidden="true" role="tooltip"></div>
+
     <div id="card-effect-tooltip" class="card-effect-tooltip" aria-hidden="true" role="tooltip">
         <span class="card-effect-rank-suit"></span>
         <span class="card-effect-name"></span>
@@ -369,9 +376,19 @@
         <div id="dark-preview-card" class="dark-preview-card"></div>
     </div>
 
+    <div id="selected-card-preview-wrap" class="selected-card-preview-wrap" aria-hidden="true">
+        <div class="selected-card-preview-backdrop" id="selected-card-preview-backdrop"></div>
+        <div id="selected-card-preview" class="selected-card-preview" aria-label="Selected card preview">
+            <button type="button" class="selected-card-preview-close" id="selected-card-preview-close" aria-label="Close preview">&times;</button>
+            <span class="selected-card-preview-label">PREVIEW</span>
+            <div id="selected-card-preview-inner" class="selected-card-preview-inner"></div>
+        </div>
+    </div>
+
     <script src="js/config.js"></script>
     <script src="js/data.js"></script>
     <script src="js/audio.js"></script>
+    <script src="js/ritual-layout.js"></script>
     <script src="js/game.js"></script>
 </body>
 </html>

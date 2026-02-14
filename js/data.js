@@ -5,7 +5,7 @@ window.CLASSES = [
     { name: "THE CROW", desc: "If a neighbour Burns a Face card (to the top of The Dark), you may add it to your hand instead." },
     { name: "THE DOOMREADER", desc: "Up to once per turn, you may discard 1 card to The Dark to change the suit of a Ghost in your Shadow." },
     { name: "THE EXORCIST", desc: "Your 7 (Cleanse) destroys 2 Ghosts from your Shadow. You may Siphon only one (to the bottom of your Candle); the other goes to the top of The Dark." },
-    { name: "THE EXTORTIONER", desc: "When you play a 6 (Claim), steal 2 cards from that neighbour to your hand instead of 1." },
+    { name: "THE EXTORTIONER", desc: "When you play a 6 (Sight), take 2 cards from that neighbour's hand instead of 1." },
     { name: "THE FUNERAL BELL", desc: "When a player dies, each other remaining player Burns 1 card. You are not affected." },
     { name: "THE GATEKEEPER", desc: "You are immune to Ghosts being moved into your Shadow (Mirror/Possess)." },
     { name: "THE GRAVEDIGGER", desc: "When a neighbour dies, add their remaining Candle to the bottom of yours." },
@@ -27,16 +27,16 @@ window.CLASSES = [
     { name: "THE REAPER", desc: "When a neighbour Banishes a Ghost from their Shadow without Siphoning (Ghost goes to The Dark), you may add that Ghost to the bottom of your Candle instead." },
     { name: "THE SADIST", desc: "When you play a 3 (Scare), your chosen neighbour discards 2 cards to The Dark (you blindly pick which; they do not choose)." },
     { name: "THE SEALBINDER", desc: "Ghosts you Haunt cannot be moved (Possess) or returned (Recall)." },
-    { name: "THE SILENCE", desc: "Your actions cannot be interrupted by Salt (5)." },
+    { name: "THE SILENCE", desc: "Your actions cannot be interrupted by Salt (5), including when you play BOO! (Joker)." },
     { name: "THE SKEPTIC", desc: "Immune to 4s (Drain)." },
     { name: "THE SUFFERER", desc: "When taking Damage during The Haunting, you may Draw 1 Card." },
     { name: "THE UNSEEN", desc: "Once per turn, when a neighbour would Haunt you, you may discard 1 card to the top of The Dark to cancel the Haunt (both cards to the top of The Dark)." },
     { name: "THE USERER", desc: "Discard 1 to The Dark to choose a neighbour; look at their hand and swap 1 card with theirs (one to your hand, one to theirs). Once per turn; counts as your action." },
     { name: "THE VESSEL", desc: "The first Ghost in your Shadow does not cause you to Burn (you still Burn for the rest)." },
-    { name: "THE VOODOO DOLL", desc: "When you are forced to Burn cards by a Haunt, the attacker must Burn the same amount." },
+    { name: "THE VOODOO DOLL", desc: "When you are Haunted by a card of one of the two lowest suits (Clubs ♣ or Diamonds ♦), the attacker must Burn the same number of cards." },
     { name: "THE VULTURE", desc: "When a neighbour dies, add up to 5 random cards from The Dark to the bottom of your Candle." },
     { name: "THE WARLOCK", desc: "You can use Face Cards to Haunt (Strength 10) instead of Summon. *Note: 10♠ can banish a J♠, Q♠ and K♠ haunted by you.*" },
-    { name: "THE WATCHER", desc: "When you cast an Ace (Sight), you see both neighbours' hands (instead of choosing one)." },
+    { name: "THE WATCHER", desc: "When you cast a 6 (Sight), you see both neighbours' hands and take 1 card from either (instead of choosing one neighbour)." },
     { name: "THE WITNESS", desc: "You may not win the game. If you are alive when only one player remains, they also lose." }
 ];
 
