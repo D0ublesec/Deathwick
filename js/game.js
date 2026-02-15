@@ -228,7 +228,7 @@
     var CHEATSHEET_TURN_DARK = '<li>Candle empty at any moment → Consumed immediately (lose).</li>';
     var CHEATSHEET_REST = '<section class="cs-section"><h3>Actions</h3><ul class="cs-list"><li><strong>Haunt</strong> — Number card to a neighbour\'s Shadow.</li><li><strong>Banish</strong> — Match/beat a Ghost in your Shadow.</li><li><strong>Panic</strong> — Flip top of Candle vs Ghost.</li><li><strong>Séance</strong> — Pair → heal 4 from Dark.</li><li><strong>Cast</strong> (number cards) / <strong>Summon</strong> (face cards & Jokers) — Use card effect (see Grimoire).</li><li><strong>Flicker</strong> — Shuffle hand, draw 3.</li><li><strong>Ability</strong> — Class power.</li></ul></section>' +
         '<section class="cs-section"><h3>Targeting</h3><p>You can only target your two Neighbours (left/right) unless a card or class says otherwise (e.g. THE OCCULTIST 9 = any player).</p></section>' +
-        '<section class="cs-section"><h3>Grimoire</h3><table class="cs-table"><tr><td>A or 1</td><td>Exchange</td><td>Swap a ghost in your Shadow with any number card (A–10) from The Dark.</td></tr><tr><td>2</td><td>Greed</td><td>Draw 2 to your hand.</td></tr><tr><td>3</td><td>Scare</td><td>Choose a neighbour; they shuffle hand, discard 1 to The Dark (Sadist: 2 to The Dark).</td></tr><tr><td>4</td><td>Drain</td><td>Choose a neighbour; take top of their Candle, put on top of yours.</td></tr><tr><td>5</td><td>Salt</td><td>Reaction: cancel action targeting you (both to The Dark).</td></tr><tr><td>6</td><td>Sight</td><td>View a neighbour\'s hand and take one card (Watcher: view both, take 1 from either).</td></tr><tr><td>7</td><td>Cleanse</td><td>Destroy 1 Ghost (to The Dark or Siphon to your Candle).</td></tr><tr><td>8</td><td>Recall</td><td>Take a Ghost from any Shadow to your hand.</td></tr><tr><td>9</td><td>Possess</td><td>Move a Ghost from your Shadow to a neighbour\'s Shadow.</td></tr><tr><td>10</td><td>Rekindle</td><td>Top 3 from The Dark to your Candle, then shuffle Candle.</td></tr><tr><td>J</td><td>Mirror</td><td>Choose a neighbour and swap your Shadow with their Shadow.</td></tr><tr><td>Q</td><td>Medium</td><td>1 from Dark to hand (no Joker), OR top 2 from Dark → Candle then shuffle.</td></tr><tr><td>K</td><td>Purge</td><td>Banish all Ghosts in your Shadow (to The Dark / Siphon).</td></tr><tr><td>★</td><td>BOO!</td><td>Others Burn until number (to The Dark); number → Ghost in their Shadow.</td></tr></table></section>';
+        '<section class="cs-section"><h3>Grimoire</h3><table class="cs-table"><tr><td>A or 1</td><td>Reprieve</td><td>At the start of your turn you may play the Ace to skip the Haunting phase (you do not Burn); you then Draw and take your action as normal.</td></tr><tr><td>2</td><td>Greed</td><td>Draw 2 to your hand.</td></tr><tr><td>3</td><td>Scare</td><td>Choose a neighbour; they shuffle hand, discard 1 to The Dark (Sadist: 2 to The Dark).</td></tr><tr><td>4</td><td>Drain</td><td>Choose a neighbour; take top of their Candle, put on top of yours.</td></tr><tr><td>5</td><td>Salt</td><td>Reaction: cancel action targeting you (both to The Dark).</td></tr><tr><td>6</td><td>Sight</td><td>View a neighbour\'s hand and take one card (Watcher: view both, take 1 from either).</td></tr><tr><td>7</td><td>Cleanse</td><td>Destroy 1 Ghost (to The Dark or Siphon to your Candle).</td></tr><tr><td>8</td><td>Recall</td><td>Take a Ghost from any Shadow to your hand.</td></tr><tr><td>9</td><td>Possess</td><td>Move a Ghost from your Shadow to a neighbour\'s Shadow.</td></tr><tr><td>10</td><td>Rekindle</td><td>Top 3 from The Dark to your Candle, then shuffle Candle.</td></tr><tr><td>J</td><td>Mirror</td><td>Choose a neighbour and swap your Shadow with their Shadow.</td></tr><tr><td>Q</td><td>Medium</td><td>1 from Dark to hand (no Joker), OR top 2 from Dark → Candle then shuffle.</td></tr><tr><td>K</td><td>Purge</td><td>Banish all Ghosts in your Shadow (to The Dark / Siphon).</td></tr><tr><td>★</td><td>BOO!</td><td>Others Burn until number (to The Dark); number → Ghost in their Shadow.</td></tr></table></section>';
 
     function getCheatsheetHTML(darkMode) {
         var candleRule = darkMode ? CHEATSHEET_TURN_DARK : CHEATSHEET_TURN_NORMAL;
@@ -236,7 +236,7 @@
             ? '<li>3 Ghosts same suit → Possessed (lose). In Dark ritual: checked <strong>as soon as</strong> you get the 3rd (Haunt, BOO!, etc.), not only at end of turn.</li>'
             : '<li>3 Ghosts same suit in Shadow → Possessed (lose).</li>';
         return '<section class="cs-section"><h3>Win</h3><p>Be the last player with a lit Candle.</p></section>' +
-            '<section class="cs-section"><h3>Turn order</h3><ol class="cs-list"><li>Burn 1 card per Ghost in your Shadow.</li><li>Draw 1.</li><li>Do <strong>one</strong> action.</li><li>Discard down to 5.</li>' + candleRule + possessionLine + '</ol></section>' +
+            '<section class="cs-section"><h3>Turn order</h3><ol class="cs-list"><li>Haunting: Burn 1 per Ghost (or play Ace (Reprieve) at start of turn to skip).</li><li>Draw 1.</li><li>Do <strong>one</strong> action.</li><li>Discard down to 5.</li>' + candleRule + possessionLine + '</ol></section>' +
             CHEATSHEET_REST;
     }
 
@@ -772,6 +772,23 @@
         p.phantomCancelUsedThisTurn = false;
         p.fatalistUsedThisTurn = false;
         gameState.funeralBellTriggeredThisTurn = false;
+        if (p.type === 'human') {
+            var aceIdx = -1;
+            for (var ai = 0; ai < p.hand.length; ai++) {
+                if (p.hand[ai].r === 'A' && !p.hand[ai].isFace) { aceIdx = ai; break; }
+            }
+            if (aceIdx >= 0) {
+                var reprieveModal = document.getElementById('reprieve-modal');
+                if (reprieveModal) reprieveModal.style.display = 'flex';
+                return;
+            }
+        }
+        runOracleAndBurnPhase();
+    }
+
+    function runOracleAndBurnPhase() {
+        var p = gameState.players[gameState.activeIdx];
+        if (!p) return;
         if (p.class && p.class.name === 'THE ORACLE' && p.candle.length > 0 && p.type === 'human') {
             var topCard = p.candle[0];
             var slot = document.getElementById('oracle-card-slot');
@@ -790,8 +807,34 @@
                 log(p.name + ' (THE ORACLE) put top card on bottom.');
             }
         }
-        continueStartOfTurnPhase();
+        continueStartOfTurnPhase(false);
+        if (!gameState.isGameOver) updateUI();
     }
+
+    window.resolveReprieve = function (useReprieve) {
+        var modal = document.getElementById('reprieve-modal');
+        if (modal) modal.style.display = 'none';
+        var p = gameState.players[gameState.activeIdx];
+        if (!p) return;
+        if (useReprieve) {
+            var aceIdx = -1;
+            for (var i = 0; i < p.hand.length; i++) {
+                if (p.hand[i].r === 'A' && !p.hand[i].isFace) { aceIdx = i; break; }
+            }
+            if (aceIdx >= 0) {
+                var aceCard = p.hand.splice(aceIdx, 1)[0];
+                gameState.lastDiscardByPlayerId = p.id;
+                gameState.discard.push(aceCard);
+                log(p.name + ' played Reprieve (Ace): skipped the Haunting phase.');
+                continueStartOfTurnPhase(true);
+            } else {
+                runOracleAndBurnPhase();
+            }
+        } else {
+            runOracleAndBurnPhase();
+        }
+        if (!gameState.isGameOver) updateUI();
+    };
 
     function resolveOracle(keepOnTop) {
         var modal = document.getElementById('oracle-modal');
@@ -849,11 +892,11 @@
         return true;
     }
 
-    function continueStartOfTurnPhase() {
+    function continueStartOfTurnPhase(skipBurn) {
         var p = gameState.players[gameState.activeIdx];
         if (!p) return;
         var ghostCount = p.shadow.filter(function (g) { return !g.isWall; }).length;
-        var burn = ghostCount;
+        var burn = skipBurn ? 0 : ghostCount;
         if (p.class && p.class.name === 'THE VESSEL' && burn > 0) burn = Math.max(0, burn - 1);
         if (!gameState.darkMode && burn > 0 && p.candle.length < burn) {
             if (handleDeath(p)) return;
@@ -891,7 +934,7 @@
             log(p.name + ' burned ' + burn + ' card' + (burn === 1 ? '' : 's') + '. Candle: ' + p.candle.length);
             if (typeof window.playSFX === 'function') window.playSFX('burn');
         }
-        if (p.class && p.class.name === 'THE VOODOO DOLL' && p.voodooSuits) {
+        if (!skipBurn && p.class && p.class.name === 'THE VOODOO DOLL' && p.voodooSuits) {
             for (var v = 0; v < p.shadow.length; v++) {
                 var g = p.shadow[v];
                 if (g.isWall || !g.s || p.voodooSuits.indexOf(g.s) < 0 || g.hauntedBy == null) continue;
@@ -1179,7 +1222,7 @@
     })();
 
     var CARD_EFFECTS = {
-        'A': { name: 'Exchange (A or 1)', effect: 'Choose a ghost in your Shadow; swap it with any number card (A–10) from The Dark (change suit to avoid possession or lower rank to banish).' },
+        'A': { name: 'Reprieve (A or 1)', effect: 'At the start of your turn you may play the Ace to skip the Haunting phase (you do not Burn this turn); you then Draw and take your action as normal.' },
         '2': { name: 'Greed', effect: 'Draw 2 cards to your hand.' },
         '3': { name: 'Scare', effect: 'Choose a neighbour. They shuffle their hand and blindly discard 1 to The Dark (The Sadist: 2 to The Dark; you pick which).' },
         '4': { name: 'Drain', effect: 'Choose a neighbour. Take the top card of their Candle; put it on top of your Candle.' },
@@ -1191,7 +1234,7 @@
         '10': { name: 'Rekindle', effect: 'Take the top 3 cards from The Dark and put them on top of your Candle.' },
         'J': { name: 'Mirror', effect: 'Choose a neighbour and swap your Shadow with their Shadow.' },
         'Q': { name: 'Medium', effect: 'Choose: take 1 from The Dark to your hand, OR take the top 2 from The Dark and put them on top of your Candle.' },
-        'K': { name: 'Purge', effect: 'Banish all Ghosts in your Shadow (to the top of The Dark; Siphon if rank matches and not Spades—Siphoned to bottom of your Candle).' },
+        'K': { name: 'Purge', effect: 'Banish all Ghosts in your Shadow (to the top of The Dark; Siphon if suit matches the King\'s suit and not Spades—Siphoned to bottom of your Candle).' },
         'JOKER': { name: 'BOO!', effect: 'Each other player Burns from the top of their Candle until they reveal a number (burned cards go to the top of The Dark; the number becomes a Ghost in their Shadow).' }
     };
 
@@ -2512,14 +2555,7 @@
             return;
         }
         if (c.r === 'A') {
-            var ghosts = p.shadow.filter(function (g) { return !g.isWall; });
-            if (ghosts.length === 0) { showAlertModal('No ghost in your Shadow to Exchange.', 'Cast'); return; }
-            if (gameState.discard.length === 0) { showAlertModal('The Dark is empty.', 'Exchange'); return; }
-            gameState.pendingAction = 'cast';
-            gameState.pendingCardIdx = idx;
-            gameState.selectionMode = 'SELECT_GHOST';
-            gameState.selectionTarget = p.id;
-            updateUI();
+            showAlertModal('The Ace (Reprieve) can only be played at the start of your turn to skip the Haunting phase. You do not Burn that turn; you then Draw and take your action as normal.', 'Reprieve');
             return;
         }
         if (c.r === '2' && p.class && p.class.name === 'THE RAVENOUS') {
@@ -2874,13 +2910,27 @@
                 log(p.name + ' Rekindle: Top 3 from The Dark to Candle, then shuffled. Candle: ' + p.candle.length);
                 if (typeof window.playSFX === 'function') window.playSFX('draw');
                 break;
-            case 'K':
+            case 'K': {
                 gameState.lastDiscardByPlayerId = p.id;
-                gameState.discard.push.apply(gameState.discard, p.shadow);
+                var kingSuit = c.s;
+                var toDark = [];
+                var siphoned = 0;
+                for (var pi = 0; pi < p.shadow.length; pi++) {
+                    var g = p.shadow[pi];
+                    if (g.isWall) { toDark.push(g); continue; }
+                    if (kingSuit === g.s && g.s !== '♠') {
+                        p.candle.push(g);
+                        siphoned++;
+                    } else {
+                        toDark.push(g);
+                    }
+                }
+                gameState.discard.push.apply(gameState.discard, toDark);
                 p.shadow = [];
-                log(p.name + ' used Purge.');
+                log(p.name + ' used Purge.' + (siphoned ? ' Siphoned ' + siphoned + ' to Candle.' : ''));
                 if (typeof window.playSFX === 'function') window.playSFX('banish');
                 break;
+            }
             case 'JOKER': {
                 var jokerFoes = [];
                 for (var ji = 0; ji < gameState.players.length; ji++) {
@@ -2932,19 +2982,6 @@
             return;
         }
 
-        if (gameState.pendingAction === 'cast' && gameState.pendingCardIdx != null && ownerId === p.id) {
-            var aceCard = p.hand[gameState.pendingCardIdx];
-            if (aceCard && aceCard.r === 'A') {
-                var ghostA = t.shadow[idx];
-                if (!ghostA || ghostA.isWall) { showAlertModal('Choose a ghost (not a Wall) to Exchange.', 'Exchange'); return; }
-                var numberCardsInDark = gameState.discard.filter(function (c) { return c && !c.isWall && c.r !== 'JOKER' && c.r !== '★' && !c.isFace; });
-                if (numberCardsInDark.length === 0) { showAlertModal('No number card in The Dark to swap with.', 'Exchange'); return; }
-                gameState.pendingExchangeGhostOwnerId = ownerId;
-                gameState.pendingExchangeGhostIdx = idx;
-                openExchangeDarkModal();
-                return;
-            }
-        }
 
         if (gameState.selectedIdxs.length === 1) {
             var c = p.hand[gameState.selectedIdxs[0]];
@@ -3327,7 +3364,6 @@
                 el.style.cursor = 'pointer';
                 el.onclick = function () {
                     if (gameState.pendingDoomreader) resolveDoomreaderWithCard(discardIdx);
-                    else resolveExchangeWithCard(discardIdx);
                 };
                 container.appendChild(el);
             })(i);
@@ -3378,36 +3414,6 @@
         document.getElementById('exchange-dark-modal').style.display = 'none';
         log(p.name + ' (THE DOOMREADER) swapped a ghost with a ranked card from The Dark.');
         updateUI();
-        finishAction();
-    }
-
-    function resolveExchangeWithCard(discardIdx) {
-        var p = gameState.players[gameState.activeIdx];
-        var ownerId = gameState.pendingExchangeGhostOwnerId;
-        var ghostIdx = gameState.pendingExchangeGhostIdx;
-        var cardIdx = gameState.pendingCardIdx;
-        if (ownerId == null || ghostIdx == null || cardIdx == null || !p.hand[cardIdx] || p.hand[cardIdx].r !== 'A') return;
-        var t = null;
-        for (var i = 0; i < gameState.players.length; i++) {
-            if (gameState.players[i].id === ownerId) { t = gameState.players[i]; break; }
-        }
-        if (!t || !t.shadow[ghostIdx] || discardIdx < 0 || discardIdx >= gameState.discard.length) return;
-        var chosenCard = gameState.discard[discardIdx];
-        if (chosenCard.isFace || chosenCard.r === 'JOKER' || chosenCard.r === '★') return;
-        var ghostA = t.shadow[ghostIdx];
-        gameState.discard.splice(discardIdx, 1);
-        gameState.lastDiscardByPlayerId = p.id;
-        gameState.discard.push(ghostA);
-        chosenCard.hauntedBy = ghostA.hauntedBy;
-        t.shadow[ghostIdx] = chosenCard;
-        var aceCard = p.hand.splice(cardIdx, 1)[0];
-        gameState.lastDiscardByPlayerId = p.id;
-        gameState.discard.push(aceCard);
-        gameState.pendingExchangeGhostOwnerId = null;
-        gameState.pendingExchangeGhostIdx = null;
-        document.getElementById('exchange-dark-modal').style.display = 'none';
-        log(p.name + ' used Exchange: swapped a ghost with ' + chosenCard.r + chosenCard.s + ' from The Dark.');
-        clearTargetMode();
         finishAction();
     }
 
@@ -3766,6 +3772,17 @@
             }
             var aiGhostCount = ai.shadow.filter(function (g) { return !g.isWall; }).length;
             var burn = aiGhostCount;
+            var aiAceIdx = -1;
+            for (var aii = 0; aii < ai.hand.length; aii++) {
+                if (ai.hand[aii].r === 'A' && !ai.hand[aii].isFace) { aiAceIdx = aii; break; }
+            }
+            if (aiAceIdx >= 0 && burn > 0 && (ai.candle.length < burn || Math.random() < 0.35)) {
+                var aiAce = ai.hand.splice(aiAceIdx, 1)[0];
+                gameState.lastDiscardByPlayerId = ai.id;
+                gameState.discard.push(aiAce);
+                log(ai.name + ' played Reprieve (Ace): skipped the Haunting phase.');
+                burn = 0;
+            }
             if (ai.class && ai.class.name === 'THE VESSEL' && burn > 0) burn = Math.max(0, burn - 1);
             if (!gameState.darkMode && burn > 0 && ai.candle.length < burn) {
                 if (handleDeath(ai)) return;
@@ -3784,7 +3801,7 @@
                 }
             }
             if (burn > 0) log('AI Burned ' + burn + ' card' + (burn === 1 ? '' : 's') + '. Candle: ' + ai.candle.length);
-            if (ai.class && ai.class.name === 'THE VOODOO DOLL' && ai.voodooSuits) {
+            if (burn > 0 && ai.class && ai.class.name === 'THE VOODOO DOLL' && ai.voodooSuits) {
                 for (var v = 0; v < ai.shadow.length; v++) {
                     var g = ai.shadow[v];
                     if (g.isWall || !g.s || ai.voodooSuits.indexOf(g.s) < 0 || g.hauntedBy == null) continue;
@@ -3999,9 +4016,9 @@
     (function initRitualTheme() {
         try {
             var t = localStorage.getItem('finalFlickerRitualTheme');
-            document.body.classList.add(t === 'blood' ? 'ritual-theme-blood' : 'ritual-theme-fire');
+            document.body.classList.add(t === 'fire' ? 'ritual-theme-fire' : 'ritual-theme-blood');
         } catch (e) {
-            document.body.classList.add('ritual-theme-fire');
+            document.body.classList.add('ritual-theme-blood');
         }
     })();
 

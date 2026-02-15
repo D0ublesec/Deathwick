@@ -2389,14 +2389,26 @@ body.game-page.ritual-theme-blood #theme-btn-blood {
     .nav-player-banner { font-size: 0.75rem; gap: 4px; }
     .game-nav { padding: 8px 10px; gap: 8px; }
     .top-right-btn { padding: 6px 10px; font-size: 0.7rem; }
-    #game-board { padding: 4px; gap: 4px; padding-top: 28vh; }
+    #game-board { padding: 4px; gap: 4px; padding-top: 36vh; }
     /* Ritual table: push way down on mobile so table sits lower and hand/actions have room */
-    #game-board #ritual-table { margin-top: 10vh; }
+    #game-board #ritual-table { margin-top: 14vh; }
+    /* P1 (you) table zone: push shadow row considerably lower; deck + class card at bottom of zone */
+    #table-zone-you.ritual-zone-you {
+        bottom: -2%;
+        transform: translate(-50%, 18%);
+    }
+    #table-zone-you.ritual-zone-you .ritual-zone-row {
+        flex-direction: column;
+        gap: 8px;
+    }
+    #table-zone-you.ritual-zone-you .ritual-zone-shadow { order: 1; }
+    #table-zone-you.ritual-zone-you .ritual-zone-candle { order: 2; }
+    #table-zone-you.ritual-zone-you .ritual-zone-left { order: 3; flex-direction: row; justify-content: center; gap: 10px; }
     /* 3–4 player mobile: keep same padding all sides so no card leaves screen; table still lower */
     #game-board:has(.ritual-table[data-player-count="3"]),
     #game-board:has(.ritual-table[data-player-count="4"]) {
         padding: clamp(36px, 12%, 56px);
-        padding-top: 28vh;
+        padding-top: 36vh;
         box-sizing: border-box;
     }
     .selection-hint { font-size: 0.7rem; padding: 2px 6px; }

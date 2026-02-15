@@ -98,15 +98,41 @@ body.game-page.ritual-theme-fire {
     --ritual-ring-color: rgba(201, 77, 40, 0.3);
 }
 
-/* Dark ritual — stricter ruling + darker theme */
+/* Dark ritual — stricter ruling + visibly darker theme so it's clear dark mode is on */
 body.game-page.dark-mode {
-    --bg-color: #030305;
-    --bg-elevated: #08060a;
-    --bg-card: #0a080c;
-    --border-color: #1a1815;
-    --border-focus: #252220;
-    --text-muted: #5a5650;
-    --accent-color: #a83d20;
-    --accent-glow: rgba(168, 61, 32, 0.3);
-    --ritual-ring: rgba(168, 61, 32, 0.2);
+    --bg-color: #020203;
+    --bg-elevated: #050406;
+    --bg-card: #070508;
+    --border-color: #12100f;
+    --border-focus: #1a1816;
+    --text-color: #d8d4cc;
+    --text-muted: #4a4640;
+    --accent-color: #8a3018;
+    --accent-glow: rgba(138, 48, 24, 0.25);
+    --ritual-ring: rgba(100, 40, 25, 0.2);
+    /* Darker ritual room and table so the board clearly reads as dark mode */
+    --ritual-bg: #040302;
+    --ritual-bg-radial: rgba(25, 10, 8, 0.7);
+    --ritual-table-surface: #0c0a08;
+    --ritual-table-light: #100e0c;
+    --ritual-table-gradient: #080605;
+    --ritual-table-rim: #050403;
+    --ritual-table-highlight: rgba(80, 40, 30, 0.04);
+    --ritual-table-groove: rgba(0, 0, 0, 0.6);
+    --ritual-ring-color: rgba(100, 30, 20, 0.35);
+    --ritual-sigil-color: rgba(40, 15, 10, 0.3);
+    --ritual-sigil-glow: rgba(80, 25, 15, 0.2);
+    --ritual-sigil-shadow: rgba(20, 5, 2, 0.8);
+    --ritual-candle-glow: rgba(90, 45, 35, 0.18);
+    --dark-pit: #010101;
+    --dark-glow: rgba(30, 10, 15, 0.5);
+}
+
+/* Dark ritual + blood theme: keep red but darker */
+body.game-page.dark-mode.ritual-theme-blood {
+    --accent-color: #6a2020;
+    --accent-glow: rgba(90, 25, 25, 0.25);
+    --ritual-ring-color: rgba(80, 20, 20, 0.4);
+    --ritual-sigil-glow: rgba(80, 20, 20, 0.25);
+    --ritual-bg-radial: rgba(40, 10, 10, 0.75);
 }

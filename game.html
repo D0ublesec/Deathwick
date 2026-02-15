@@ -87,6 +87,18 @@
         </div>
     </div>
 
+    <div id="reprieve-modal" class="modal" style="display:none;">
+        <div class="modal-content" style="border-color:var(--accent-color);">
+            <h2 style="color:var(--accent-color)">REPRIEVE (Ace)</h2>
+            <p style="margin-bottom:12px;">At the start of your turn you may play the Ace to skip the Haunting phase (you do not Burn this turn); you then Draw and take your action as normal.</p>
+            <p style="margin-bottom:16px;"><strong>Play your Ace now to skip Burning?</strong></p>
+            <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+                <button type="button" class="game-btn" id="reprieve-play-btn" onclick="resolveReprieve(true)">Play Ace (skip Haunting)</button>
+                <button type="button" class="game-btn" style="background:var(--bg-elevated); color:var(--text-muted);" onclick="resolveReprieve(false)">No thanks</button>
+            </div>
+        </div>
+    </div>
+
     <div id="exchange-dark-modal" class="modal" style="display:none;">
         <div class="modal-content">
             <h2 id="exchange-dark-modal-title" style="color:var(--accent-color)">EXCHANGE — Pick a number card from The Dark</h2>
