@@ -290,7 +290,7 @@
             <h3>The Draw</h3>
             <p><strong>Draw 1 card</strong> from the top of your Candle into your hand.</p>
             <h3>The Ritual</h3>
-            <p>Perform <strong>exactly one</strong> of the following actions:</p>
+            <p>Perform <strong>exactly one</strong> of the following actions, or <strong>Abstain</strong>:</p>
             <div class="ritual-actions">
                 <div class="ritual-action">
                     <h4 class="ritual-action-name">HAUNT <span class="ritual-action-tag">Attack</span></h4>
@@ -322,6 +322,10 @@
                     <div class="ritual-action-detail">
                         <strong>Joker:</strong> Instant success; you siphon the ghost (unless it is a Spade).
                     </div>
+                </div>
+                <div class="ritual-action">
+                    <h4 class="ritual-action-name">ABSTAIN <span class="ritual-action-tag">Skip</span></h4>
+                    <p class="ritual-action-summary">If you cannot (or choose not to) perform another Ritual action, you may Abstain. Abstaining uses your action for the turn and has no additional cost.</p>
                 </div>
             </div>
             <h3>The Burden</h3>
@@ -444,6 +448,7 @@
             <h3>Other common questions</h3>
             <ul class="faq-list">
                 <li><strong>What does “once per turn” mean?</strong> It depends on whose turn is relevant. For <strong>your own</strong> abilities (e.g. a class action like The Pyromaniac’s “Once per turn”), it means once per <strong>your</strong> turn; it resets at the start of your next turn. For <strong>reactions to another player</strong> (e.g. <strong>The Unseen</strong> cancelling a Haunt, or <strong>The Hex</strong> cancelling with a matching rank), it means once per <strong>that other player’s turn</strong>; so each different attacker has one chance per their turn to be cancelled; The Unseen can cancel once per attacker per round. See the Edge cases below for Haunt vs The Unseen / The Hex.</li>
+                <li><strong>What if I can’t play a valid action?</strong> You may <strong>Abstain</strong> from your Ritual action. This is especially common when your hand is all face cards/Jokers and you are not The Warlock (so you cannot Haunt with them).</li>
                 <li><strong>The Silence and Salt:</strong> The Silence's actions cannot be interrupted by Salt (5), including when they Summon BOO! (Joker). If The Silence plays a Joker, defenders cannot Salt it.</li>
                 <li><strong>Salt vs BOO! (Joker):</strong> When someone plays BOO! (Joker), each other player is targeted and must Burn until they reveal a number (that number becomes a Ghost in their Shadow). You may use <strong>Salt (5)</strong> when BOO! targets you: your Salt goes to The Dark and the BOO! has <strong>no effect on you</strong> (you do not Burn). The only exception is <strong>The Silence</strong>—if they played the Joker, you cannot Salt it.</li>
                 <li><strong>The Mime and Salt:</strong> When The Mime redirects a Haunt to you (you are their other neighbour), that redirect is an action targeting you. You may use <strong>Salt (5)</strong> to cancel it: your Salt and the Mime’s discarded card go to The Dark, and the ghost does not enter your Shadow (it stays in The Mime’s Shadow).</li>

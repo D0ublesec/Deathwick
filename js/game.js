@@ -226,7 +226,7 @@
 
     var CHEATSHEET_TURN_NORMAL = '<li>Start of turn: fewer Candle cards than ghosts → Consumed immediately. Otherwise burn, then draw 1 (if Candle left); Candle empty at end of turn → Consumed.</li>';
     var CHEATSHEET_TURN_DARK = '<li>Candle empty at any moment → Consumed immediately (lose).</li>';
-    var CHEATSHEET_REST = '<section class="cs-section"><h3>Actions</h3><ul class="cs-list"><li><strong>Haunt</strong> — Number card to a neighbour\'s Shadow.</li><li><strong>Banish</strong> — Match/beat a Ghost in your Shadow.</li><li><strong>Panic</strong> — Flip top of Candle vs Ghost.</li><li><strong>Séance</strong> — Pair → heal 4 from Dark.</li><li><strong>Cast</strong> (number cards) / <strong>Summon</strong> (face cards & Jokers) — Use card effect (see Grimoire).</li><li><strong>Flicker</strong> — Shuffle hand, draw 3.</li><li><strong>Ability</strong> — Class power.</li></ul></section>' +
+    var CHEATSHEET_REST = '<section class="cs-section"><h3>Actions</h3><ul class="cs-list"><li><strong>Haunt</strong> — Number card to a neighbour\'s Shadow.</li><li><strong>Banish</strong> — Match/beat a Ghost in your Shadow.</li><li><strong>Panic</strong> — Flip top of Candle vs Ghost.</li><li><strong>Séance</strong> — Pair → heal 4 from Dark.</li><li><strong>Cast</strong> (number cards) / <strong>Summon</strong> (face cards & Jokers) — Use card effect (see Grimoire).</li><li><strong>Flicker</strong> — Shuffle hand, draw 3.</li><li><strong>Ability</strong> — Class power.</li><li><strong>Abstain</strong> — Skip your Ritual action (uses your action this turn).</li></ul></section>' +
         '<section class="cs-section"><h3>Targeting</h3><p>You can only target your two Neighbours (left/right) unless a card or class says otherwise (e.g. THE OCCULTIST 9 = any player).</p></section>' +
         '<section class="cs-section"><h3>Grimoire</h3><table class="cs-table"><tr><td>A or 1</td><td>Reprieve</td><td>At the start of your turn you may play the Ace to skip the Haunting phase (you do not Burn); you then Draw and perform the Ritual as normal.</td></tr><tr><td>2</td><td>Greed</td><td>Draw 2 to your hand.</td></tr><tr><td>3</td><td>Scare</td><td>Choose a neighbour; they shuffle hand, discard 1 to The Dark (Sadist: 2 to The Dark).</td></tr><tr><td>4</td><td>Drain</td><td>Choose a neighbour; take top of their Candle, put on top of yours.</td></tr><tr><td>5</td><td>Salt</td><td>Reaction: cancel action targeting you (both to The Dark).</td></tr><tr><td>6</td><td>Sight</td><td>View a neighbour\'s hand and take one card (Watcher: view both, take 1 from either).</td></tr><tr><td>7</td><td>Cleanse</td><td>Destroy 1 Ghost (to The Dark or Siphon to your Candle).</td></tr><tr><td>8</td><td>Recall</td><td>Take a Ghost from any Shadow to your hand.</td></tr><tr><td>9</td><td>Possess</td><td>Move a Ghost from your Shadow to a neighbour\'s Shadow.</td></tr><tr><td>10</td><td>Rekindle</td><td>Top 3 from The Dark to your Candle, then shuffle Candle.</td></tr><tr><td>J</td><td>Mirror</td><td>Choose a neighbour and swap your Shadow with their Shadow.</td></tr><tr><td>Q</td><td>Medium</td><td>1 from Dark to hand (no Joker), OR top 2 from Dark → Candle then shuffle.</td></tr><tr><td>K</td><td>Purge</td><td>Banish all Ghosts in your Shadow (to The Dark / Siphon).</td></tr><tr><td>★</td><td>BOO!</td><td>Others Burn until number (to The Dark); number → Ghost in their Shadow.</td></tr></table></section>';
 
@@ -236,7 +236,7 @@
             ? '<li>3 Ghosts same suit → Possessed (lose). In Dark ritual: checked <strong>as soon as</strong> you get the 3rd (Haunt, BOO!, etc.), not only at end of turn.</li>'
             : '<li>3 Ghosts same suit in Shadow → Possessed (lose).</li>';
         return '<section class="cs-section"><h3>Win</h3><p>Be the last player with a lit Candle.</p></section>' +
-            '<section class="cs-section"><h3>Turn order</h3><ol class="cs-list"><li>Haunting: Burn 1 per Ghost (or play Ace (Reprieve) at start of turn to skip).</li><li>Draw 1.</li><li>Do <strong>one</strong> action.</li><li>Discard down to 5.</li>' + candleRule + possessionLine + '</ol></section>' +
+            '<section class="cs-section"><h3>Turn order</h3><ol class="cs-list"><li>Haunting: Burn 1 per Ghost (or play Ace (Reprieve) at start of turn to skip).</li><li>Draw 1.</li><li>Perform the Ritual (or Abstain).</li><li>Discard down to 5.</li>' + candleRule + possessionLine + '</ol></section>' +
             CHEATSHEET_REST;
     }
 
@@ -1921,6 +1921,7 @@
         var btnSeance = document.getElementById('btn-seance');
         var btnFlicker = document.getElementById('btn-flicker');
         var btnPanic = document.getElementById('btn-panic');
+        var btnPass = document.getElementById('btn-pass');
         var btnCancelTarget = document.getElementById('btn-cancel-target');
         var canUseGrimoireWithoutCard = humanPlayer.class && humanPlayer.class.name === 'THE GRIMOIRE OF REJECTION' && gameState.grimoireRejectionRank == null;
         if (btnHaunt) btnHaunt.disabled = inTargetMode || !isHumanTurn || !isSingle || gameState.turnPhase !== 'ACTION';
@@ -1931,6 +1932,7 @@
         if (btnFlicker) btnFlicker.disabled = inTargetMode || !isHumanTurn || gameState.turnPhase !== 'ACTION';
         var hasGhosts = humanPlayer.shadow.some(function (g) { return !g.isWall; });
         if (btnPanic) btnPanic.disabled = inTargetMode || !isHumanTurn || !hasGhosts || gameState.turnPhase !== 'ACTION';
+        if (btnPass) btnPass.disabled = !isHumanTurn || gameState.turnPhase !== 'ACTION';
         var inDiscardDownMode = gameState.selectionMode === 'DISCARD_DOWN';
         var discardDownOk = inDiscardDownMode && gameState.pendingDiscardDown && gameState.selectedIdxs.length === gameState.pendingDiscardDown.needToDiscard;
         if (btnCancelTarget) btnCancelTarget.style.display = inTargetMode && !inDiscardDownMode ? 'inline-block' : 'none';
@@ -1946,6 +1948,7 @@
         var modalSeance = document.getElementById('modal-btn-seance');
         var modalFlicker = document.getElementById('modal-btn-flicker');
         var modalPanic = document.getElementById('modal-btn-panic');
+        var modalPass = document.getElementById('modal-btn-pass');
         if (modalHaunt) modalHaunt.disabled = inTargetMode || !isHumanTurn || !isSingle || gameState.turnPhase !== 'ACTION';
         if (modalBanish) modalBanish.disabled = inTargetMode || !isHumanTurn || !isSingle || gameState.turnPhase !== 'ACTION';
         if (modalCast) modalCast.disabled = inTargetMode || !isHumanTurn || !isSingle || gameState.turnPhase !== 'ACTION';
@@ -1953,6 +1956,7 @@
         if (modalSeance) modalSeance.disabled = inTargetMode || !isHumanTurn || !isDouble || gameState.turnPhase !== 'ACTION';
         if (modalFlicker) modalFlicker.disabled = inTargetMode || !isHumanTurn || gameState.turnPhase !== 'ACTION';
         if (modalPanic) modalPanic.disabled = inTargetMode || !isHumanTurn || !hasGhosts || gameState.turnPhase !== 'ACTION';
+        if (modalPass) modalPass.disabled = !isHumanTurn || gameState.turnPhase !== 'ACTION';
 
         var possWarn = document.getElementById('possession-warning');
         if (possWarn) possWarn.style.display = checkPossession(humanPlayer.shadow) ? 'block' : 'none';
@@ -2530,6 +2534,16 @@
         for (var i = 0; i < 3 && p.candle.length; i++) p.hand.push(p.candle.shift());
         log(p.name + ' Flicker: Hand reset.');
         if (typeof window.playSFX === 'function') window.playSFX('draw');
+        finishAction();
+    }
+
+    function actionPass() {
+        if (gameState.turnPhase !== 'ACTION') return;
+        var p = gameState.players[gameState.activeIdx];
+        if (!p || p.type !== 'human') return;
+        clearTargetMode();
+        gameState.selectedIdxs = [];
+        log(p.name + ' abstained from the Ritual action.');
         finishAction();
     }
 
@@ -3919,6 +3933,7 @@
     window.actionSeance = actionSeance;
     window.actionClass = actionClass;
     window.actionPanic = actionPanic;
+    window.actionPass = actionPass;
     window.endTurn = endTurn;
     window.cancelTargetMode = cancelTargetMode;
     window.resolveDiscardDown = resolveDiscardDown;
