@@ -3,8 +3,17 @@
     var CLASSES = window.CLASSES;
     var SUITS = window.SUITS;
     var EXTENDED_CLASS_NAMES = ['THE FUNERAL BELL', 'THE LICH', 'THE GRAVEDIGGER'];
+    var TWO_PLAYER_EXCLUDED_CLASS_NAMES = ['THE MIME', 'THE WATCHER', 'THE OCCULTIST', 'THE LICH', 'THE PLAGUE', 'THE VULTURE', 'THE WITNESS'];
     function getClassPool() {
-        return gameState.players.length > 6 ? CLASSES : CLASSES.filter(function (c) { return EXTENDED_CLASS_NAMES.indexOf(c.name) < 0; });
+        var basePool = gameState.players.length > 6
+            ? CLASSES
+            : CLASSES.filter(function (c) { return EXTENDED_CLASS_NAMES.indexOf(c.name) < 0; });
+        if (gameState.players.length === 2) {
+            basePool = basePool.filter(function (c) {
+                return TWO_PLAYER_EXCLUDED_CLASS_NAMES.indexOf(c.name) < 0;
+            });
+        }
+        return basePool;
     }
     var RANKS = window.RANKS;
     var getVal = window.getVal;
@@ -228,7 +237,7 @@
     var CHEATSHEET_TURN_DARK = '<li>Candle empty at any moment → Consumed immediately (lose).</li>';
     var CHEATSHEET_REST = '<section class="cs-section"><h3>Actions</h3><ul class="cs-list"><li><strong>Haunt</strong> — Number card to a neighbour\'s Shadow.</li><li><strong>Banish</strong> — Match/beat a Ghost in your Shadow.</li><li><strong>Panic</strong> — Flip top of Candle vs Ghost.</li><li><strong>Séance</strong> — Pair → heal 4 from Dark.</li><li><strong>Cast</strong> (number cards) / <strong>Summon</strong> (face cards & Jokers) — Use card effect (see Grimoire).</li><li><strong>Flicker</strong> — Shuffle hand, draw 3.</li><li><strong>Ability</strong> — Class power.</li><li><strong>Abstain</strong> — Skip your Ritual action (uses your action this turn).</li></ul></section>' +
         '<section class="cs-section"><h3>Targeting</h3><p>You can only target your two Neighbours (left/right) unless a card or class says otherwise (e.g. THE OCCULTIST 9 = any player).</p></section>' +
-        '<section class="cs-section"><h3>Grimoire</h3><table class="cs-table"><tr><td>A or 1</td><td>Reprieve</td><td>At the start of your turn you may play the Ace to skip the Haunting phase (you do not Burn); you then Draw and perform the Ritual as normal.</td></tr><tr><td>2</td><td>Greed</td><td>Draw 2 to your hand.</td></tr><tr><td>3</td><td>Scare</td><td>Choose a neighbour; they shuffle hand, discard 1 to The Dark (Sadist: 2 to The Dark).</td></tr><tr><td>4</td><td>Drain</td><td>Choose a neighbour; take top of their Candle, put on top of yours.</td></tr><tr><td>5</td><td>Salt</td><td>Reaction: cancel action targeting you (both to The Dark).</td></tr><tr><td>6</td><td>Sight</td><td>View a neighbour\'s hand and take one card (Watcher: view both, take 1 from either).</td></tr><tr><td>7</td><td>Cleanse</td><td>Destroy 1 Ghost (to The Dark or Siphon to your Candle).</td></tr><tr><td>8</td><td>Recall</td><td>Take a Ghost from any Shadow to your hand.</td></tr><tr><td>9</td><td>Possess</td><td>Move a Ghost from your Shadow to a neighbour\'s Shadow.</td></tr><tr><td>10</td><td>Rekindle</td><td>Top 3 from The Dark to your Candle, then shuffle Candle.</td></tr><tr><td>J</td><td>Mirror</td><td>Choose a neighbour and swap your Shadow with their Shadow.</td></tr><tr><td>Q</td><td>Medium</td><td>1 from Dark to hand (no Joker), OR top 2 from Dark → Candle then shuffle.</td></tr><tr><td>K</td><td>Purge</td><td>Banish all Ghosts in your Shadow (to The Dark / Siphon).</td></tr><tr><td>★</td><td>BOO!</td><td>Others Burn until number (to The Dark); number → Ghost in their Shadow.</td></tr></table></section>';
+        '<section class="cs-section"><h3>Grimoire</h3><table class="cs-table"><tr><td>A or 1</td><td>Reprieve</td><td>At the start of your turn you may play the Ace to skip the Haunting phase (you do not Burn); you then Draw and perform the Ritual as normal.</td></tr><tr><td>2</td><td>Greed</td><td>Draw 2 to your hand.</td></tr><tr><td>3</td><td>Scare</td><td>Choose a neighbour; they shuffle hand, discard 2 to The Dark (Sadist: 3 to The Dark).</td></tr><tr><td>4</td><td>Drain</td><td>Choose a neighbour; take top of their Candle, put on top of yours.</td></tr><tr><td>5</td><td>Salt</td><td>Reaction: cancel action targeting you (both to The Dark).</td></tr><tr><td>6</td><td>Sight</td><td>View a neighbour\'s hand and take one card (Watcher: view both, take 1 from either).</td></tr><tr><td>7</td><td>Cleanse</td><td>Destroy 1 Ghost (to The Dark or Siphon to your Candle).</td></tr><tr><td>8</td><td>Recall</td><td>Take a Ghost from any Shadow to your hand.</td></tr><tr><td>9</td><td>Possess</td><td>Move a Ghost from your Shadow to a neighbour\'s Shadow.</td></tr><tr><td>10</td><td>Rekindle</td><td>Top 3 from The Dark to your Candle, then shuffle Candle.</td></tr><tr><td>J</td><td>Mirror</td><td>Choose a neighbour and swap your Shadow with their Shadow.</td></tr><tr><td>Q</td><td>Medium</td><td>1 from Dark to hand (no Joker), OR top 2 from Dark → Candle then shuffle.</td></tr><tr><td>K</td><td>Purge</td><td>Banish all Ghosts in your Shadow (to The Dark / Siphon).</td></tr><tr><td>★</td><td>BOO!</td><td>Others Burn until number (to The Dark); number → Ghost in their Shadow.</td></tr></table></section>';
 
     function getCheatsheetHTML(darkMode) {
         var candleRule = darkMode ? CHEATSHEET_TURN_DARK : CHEATSHEET_TURN_NORMAL;
@@ -1224,7 +1233,7 @@
     var CARD_EFFECTS = {
         'A': { name: 'Reprieve (A or 1)', effect: 'At the start of your turn you may play the Ace to skip the Haunting phase (you do not Burn this turn); you then Draw and perform the Ritual as normal.' },
         '2': { name: 'Greed', effect: 'Draw 2 cards to your hand.' },
-        '3': { name: 'Scare', effect: 'Choose a neighbour. They shuffle their hand and blindly discard 1 to The Dark (The Sadist: 2 to The Dark; you pick which).' },
+        '3': { name: 'Scare', effect: 'Choose a neighbour. They shuffle their hand and blindly discard 2 to The Dark (The Sadist: 3 to The Dark; you pick which).' },
         '4': { name: 'Drain', effect: 'Choose a neighbour. Take the top card of their Candle; put it on top of your Candle.' },
         '5': { name: 'Salt', effect: 'Reaction: cancel an action targeting you (your Salt and their card go to the top of The Dark).' },
         '6': { name: 'Sight', effect: 'Choose a neighbour; view their hand and take one card of your choice to your hand (The Watcher: view both neighbours and take 1 from either).' },
@@ -2832,7 +2841,7 @@
                         target.hand[s] = target.hand[j];
                         target.hand[j] = tmp;
                     }
-                    var numDiscard = (p.class && p.class.name === 'THE SADIST') ? 2 : 1;
+                    var numDiscard = (p.class && p.class.name === 'THE SADIST') ? 3 : 2;
                     numDiscard = Math.min(numDiscard, target.hand.length);
                     var discardedLog = [];
                     for (var d = 0; d < numDiscard; d++) {

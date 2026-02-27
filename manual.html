@@ -58,6 +58,7 @@
 
             <h3>The Calling (Class Selection)</h3>
             <p>Before the game begins, every player must accept a curse. Each player is offered <strong>3 random classes</strong> and chooses one.</p>
+            <p style="border: 1px solid var(--accent-color); padding: 10px; border-radius: 4px; background: #1a1a22;"><strong>2-player games:</strong> These classes tend to play poorly or feel unsatisfying with only 2 players: <strong>The Mime</strong>, <strong>The Watcher</strong>, <strong>The Occultist</strong>, <strong>Lich</strong>, <strong>The Plague</strong>, <strong>The Vulture</strong>, <strong>The Witness</strong>. Consider redrawing or avoiding them in 2-player matches.</p>
             <ul class="setup-list">
                 <li><strong>Choose player count for the pool:</strong> Decide whether the game has <strong>2–6 players</strong> or <strong>7+ players</strong>. That choice sets which classes you draw from:
                     <ul>
@@ -72,7 +73,8 @@
                 <h3 style="border:none; margin:0;">The Random Selector</h3>
                 <p style="font-size:0.9em; margin-bottom:8px;">First choose how many players (this sets the class pool):</p>
                 <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px; justify-content:center;">
-                    <button type="button" class="tool-btn" id="manual-pool-20" onclick="setManualClassPool(20)">2–6 players (35 classes)</button>
+                    <button type="button" class="tool-btn" id="manual-pool-2" onclick="setManualClassPool(2)">2 players (restricted pool)</button>
+                    <button type="button" class="tool-btn" id="manual-pool-20" onclick="setManualClassPool(20)">3–6 players (35 classes)</button>
                     <button type="button" class="tool-btn" id="manual-pool-38" onclick="setManualClassPool(38)">7+ players (38 classes)</button>
                 </div>
                 <p id="pool-status" style="color:#888; font-size:0.9em; margin-bottom:15px;">Choose a pool above, then draw.</p>
@@ -94,7 +96,7 @@
                 <li>Each player draws <strong>3 cards</strong> from their Candle into their hand; this is their <strong>starting hand</strong>.</li>
                 <li><strong>Turn order, then class selection:</strong>
                     <ul>
-                        <li><strong>Physical (The Chilling Touch):</strong> All players touch the hand of the person to their left. The player with the <strong>Coldest Hands</strong> goes first. Then class selection follows that order (first goes first, etc.).</li>
+                        <li><strong>Physical (choose one):</strong> Last person to <strong>light a candle</strong> goes first; or last person to <strong>tell a ghost story</strong> goes first; or last person to <strong>watch a horror movie</strong> goes first. Alternatively, <strong>The Chilling Touch:</strong> all players touch the hand of the person to their left—the player with the <strong>Coldest Hands</strong> goes first. Then class selection follows that order (first goes first, etc.).</li>
                         <li><strong>Digital / online:</strong> <strong>Decide turn order</strong> first (host chooses who starts, or Random). Then <strong>class selection follows turn order</strong>: first in turn order picks class first, then the next, and so on. The last to pick sees all previous choices (minor advantage).</li>
                     </ul>
                 </li>
@@ -295,11 +297,14 @@
                 <div class="ritual-action">
                     <h4 class="ritual-action-name">HAUNT <span class="ritual-action-tag">Attack</span></h4>
                     <p class="ritual-action-summary"><strong>Only number cards (A or 1 through 10) can be used to Haunt.</strong> Face cards (J, Q, K) and Jokers cannot be used to Haunt someone—use them to Summon instead. The only exception is <strong>The Warlock</strong>: they may use a face card or Joker to Haunt (it counts as strength 10).</p>
-                    <p class="ritual-action-summary">Choose a neighbour. Play a number card (A–10) from your hand into their Shadow (or a face card if you are The Warlock). That card becomes a ghost there; they will Burn one card per ghost (to The Dark) at the start of their next turn.</p>
+                    <p class="ritual-action-summary">Choose a neighbour. Play a number card (A–10) from your hand into their Shadow (or a face card if you are The Warlock). That card becomes a ghost there; they will Burn one card from their Candle for each ghost in their Shadow (to The Dark) at the start of their next turn. <em>Example:</em> if they have 3 ghosts, they Burn 3 cards.</p>
                 </div>
                 <div class="ritual-action">
                     <h4 class="ritual-action-name">BANISH <span class="ritual-action-tag">Defend</span></h4>
                     <p class="ritual-action-summary">Play a card from your hand onto one ghost in <em>your</em> Shadow. Your card must have <strong>equal or higher value</strong> than the ghost; on a tie, <strong>suit tier</strong> breaks it: Spades <span class="suit-spades">♠</span> &gt; Hearts <span class="suit-hearts">♥</span> &gt; Clubs <span class="suit-clubs">♣</span> &gt; Diamonds <span class="suit-diamonds">♦</span>. The ghost is destroyed (to The Dark, or to the bottom of your Candle if you Siphon).</p>
+                    <div class="ritual-action-detail">
+                        <strong>Face cards (J, Q, K):</strong> You may Banish with a Jack, Queen, or King. They count as <strong>value 10</strong> for beating a ghost; suit tier breaks ties. This is especially useful against The Clown’s ghosts (which can only be Banished by a face card or Cleanse (7)) or when matching a face-card ghost (e.g. from The Warlock’s Haunt)—matching rank or suit can Siphon (Spades cannot be Siphoned).
+                    </div>
                     <div class="ritual-action-detail">
                         <strong>Siphon:</strong> If your card’s <strong>rank matches</strong> the ghost’s rank (e.g. 7<span class="suit-hearts">♥</span> on 7<span class="suit-clubs">♣</span>), you <strong>siphon</strong>: put that ghost on the bottom of your Candle instead of The Dark. With <strong>Cleanse (7)</strong>, you can also siphon if <strong>suits match</strong> (e.g. 7<span class="suit-hearts">♥</span> on 3<span class="suit-hearts">♥</span>). You cannot siphon <strong>Spades (<span class="suit-spades">♠</span>)</strong>.
                     </div>
@@ -349,9 +354,9 @@
                 <tbody>
                     <tr><td><img class="grimoire-card-img" src="images/cards/ranks/ace/deathwick_ace_spades.png" alt="Ace of Spades"></td><td>A or 1</td><td>REPRIEVE</td><td class="grimoire-effect">At the start of your turn you may play the Ace to skip the Haunting phase (you do not Burn this turn); you then Draw and perform the Ritual as normal.</td></tr>
                     <tr><td><img class="grimoire-card-img" src="images/cards/ranks/two/deathwick_2_spades.png" alt="2 of Spades"></td><td>2</td><td>GREED</td><td class="grimoire-effect">Draw 2 cards to your hand.</td></tr>
-                    <tr><td><img class="grimoire-card-img" src="images/cards/ranks/three/deathwick_3_spades.png" alt="3 of Spades"></td><td>3</td><td>SCARE</td><td class="grimoire-effect">Choose a neighbour. They shuffle their hand and blindly discard 1 card to The Dark (The Sadist: 2 cards to The Dark; you pick which).</td></tr>
+                    <tr><td><img class="grimoire-card-img" src="images/cards/ranks/three/deathwick_3_spades.png" alt="3 of Spades"></td><td>3</td><td>SCARE</td><td class="grimoire-effect">Choose a neighbour. They shuffle their hand and blindly discard 2 cards to The Dark (The Sadist: 3 cards to The Dark; you pick which).</td></tr>
                     <tr><td><img class="grimoire-card-img" src="images/cards/ranks/four/deathwick_4_spades.png" alt="4 of Spades"></td><td>4</td><td>DRAIN</td><td class="grimoire-effect">Choose a neighbour. Take the top card of their Candle and put it on top of your Candle.</td></tr>
-                    <tr><td><img class="grimoire-card-img" src="images/cards/ranks/five/deathwick_5_spades.png" alt="5 of Spades"></td><td>5</td><td>SALT</td><td class="grimoire-effect"><strong>Reaction:</strong> Cancel an action targeting you; your Salt and their card go to The Dark (see Salt section below).</td></tr>
+                    <tr><td><img class="grimoire-card-img" src="images/cards/ranks/five/deathwick_5_spades.png" alt="5 of Spades"></td><td>5</td><td>SALT</td><td class="grimoire-effect"><strong>Reaction:</strong> Cancel any player’s Action; your Salt and their card go to The Dark (see Salt section below).</td></tr>
                     <tr><td><img class="grimoire-card-img" src="images/cards/ranks/six/deathwick_6_spades.png" alt="6 of Spades"></td><td>6</td><td>SIGHT</td><td class="grimoire-effect">Choose a neighbour; <strong>view their hand</strong> and take <strong>one card of your choice</strong> to your hand. The Watcher: view both neighbours’ hands and take 1 from either. The Extortioner: take 2 cards instead of 1.</td></tr>
                     <tr><td><img class="grimoire-card-img" src="images/cards/ranks/seven/deathwick_7_spades.png" alt="7 of Spades"></td><td>7</td><td>CLEANSE</td><td class="grimoire-effect">Destroy 1 ghost from your Shadow (to the top of The Dark, or to the bottom of your Candle if Siphon (rank or suit match); <span class="suit-spades">♠</span> cannot be Siphoned).</td></tr>
                     <tr><td><img class="grimoire-card-img" src="images/cards/ranks/eight/deathwick_8_spades.png" alt="8 of Spades"></td><td>8</td><td>RECALL</td><td class="grimoire-effect">Take a ghost from any Shadow and add it to your hand.</td></tr>
@@ -373,9 +378,9 @@
                     <tbody>
                         <tr><td>A or 1</td><td>Reprieve</td><td class="manual-ref-effect">At start of turn: play Ace to skip the Haunting phase (no Burn); then Draw and perform the Ritual as normal.</td></tr>
                         <tr><td>2</td><td>Greed</td><td class="manual-ref-effect">Draw 2 to your hand.</td></tr>
-                        <tr><td>3</td><td>Scare</td><td class="manual-ref-effect">Choose a neighbour; they shuffle hand, discard 1 to The Dark (Sadist: 2 to The Dark).</td></tr>
+                        <tr><td>3</td><td>Scare</td><td class="manual-ref-effect">Choose a neighbour; they shuffle hand, discard 2 to The Dark (Sadist: 3 to The Dark).</td></tr>
                         <tr><td>4</td><td>Drain</td><td class="manual-ref-effect">Choose a neighbour; take top of their Candle, put on top of yours.</td></tr>
-                        <tr><td>5</td><td>Salt</td><td class="manual-ref-effect">Reaction: cancel action targeting you (both to The Dark).</td></tr>
+                        <tr><td>5</td><td>Salt</td><td class="manual-ref-effect">Reaction: cancel any player’s Action (both to The Dark).</td></tr>
                         <tr><td>6</td><td>Sight</td><td class="manual-ref-effect">View a neighbour's hand and take one card (Watcher: both neighbours, take 1 from either; Extortioner: take 2).</td></tr>
                         <tr><td>7</td><td>Cleanse</td><td class="manual-ref-effect">Destroy 1 Ghost (to The Dark or Siphon to your Candle).</td></tr>
                         <tr><td>8</td><td>Recall</td><td class="manual-ref-effect">Take a Ghost from any Shadow to your hand.</td></tr>
@@ -406,7 +411,7 @@
                 <li><strong>When do I Siphon?</strong> When you <strong>Banish</strong> a Ghost: play a card from your hand that meets or beats the Ghost (value, and suit tier on a tie). If your card’s <strong>rank matches</strong> the Ghost’s rank (e.g. your 7<span class="suit-hearts">♥</span> on a 7<span class="suit-clubs">♣</span> Ghost), you Siphon: the Ghost goes to the bottom of your Candle. If the ranks don’t match, you still destroy the Ghost but it goes to the top of The Dark (no heal).</li>
                 <li><strong>Siphon when suits match (Cleanse 7):</strong> When you Banish a Ghost with a <strong>7 (Cleanse)</strong>, you can also Siphon if your card’s <strong>suit matches</strong> the Ghost’s suit (e.g. 7<span class="suit-hearts">♥</span> on a 3<span class="suit-hearts">♥</span> Ghost), the Ghost goes to the bottom of your Candle. Spades <span class="suit-spades">♠</span> still cannot be Siphoned; only Hearts <span class="suit-hearts">♥</span>, Clubs <span class="suit-clubs">♣</span>, and Diamonds <span class="suit-diamonds">♦</span>.</li>
                 <li><strong>Same rank and same suit (e.g. 7<span class="suit-hearts">♥</span> on 7<span class="suit-hearts">♥</span>):</strong> In games with <strong>3 or more players</strong>, you use multiple decks, so two identical cards can exist. You can Banish a 7<span class="suit-hearts">♥</span> Ghost with your 7<span class="suit-hearts">♥</span> (equal value). Since rank matches and suits match, you <strong>Siphon</strong>; the Ghost goes to the bottom of your Candle. Not if the Ghost is a Spade <span class="suit-spades">♠</span>.</li>
-                <li><strong>Face card ghost (e.g. from The Warlock’s Haunt):</strong> If someone Haunted you with a <strong>face card</strong> (J, Q, K; e.g. The Warlock using a face as strength 10), that ghost is in your Shadow. When you <strong>Banish</strong> it (with a 10, or by Summoning the matching face card), if your card’s <strong>suit matches</strong> the ghost’s suit, you <strong>Siphon</strong>: the ghost goes to the bottom of your Candle. Spades <span class="suit-spades">♠</span> cannot be Siphoned.</li>
+                <li><strong>Face card ghost (e.g. from The Warlock’s Haunt):</strong> If someone Haunted you with a <strong>face card</strong> (J, Q, K; e.g. The Warlock using a face as strength 10), that ghost is in your Shadow. You can <strong>Banish</strong> it with a 10 or with any face card (J, Q, K count as 10). If your card’s <strong>suit matches</strong> the ghost’s suit, you <strong>Siphon</strong>: the ghost goes to the bottom of your Candle. Spades <span class="suit-spades">♠</span> cannot be Siphoned.</li>
                 <li><strong>Spades <span class="suit-spades">♠</span> can never be Siphoned because they are cursed by the darkness.</strong> You can Banish a Spade ghost (destroy it), but it always goes to the top of The Dark. Only Hearts <span class="suit-hearts">♥</span>, Clubs <span class="suit-clubs">♣</span>, and Diamonds <span class="suit-diamonds">♦</span> can be Siphoned (whether by rank match or, with Cleanse, suit match).</li>
                 <li><strong>Do I still use my card when I Siphon?</strong> Yes. You discard the card you played; only the Ghost is healed to the bottom of your Candle.</li>
                 <li><strong>Panic and Joker:</strong> If you Panic and flip a Joker, you Siphon the Ghost (unless it’s a Spade).</li>
@@ -415,14 +420,16 @@
             <ul class="manual-bullets">
                 <li><strong>Banish</strong> = play one card from your hand onto one Ghost in <em>your</em> Shadow.</li>
                 <li>Your card must have <strong>equal or higher value</strong> than the Ghost; on a tie, <strong>suit tier</strong> breaks it: Spades <span class="suit-spades">♠</span> &gt; Hearts <span class="suit-hearts">♥</span> &gt; Clubs <span class="suit-clubs">♣</span> &gt; Diamonds <span class="suit-diamonds">♦</span>.</li>
+                <li>You may Banish with a <strong>face card (J, Q, K)</strong>: they count as value 10; suit tier breaks ties. Required for The Clown’s ghosts (only face or Cleanse (7) can Banish them).</li>
                 <li>The Ghost is destroyed. If <strong>rank matched</strong> (or, for Cleanse 7, <strong>suit matched</strong>) and the Ghost wasn’t a Spade, you <strong>Siphon</strong> it (Ghost goes to the bottom of your Candle (see Siphon above).</li>
             </ul>
             <h3>Salt (reaction)</h3>
             <ul class="manual-bullets">
-                <li><strong>Salt (5)</strong> is a <strong>reaction</strong>, not a turn action: keep it in hand until someone targets you with an action, then you may reveal Salt to <strong>interrupt</strong> (your Salt and their card go to The Dark).</li>
+                <li><strong>Salt (5)</strong> is a <strong>reaction</strong>, not a turn action: keep it in hand until a player performs an Action, then you may reveal Salt to <strong>cancel that Action</strong> (your Salt and their card go to The Dark; their turn ends).</li>
+                <li><strong>Optional rule—Salt only when targeted:</strong> You may agree before play to limit Salt to actions that <strong>target you</strong> (Haunt, Scare, Drain, Sight, BOO!, etc.).</li>
             </ul>
             <ul class="faq-list">
-                <li><strong>What can be Salted?</strong> Any action that <strong>targets you</strong>: Haunt, Scare (3), Drain (4), Sight (6), BOO! (Joker), The Mime’s redirect (when you are the other neighbour), The Pyromaniac’s Burn 2, The Inquisitor’s reveal, The Usurer’s swap, The Ravenous’s 2 (Greed) when they steal from you, etc. Effects that do not target a player (e.g. Rekindle, Flicker) cannot be Salted. The <strong>Ace (Reprieve)</strong> also cannot be Salted, since it does not target anyone—it is played at the start of your turn to skip your own Haunting phase. The only exception is <strong>The Silence</strong>—their actions cannot be Salted.</li>
+                <li><strong>What can be Salted?</strong> By default, <strong>any player’s Action</strong> can be Salted: Haunt, Scare (3), Drain (4), Sight (6), Rekindle, Flicker, BOO! (Joker), class actions, etc. The <strong>Ace (Reprieve)</strong> cannot be Salted—it is played at the start of your turn to skip your own Haunting phase and does not target anyone. The only exception is <strong>The Silence</strong>—their actions cannot be Salted.</li>
                 <li><strong>When the defender uses Salt:</strong> The defender's Salt and the attacker's card both go to the top of The Dark. The <strong>attacker's turn ends</strong> immediately. The defender does <strong>not</strong> lose their turn; the interrupt happens during the attacker's turn.</li>
                 <li><strong>Counter-Salt:</strong> The attacker may respond with their own Salt to "counter" the interrupt. If they do, their Salt and the defender's Salt both go to the top of The Dark, and the defender may interrupt again with another Salt (if they have one). This can repeat as long as both players have Salt in hand. The <strong>last player to play Salt</strong> decides the outcome: if the defender played last, the action is cancelled (attacker's card and defender's Salt to the top of The Dark, attacker's turn ends). If the attacker played last (or the defender allows), the original action (e.g. Haunt) goes through.</li>
             </ul>

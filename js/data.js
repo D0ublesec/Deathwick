@@ -25,7 +25,7 @@ window.CLASSES = [
     { name: "THE PYROMANIAC", desc: "Discard a Red card to the top of The Dark to choose a neighbour; they Burn 2 cards (to the top of The Dark). Once per turn; counts as your action." },
     { name: "THE RAVENOUS", desc: "When you play a 2 (Greed), you may choose a neighbour and steal 1 card from their hand to yours instead of drawing." },
     { name: "THE REAPER", desc: "When a neighbour Banishes a Ghost from their Shadow without Siphoning (Ghost goes to The Dark), you may add that Ghost to the bottom of your Candle instead." },
-    { name: "THE SADIST", desc: "When you play a 3 (Scare), your chosen neighbour discards 2 cards to The Dark (you blindly pick which; they do not choose)." },
+    { name: "THE SADIST", desc: "When you play a 3 (Scare), your chosen neighbour discards 3 cards to The Dark (you pick which; they do not choose)." },
     { name: "THE SEALBINDER", desc: "Ghosts you Haunt cannot be moved (Possess) or returned (Recall)." },
     { name: "THE SILENCE", desc: "Your actions cannot be interrupted by Salt (5), including when you play BOO! (Joker)." },
     { name: "THE SKEPTIC", desc: "Immune to 4s (Drain)." },
@@ -35,7 +35,7 @@ window.CLASSES = [
     { name: "THE VESSEL", desc: "The first Ghost in your Shadow does not cause you to Burn (you still Burn for the rest)." },
     { name: "THE VOODOO DOLL", desc: "When you burn during the Haunting (start of your turn), the reflection strikes: for each ghost in your Shadow that is Clubs ♣ or Diamonds ♦, the player who Haunted that ghost must also Burn 1. Spades and Hearts have no effect." },
     { name: "THE VULTURE", desc: "When a neighbour dies, add up to 5 random cards from The Dark to the bottom of your Candle." },
-    { name: "THE WARLOCK", desc: "You can use Face Cards to Haunt (Strength 10) instead of Summon. *Note: 10♠ can banish a J♠, Q♠ and K♠ haunted by you.*" },
+    { name: "THE WARLOCK", desc: "You can use Face Cards to Haunt (Strength 10) instead of Summon. Opponents Banish those ghosts with a 10 or a face card (J, Q, K count as 10)." },
     { name: "THE WATCHER", desc: "When you cast a 6 (Sight), you see both neighbours' hands and take 1 card from either (instead of choosing one neighbour)." },
     { name: "THE WITNESS", desc: "You may not win the game. If you are alive when only one player remains, they also lose." }
 ];

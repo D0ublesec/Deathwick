@@ -5,7 +5,9 @@
     if (!CLASSES) return;
 
     var EXTENDED_CLASS_NAMES = ['THE FUNERAL BELL', 'THE LICH', 'THE GRAVEDIGGER'];
+    var TWO_PLAYER_EXCLUDED_CLASS_NAMES = ['THE MIME', 'THE WATCHER', 'THE OCCULTIST', 'THE LICH', 'THE PLAGUE', 'THE VULTURE', 'THE WITNESS'];
     var POOL_20 = CLASSES.filter(function (c) { return EXTENDED_CLASS_NAMES.indexOf(c.name) < 0; });
+    var POOL_2 = POOL_20.filter(function (c) { return TWO_PLAYER_EXCLUDED_CLASS_NAMES.indexOf(c.name) < 0; });
 
     var CLASS_IMAGES_BASE = 'images/cards/classes/';
     var CARD_IMAGE_EXT = '.png';
@@ -19,19 +21,27 @@
 
     function updatePoolStatus() {
         var el = document.getElementById('pool-status');
-        if (el) el.textContent = 'Drawing from ' + manualClassPool.length + ' classes (' + (manualPoolSize === 20 ? '2–6 player' : '7+ player') + ' pool).';
+        if (!el) return;
+        var label = '2–6 player';
+        if (manualPoolSize === 2) label = '2-player (restricted)';
+        else if (manualPoolSize === 38) label = '7+ player';
+        el.textContent = 'Drawing from ' + manualClassPool.length + ' classes (' + label + ' pool).';
     }
 
     function updatePoolButtons() {
+        var btn2 = document.getElementById('manual-pool-2');
         var btn20 = document.getElementById('manual-pool-20');
         var btn38 = document.getElementById('manual-pool-38');
+        if (btn2) btn2.classList.toggle('selected', manualPoolSize === 2);
         if (btn20) btn20.classList.toggle('selected', manualPoolSize === 20);
         if (btn38) btn38.classList.toggle('selected', manualPoolSize === 38);
     }
 
     window.setManualClassPool = function (size) {
-        manualPoolSize = size === 38 ? 38 : 20;
-        manualClassPool = (manualPoolSize === 38 ? CLASSES : POOL_20).slice();
+        if (size === 38) manualPoolSize = 38;
+        else if (size === 2) manualPoolSize = 2;
+        else manualPoolSize = 20;
+        manualClassPool = (manualPoolSize === 38 ? CLASSES : manualPoolSize === 2 ? POOL_2 : POOL_20).slice();
         updatePoolStatus();
         updatePoolButtons();
     };
