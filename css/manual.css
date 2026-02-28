@@ -888,3 +888,65 @@ th {
 .diagram-12 .d-node-name { font-size: inherit; }
 .diagram-12 .candle-mini { width: 6px; height: 10px; }
 .diagram-12 .d-shadow-box .ghost-mini { width: 12px; height: 18px; font-size: 0.5rem; }
+
+/* Full deck — all ranks and suits */
+#full-deck {
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+}
+.full-deck-table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin: 1rem 0;
+}
+.full-deck-table {
+    width: 100%;
+    min-width: 360px;
+    border-collapse: collapse;
+    background: var(--bg-elevated, #1e1e28);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+}
+.full-deck-table th,
+.full-deck-table td {
+    padding: 6px 8px;
+    vertical-align: middle;
+    text-align: center;
+    border-bottom: 1px solid var(--border-color);
+}
+.full-deck-table thead th {
+    font-family: var(--font-heading);
+    color: var(--accent-color);
+    font-size: 0.9rem;
+}
+.full-deck-table tbody th {
+    text-align: right;
+    padding-right: 12px;
+    font-weight: 600;
+    width: 2.5em;
+}
+.full-deck-card {
+    display: block;
+    width: 72px;
+    height: auto;
+    aspect-ratio: 56 / 80;
+    object-fit: contain;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-color);
+    cursor: pointer;
+    margin: 0 auto;
+}
+.full-deck-card:hover {
+    border-color: var(--accent-color);
+    filter: brightness(1.05);
+}
+.full-deck-jokers {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    align-items: center;
+}
+.full-deck-jokers .full-deck-card {
+    width: 56px;
+}
