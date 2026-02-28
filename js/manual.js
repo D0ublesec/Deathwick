@@ -146,7 +146,7 @@
     };
 
     window.resetPoolManual = function () {
-        manualClassPool = (manualPoolSize === 38 ? CLASSES : POOL_20).slice();
+        manualClassPool = (manualPoolSize === 38 ? CLASSES : manualPoolSize === 2 ? POOL_2 : POOL_20).slice();
         pickedClasses = [];
         try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
         updatePoolStatus();
