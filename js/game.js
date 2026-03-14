@@ -237,7 +237,7 @@
     var CHEATSHEET_TURN_DARK = '<li>Candle empty at any moment → Consumed immediately (lose).</li>';
     var CHEATSHEET_REST = '<section class="cs-section"><h3>Actions</h3><ul class="cs-list"><li><strong>Haunt</strong> — Number card to a neighbour\'s Shadow.</li><li><strong>Banish</strong> — Match/beat a Ghost in your Shadow.</li><li><strong>Panic</strong> — Flip top of Candle vs Ghost.</li><li><strong>Séance</strong> — Pair → heal 4 from Dark.</li><li><strong>Cast</strong> (number cards) / <strong>Summon</strong> (face cards & Jokers) — Use card effect (see Grimoire).</li><li><strong>Flicker</strong> — Shuffle hand, draw 3.</li><li><strong>Ability</strong> — Class power.</li><li><strong>Abstain</strong> — Skip your Ritual action (uses your action this turn).</li></ul></section>' +
         '<section class="cs-section"><h3>Targeting</h3><p>You can only target your two Neighbours (left/right) unless a card or class says otherwise (e.g. THE OCCULTIST 9 = any player).</p></section>' +
-        '<section class="cs-section"><h3>Grimoire</h3><table class="cs-table"><tr><td>A or 1</td><td>Reprieve</td><td>At the start of your turn you may play the Ace to skip the Haunting phase (you do not Burn); you then Draw and perform the Ritual as normal.</td></tr><tr><td>2</td><td>Greed</td><td>Draw 2 to your hand.</td></tr><tr><td>3</td><td>Scare</td><td>Choose a neighbour; they shuffle hand, discard 2 to The Dark (Sadist: 3 to The Dark).</td></tr><tr><td>4</td><td>Drain</td><td>Choose a neighbour; take top of their Candle, put on top of yours.</td></tr><tr><td>5</td><td>Salt</td><td>Reaction: cancel any player’s Action except Ace (both to The Dark). The 5 can also be used to Haunt (strength 5).</td></tr><tr><td>6</td><td>Sight</td><td>View a neighbour\'s hand and take one card (Watcher: view both, take 1 from either).</td></tr><tr><td>7</td><td>Cleanse</td><td>Destroy 1 Ghost (to The Dark or Siphon to your Candle).</td></tr><tr><td>8</td><td>Recall</td><td>Take a Ghost from any Shadow to your hand.</td></tr><tr><td>9</td><td>Possess</td><td>Move a Ghost from your Shadow to a neighbour\'s Shadow.</td></tr><tr><td>10</td><td>Rekindle</td><td>Top 3 from The Dark to your Candle, then shuffle Candle.</td></tr><tr><td>J</td><td>Mirror</td><td>Choose a neighbour and swap your Shadow with their Shadow.</td></tr><tr><td>Q</td><td>Medium</td><td>1 from Dark to hand (no Joker), OR top 2 from Dark → Candle then shuffle.</td></tr><tr><td>K</td><td>Purge</td><td>Banish all Ghosts in your Shadow (to The Dark / Siphon).</td></tr><tr><td>★</td><td>BOO!</td><td>Others Burn until number (to The Dark); number → Ghost in their Shadow.</td></tr></table></section>';
+        '<section class="cs-section"><h3>Grimoire</h3><table class="cs-table"><tr><td>A or 1</td><td>Reprieve</td><td>At the start of your turn you may play the Ace to skip the Haunting phase (you do not Burn); you then Draw and perform the Ritual as normal.</td></tr><tr><td>2</td><td>Greed</td><td>Draw 2 to your hand.</td></tr><tr><td>3</td><td>Scare</td><td>Choose a neighbour; they shuffle hand, discard 2 to The Dark (Sadist: 3 to The Dark).</td></tr><tr><td>4</td><td>Drain</td><td>Choose a neighbour; take top of their Candle, put on top of yours.</td></tr><tr><td>5</td><td>Salt</td><td>Reaction: cancel any player’s Action except Ace (both to The Dark). The 5 can also be used to Haunt (strength 5).</td></tr><tr><td>6</td><td>Sight</td><td>View a neighbour\'s hand and take one card (Watcher: view both, take 2 from either or one from each).</td></tr><tr><td>7</td><td>Cleanse</td><td>Destroy 1 Ghost (to The Dark or Siphon to your Candle).</td></tr><tr><td>8</td><td>Recall</td><td>Take a Ghost from any Shadow to your hand.</td></tr><tr><td>9</td><td>Possess</td><td>Move a Ghost from your Shadow to a neighbour\'s Shadow.</td></tr><tr><td>10</td><td>Rekindle</td><td>Top 3 from The Dark to your Candle, then shuffle Candle.</td></tr><tr><td>J</td><td>Mirror</td><td>Choose a neighbour and swap your Shadow with their Shadow.</td></tr><tr><td>Q</td><td>Medium</td><td>1 from Dark to hand (no Joker), OR top 2 from Dark → Candle then shuffle.</td></tr><tr><td>K</td><td>Purge</td><td>Banish all Ghosts in your Shadow (to The Dark / Siphon).</td></tr><tr><td>★</td><td>BOO!</td><td>Others Burn until number (to The Dark); number → Ghost in their Shadow.</td></tr></table></section>';
 
     function getCheatsheetHTML(darkMode) {
         var candleRule = darkMode ? CHEATSHEET_TURN_DARK : CHEATSHEET_TURN_NORMAL;
@@ -1037,15 +1037,9 @@
                     for (var hr = half; hr < half + half; hr++) right.shadow.push(ghostsToPass[hr]);
                     var recipient = null;
                     if (extra === 1) {
-                        var aliveForMin = gameState.players.filter(function (pl) { return !pl.isDead; });
-                        var minGhosts = Infinity;
-                        for (var mi = 0; mi < aliveForMin.length; mi++) {
-                            var count = aliveForMin[mi].shadow.filter(function (g) { return !g.isWall; }).length;
-                            if (count < minGhosts) { minGhosts = count; recipient = aliveForMin[mi]; }
-                        }
-                        if (recipient) recipient.shadow.push(ghostsToPass[ghostsToPass.length - 1]);
-                        else { gameState.lastDiscardByPlayerId = p.id; gameState.discard.push(ghostsToPass[ghostsToPass.length - 1]); }
-                        log(p.name + '\'s ghosts passed to neighbours; 1 extra to ' + (recipient ? recipient.name : 'The Dark') + '.');
+                        recipient = Math.random() < 0.5 ? left : right;
+                        recipient.shadow.push(ghostsToPass[ghostsToPass.length - 1]);
+                        log(p.name + '\'s ghosts passed to neighbours; 1 extra to ' + recipient.name + ' (dead player decides).');
                     } else {
                         log(p.name + '\'s ghosts passed evenly to ' + left.name + ' and ' + right.name + '.');
                     }
@@ -1236,7 +1230,7 @@
         '3': { name: 'Scare', effect: 'Choose a neighbour. They shuffle their hand and blindly discard 2 to The Dark (The Sadist: 3 to The Dark; you pick which).' },
         '4': { name: 'Drain', effect: 'Choose a neighbour. Take the top card of their Candle; put it on top of your Candle.' },
         '5': { name: 'Salt', effect: 'Reaction: cancel any player’s Action except the Ace (your Salt and their card go to The Dark). You can also play the 5 to Haunt (strength 5).' },
-        '6': { name: 'Sight', effect: 'Choose a neighbour; view their hand and take one card of your choice to your hand (The Watcher: view both neighbours and take 1 from either).' },
+        '6': { name: 'Sight', effect: 'Choose a neighbour; view their hand and take one card of your choice to your hand (The Watcher: view both neighbours and take 2 from either or one from each).' },
         '7': { name: 'Cleanse', effect: 'Destroy 1 Ghost from your Shadow (to the top of The Dark, or to the bottom of your Candle if Siphon).' },
         '8': { name: 'Recall', effect: 'Take a Ghost from any Shadow and add it to your hand.' },
         '9': { name: 'Possess', effect: 'Move a Ghost from your Shadow to a neighbour\'s Shadow.' },
@@ -2721,10 +2715,12 @@
         var c = p.hand[cardIdx];
         if (!c || c.r !== '6') return;
         var n = getNeighbours(p);
+        gameState.pendingWatcherClaimTaken = gameState.pendingWatcherClaimTaken || 0;
+        var need = 2;
         var d = document.getElementById('hand-view-area');
         var modal = document.getElementById('hand-view-modal');
         var h2 = modal ? modal.querySelector('h2') : null;
-        if (h2) h2.textContent = "Sight (THE WATCHER) — pick one card to take";
+        if (h2) h2.textContent = gameState.pendingWatcherClaimTaken > 0 ? "Sight (THE WATCHER) — pick one more card to take" : "Sight (THE WATCHER) — pick a card to take (you may take 2 total)";
         if (d) d.innerHTML = '';
         function addHandLabel(name) {
             var lab = document.createElement('p');
@@ -2741,13 +2737,21 @@
                 if (!owner.hand[idx]) return;
                 var stolen = owner.hand.splice(idx, 1)[0];
                 p.hand.push(stolen);
+                gameState.pendingWatcherClaimTaken++;
+                var totalTaken = gameState.pendingWatcherClaimTaken;
+                var totalAvailable = (n.left ? n.left.hand.length : 0) + (n.right && n.right !== n.left ? n.right.hand.length : 0);
+                if (totalTaken < need && totalAvailable > 0) {
+                    viewHandAllNeighboursForClaim(p, p.hand.indexOf(c));
+                    return;
+                }
                 p.hand.splice(p.hand.indexOf(c), 1);
                 gameState.lastDiscardByPlayerId = p.id;
                 gameState.discard.push(c);
                 gameState.pendingClaimTarget = null;
+                gameState.pendingWatcherClaimTaken = 0;
                 if (modal) modal.style.display = 'none';
                 if (h2) h2.textContent = 'SIGHT REVEALED';
-                log(p.name + ' (THE WATCHER) used Sight: took 1 card from ' + owner.name + '.');
+                log(p.name + ' (THE WATCHER) used Sight: took ' + totalTaken + ' card(s) from neighbour(s).');
                 clearTargetMode();
                 finishAction();
             };
@@ -2803,6 +2807,7 @@
             gameState.pendingClaimTarget = null;
             gameState.pendingClaimCardIdx = null;
             gameState.pendingClaimTaken = 0;
+            gameState.pendingWatcherClaimTaken = 0;
             clearTargetMode();
             updateUI();
         } else {

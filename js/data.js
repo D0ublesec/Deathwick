@@ -36,7 +36,7 @@ window.CLASSES = [
     { name: "THE VOODOO DOLL", desc: "When you burn during the Haunting (start of your turn), the reflection strikes: for each ghost in your Shadow that is Clubs ♣ or Diamonds ♦, the player who Haunted that ghost must also Burn 1. Spades and Hearts have no effect." },
     { name: "THE VULTURE", desc: "When a neighbour dies, add up to 5 random cards from The Dark to the bottom of your Candle." },
     { name: "THE WARLOCK", desc: "You can use Face Cards to Haunt (Strength 10) instead of Summon. Opponents Banish those ghosts with a 10 or a face card (J, Q, K count as 10)." },
-    { name: "THE WATCHER", desc: "When you cast a 6 (Sight), you see both neighbours' hands and take 1 card from either (instead of choosing one neighbour)." },
+    { name: "THE WATCHER", desc: "When you cast a 6 (Sight), you see both neighbours' hands and take 2 cards from either (or one from each—instead of choosing one neighbour and taking 1)." },
     { name: "THE WITNESS", desc: "You may not win the game. If you are alive when only one player remains, they also lose." }
 ];
 

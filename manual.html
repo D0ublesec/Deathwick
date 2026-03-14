@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en-GB">
 <head>
     <meta charset="UTF-8">
@@ -357,6 +357,7 @@
             <h3>Am I Alive?</h3>
             <p><strong>Candle check:</strong> If your Candle is empty, you are <strong>Consumed by the Darkness</strong> and are eliminated.</p>
             <p><strong>Possession check:</strong> If you have <strong>3 or more ghosts of the same suit</strong> in your Shadow (Walls do not count as ghosts), you are <strong>Possessed</strong> and lose immediately. In the <strong>Dark ritual</strong>, this is checked <strong>as soon as</strong> you receive a third ghost of the same suit (e.g. from a Haunt, BOO!, or ghost pass), not only at end of turn.</p>
+            <p><strong>When you die:</strong> When you are eliminated (Consumed or Possessed), any ghosts in your Shadow are split evenly between your two neighbours. If the number is odd, you decide who gets the extra ghost. See <a href="#faq-death-ghosts">FAQ: When a player is eliminated</a> for details.</p>
             <p><em>Note:</em> At the <strong>start</strong> of your turn (The Haunting), you burn one card per ghost before you draw. If your Candle is empty when you must burn, you are Consumed then. If your Candle becomes empty <strong>during</strong> your turn, see <a href="#faq">FAQ</a> for the optional ruling.</p>
         </section>
 
@@ -376,7 +377,7 @@
                     <tr><td><img class="grimoire-card-img" src="images/cards/ranks/three/deathwick_3_spades.png" alt="3 of Spades"></td><td>3</td><td>SCARE</td><td class="grimoire-effect">Choose a neighbour. They shuffle their hand and blindly discard 2 cards to The Dark (The Sadist: 3 cards to The Dark; you pick which).</td></tr>
                     <tr><td><img class="grimoire-card-img" src="images/cards/ranks/four/deathwick_4_spades.png" alt="4 of Spades"></td><td>4</td><td>DRAIN</td><td class="grimoire-effect">Choose a neighbour. Take the top card of their Candle and put it on top of your Candle.</td></tr>
                     <tr><td><img class="grimoire-card-img" src="images/cards/ranks/five/deathwick_5_spades.png" alt="5 of Spades"></td><td>5</td><td>SALT</td><td class="grimoire-effect"><strong>Reaction:</strong> Cancel any player’s Action (except the Ace); your Salt and their card go to The Dark (see Salt section below). You can also play the 5 as a number card to <strong>Haunt</strong> (strength 5) instead of holding it for Salt.</td></tr>
-                    <tr><td><img class="grimoire-card-img" src="images/cards/ranks/six/deathwick_6_spades.png" alt="6 of Spades"></td><td>6</td><td>SIGHT</td><td class="grimoire-effect">Choose a neighbour; <strong>view their hand</strong> and take <strong>one card of your choice</strong> to your hand. The Watcher: view both neighbours’ hands and take 1 from either. The Extortioner: take 2 cards instead of 1.</td></tr>
+                    <tr><td><img class="grimoire-card-img" src="images/cards/ranks/six/deathwick_6_spades.png" alt="6 of Spades"></td><td>6</td><td>SIGHT</td><td class="grimoire-effect">Choose a neighbour; <strong>view their hand</strong> and take <strong>one card of your choice</strong> to your hand. The Watcher: view both neighbours’ hands and take 2 cards from either (or one from each). The Extortioner: take 2 cards instead of 1.</td></tr>
                     <tr><td><img class="grimoire-card-img" src="images/cards/ranks/seven/deathwick_7_spades.png" alt="7 of Spades"></td><td>7</td><td>CLEANSE</td><td class="grimoire-effect">Destroy 1 ghost from your Shadow (to the top of The Dark, or to the bottom of your Candle if Siphon: your 7’s <strong>suit</strong> matches the ghost’s suit; <span class="suit-spades">♠</span> cannot be Siphoned).</td></tr>
                     <tr><td><img class="grimoire-card-img" src="images/cards/ranks/eight/deathwick_8_spades.png" alt="8 of Spades"></td><td>8</td><td>RECALL</td><td class="grimoire-effect">Take a ghost from any Shadow and add it to your hand.</td></tr>
                     <tr><td><img class="grimoire-card-img" src="images/cards/ranks/nine/deathwick_9_spades.png" alt="9 of Spades"></td><td>9</td><td>POSSESS</td><td class="grimoire-effect">Move a ghost from your Shadow to a neighbour's Shadow (The Occultist: any player's Shadow).</td></tr>
@@ -400,7 +401,7 @@
                         <tr><td>3</td><td>Scare</td><td class="manual-ref-effect">Choose a neighbour; they shuffle hand, discard 2 to The Dark (Sadist: 3 to The Dark).</td></tr>
                         <tr><td>4</td><td>Drain</td><td class="manual-ref-effect">Choose a neighbour; take top of their Candle, put on top of yours.</td></tr>
                         <tr><td>5</td><td>Salt</td><td class="manual-ref-effect">Reaction: cancel any player’s Action except Ace (both to The Dark). The 5 can also be used to Haunt (strength 5).</td></tr>
-                        <tr><td>6</td><td>Sight</td><td class="manual-ref-effect">View a neighbour's hand and take one card (Watcher: both neighbours, take 1 from either; Extortioner: take 2).</td></tr>
+                        <tr><td>6</td><td>Sight</td><td class="manual-ref-effect">View a neighbour's hand and take one card (Watcher: both neighbours, take 2 from either or one from each; Extortioner: take 2).</td></tr>
                         <tr><td>7</td><td>Cleanse</td><td class="manual-ref-effect">Destroy 1 Ghost (to The Dark or Siphon to your Candle if suit matches; ♠ cannot be Siphoned).</td></tr>
                         <tr><td>8</td><td>Recall</td><td class="manual-ref-effect">Take a Ghost from any Shadow to your hand.</td></tr>
                         <tr><td>9</td><td>Possess</td><td class="manual-ref-effect">Move a Ghost from your Shadow to a neighbour's Shadow.</td></tr>
@@ -452,6 +453,14 @@
                 <li><strong>When the defender uses Salt:</strong> The defender's Salt and the attacker's card both go to the top of The Dark. The <strong>attacker's turn ends</strong> immediately. The defender does <strong>not</strong> lose their turn; the interrupt happens during the attacker's turn.</li>
                 <li><strong>Counter-Salt:</strong> The attacker may respond with their own Salt to "counter" the interrupt. If they do, their Salt and the defender's Salt both go to the top of The Dark, and the defender may interrupt again with another Salt (if they have one). This can repeat as long as both players have Salt in hand. The <strong>last player to play Salt</strong> decides the outcome: if the defender played last, the action is cancelled (attacker's card and defender's Salt to the top of The Dark, attacker's turn ends). If the attacker played last (or the defender allows), the original action (e.g. Haunt) goes through.</li>
             </ul>
+            <h3 id="faq-death-ghosts">When a player is eliminated (death)</h3>
+            <p>When a player is eliminated (Consumed by the Darkness or Possessed), the ghosts in their Shadow do not vanish—they pass to their neighbours. Distribution is <strong>even</strong> between their two neighbours:</p>
+            <ul class="manual-bullets">
+                <li>Split ghosts <strong>evenly</strong> between <strong>left neighbour</strong> and <strong>right neighbour</strong> (e.g. 4 ghosts → 2 each).</li>
+                <li>If the number is <strong>odd</strong>, the <strong>eliminated player</strong> decides who gets the extra ghost (e.g. 5 ghosts → 2 to one, 3 to the other; the dead player chooses which neighbour gets 3).</li>
+                <li>If they have no ghosts, nothing is passed. If they have only one neighbour (e.g. 2-player game and one just died), all ghosts go to that remaining neighbour.</li>
+            </ul>
+            <p>In the <strong>Dark ritual</strong>, Possession is checked as soon as a ghost is added—so if receiving ghosts from a dead player’s distribution gives you 3+ of one suit, you are Possessed immediately (see <a href="#faq">Possession</a>).</p>
             <h3>Consumed by the Darkness</h3>
             <p><strong>When does an empty Candle eliminate you?</strong> It depends which ritual you agreed at setup (see <a href="#ritual-type">The Empty Candle Rule</a>).</p>
             <p><strong>Summary:</strong></p>
