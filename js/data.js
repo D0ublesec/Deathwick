@@ -35,7 +35,7 @@ window.CLASSES = [
     { name: "THE VESSEL", desc: "The first Ghost in your Shadow does not cause you to Burn (you still Burn for the rest)." },
     { name: "THE VOODOO DOLL", desc: "When you burn during the Haunting (start of your turn), the reflection strikes: for each ghost in your Shadow that is Clubs ♣ or Diamonds ♦, the player who Haunted that ghost must also Burn 1. Spades and Hearts have no effect." },
     { name: "THE VULTURE", desc: "When a neighbour dies, add up to 5 random cards from The Dark to the bottom of your Candle." },
-    { name: "THE WARLOCK", desc: "You can use Face Cards to Haunt (Strength 10) instead of Summon. Opponents Banish those ghosts with a 10 or a face card (J, Q, K count as 10)." },
+    { name: "THE WARLOCK", desc: "You may Haunt with a face card (J, Q, K) or Joker instead of Summoning it—each counts as strength 10 and becomes a face-rank or Joker ghost in their Shadow. They Banish those ghosts with a 10 or any face card (J, Q, K count as 10)." },
     { name: "THE WATCHER", desc: "When you cast a 6 (Sight), you see both neighbours' hands and take 2 cards from either (or one from each—instead of choosing one neighbour and taking 1)." },
     { name: "THE WITNESS", desc: "You may not win the game. If you are alive when only one player remains, they also lose." }
 ];
