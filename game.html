@@ -172,6 +172,29 @@
         </div>
     </div>
 
+    <div id="hex-modal" class="modal" style="z-index:3000;">
+        <div class="modal-content" style="border-color:var(--magic-color);">
+            <h2 style="color:var(--magic-color)">THE HEX</h2>
+            <p id="hex-msg">Reveal a matching rank from your hand to cancel this Haunt? (Both cards go to The Dark.)</p>
+            <div style="display:flex; gap:20px; justify-content:center; flex-wrap:wrap;">
+                <button type="button" class="game-btn" style="background:#444;" onclick="resolveHexCancel(true)">ALLOW HAUNT</button>
+                <button type="button" class="game-btn" style="background:var(--magic-color); color:black;" onclick="resolveHexCancel(false)">REVEAL MATCH TO CANCEL</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="exorcist-siphon-modal" class="modal" style="z-index:3000;">
+        <div class="modal-content" style="border-color:var(--accent-color);">
+            <h2 style="color:var(--accent-color)">THE EXORCIST</h2>
+            <p>Both ghosts can be Siphoned. You may Siphon only one to your Candle; the other goes to The Dark.</p>
+            <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap; flex-direction:column; align-items:center;">
+                <button type="button" class="game-btn" id="exorcist-siphon-btn-1" onclick="resolveExorcistSiphonChoice(1)">Siphon first ghost</button>
+                <button type="button" class="game-btn" id="exorcist-siphon-btn-2" onclick="resolveExorcistSiphonChoice(2)">Siphon second ghost</button>
+                <button type="button" class="game-btn" style="background:#444;" onclick="resolveExorcistSiphonChoice(0)">Siphon neither (both to The Dark)</button>
+            </div>
+        </div>
+    </div>
+
     <div id="settings-modal" class="modal">
         <div class="modal-content" style="border-color:var(--border-color);">
             <h2 style="color:var(--accent-color)">SETTINGS</h2>

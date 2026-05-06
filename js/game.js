@@ -1585,6 +1585,14 @@
         }
         if (p.type === 'human') humanPlayer = p;
         if (!humanPlayer) humanPlayer = p;
+        if (gameState.selectionMode === 'HEX_DISCARD' && gameState.pendingHexCancel && gameState.pendingHexCancel.target && gameState.pendingHexCancel.target.type === 'human') {
+            humanPlayer = gameState.pendingHexCancel.target;
+        } else if (gameState.selectionMode === 'PHANTOM_DISCARD' && gameState.pendingPhantomCancel && gameState.pendingPhantomCancel.target && gameState.pendingPhantomCancel.target.type === 'human') {
+            humanPlayer = gameState.pendingPhantomCancel.target;
+        } else if (gameState.pendingMimeRedirect && gameState.pendingMimeRedirect.mime && gameState.pendingMimeRedirect.mime.type === 'human' &&
+                (gameState.selectionMode === 'MIME_REDIRECT_DISCARD' || gameState.selectionMode === 'MIME_DECISION')) {
+            humanPlayer = gameState.pendingMimeRedirect.mime;
+        }
 
         var hintEl = document.getElementById('selection-hint');
         if (hintEl) {
@@ -1603,6 +1611,12 @@
                 hintEl.style.display = 'block';
             } else if (gameState.selectionMode === 'MIME_REDIRECT_DISCARD' && gameState.pendingMimeRedirect) {
                 hintEl.textContent = 'Click a card to discard (redirect Haunt to ' + gameState.pendingMimeRedirect.otherNeighbour.name + ').';
+                hintEl.style.display = 'block';
+            } else if (gameState.selectionMode === 'MIME_DECISION' && gameState.pendingMimeRedirect) {
+                hintEl.textContent = 'THE MIME: use the popup — accept the Haunt or discard 1 to redirect to ' + gameState.pendingMimeRedirect.otherNeighbour.name + '.';
+                hintEl.style.display = 'block';
+            } else if (gameState.selectionMode === 'HEX_DISCARD') {
+                hintEl.textContent = 'THE HEX: click a card in your hand that matches the Haunt rank.';
                 hintEl.style.display = 'block';
             } else {
                 hintEl.textContent = '';
@@ -1926,11 +1940,14 @@
         var btnPanic = document.getElementById('btn-panic');
         var btnPass = document.getElementById('btn-pass');
         var btnCancelTarget = document.getElementById('btn-cancel-target');
-        var canUseGrimoireWithoutCard = humanPlayer.class && humanPlayer.class.name === 'THE GRIMOIRE OF REJECTION' && gameState.grimoireRejectionRank == null;
+        /* Ability without selecting a hand card: Grimoire (write name); Mimic (swap Candle — no discard). */
+        var canUseClassAbilityWithoutCard = !!(humanPlayer.class && (
+            (humanPlayer.class.name === 'THE GRIMOIRE OF REJECTION' && gameState.grimoireRejectionRank == null) ||
+            (humanPlayer.class.name === 'THE MIMIC' && !humanPlayer.usedMimic)));
         if (btnHaunt) btnHaunt.disabled = inTargetMode || !isHumanTurn || !isSingle || gameState.turnPhase !== 'ACTION';
         if (btnBanish) btnBanish.disabled = inTargetMode || !isHumanTurn || !isSingle || gameState.turnPhase !== 'ACTION';
         if (btnCast) btnCast.disabled = inTargetMode || !isHumanTurn || !isSingle || gameState.turnPhase !== 'ACTION';
-        if (btnClass) btnClass.disabled = inTargetMode || !isHumanTurn || gameState.turnPhase !== 'ACTION' || (!isSingle && !canUseGrimoireWithoutCard);
+        if (btnClass) btnClass.disabled = inTargetMode || !isHumanTurn || gameState.turnPhase !== 'ACTION' || (!isSingle && !canUseClassAbilityWithoutCard);
         if (btnSeance) btnSeance.disabled = inTargetMode || !isHumanTurn || !isDouble || gameState.turnPhase !== 'ACTION';
         if (btnFlicker) btnFlicker.disabled = inTargetMode || !isHumanTurn || gameState.turnPhase !== 'ACTION';
         var hasGhosts = humanPlayer.shadow.some(function (g) { return !g.isWall; });
@@ -1955,7 +1972,7 @@
         if (modalHaunt) modalHaunt.disabled = inTargetMode || !isHumanTurn || !isSingle || gameState.turnPhase !== 'ACTION';
         if (modalBanish) modalBanish.disabled = inTargetMode || !isHumanTurn || !isSingle || gameState.turnPhase !== 'ACTION';
         if (modalCast) modalCast.disabled = inTargetMode || !isHumanTurn || !isSingle || gameState.turnPhase !== 'ACTION';
-        if (modalClass) modalClass.disabled = inTargetMode || !isHumanTurn || gameState.turnPhase !== 'ACTION' || (!isSingle && !canUseGrimoireWithoutCard);
+        if (modalClass) modalClass.disabled = inTargetMode || !isHumanTurn || gameState.turnPhase !== 'ACTION' || (!isSingle && !canUseClassAbilityWithoutCard);
         if (modalSeance) modalSeance.disabled = inTargetMode || !isHumanTurn || !isDouble || gameState.turnPhase !== 'ACTION';
         if (modalFlicker) modalFlicker.disabled = inTargetMode || !isHumanTurn || gameState.turnPhase !== 'ACTION';
         if (modalPanic) modalPanic.disabled = inTargetMode || !isHumanTurn || !hasGhosts || gameState.turnPhase !== 'ACTION';
@@ -1988,6 +2005,7 @@
         if (mimeModal) mimeModal.style.display = 'none';
         if (!pm) return;
         if (allow) {
+            gameState.selectionMode = null;
             var mimeHauntContinuation = function () {
                 var cardCopy = { r: pm.card.r, s: pm.card.s, val: pm.card.val, isFace: pm.card.isFace };
                 if (pm.attacker.class && pm.attacker.class.name === 'THE WARLOCK' && (pm.card.isFace || pm.card.r === 'JOKER')) cardCopy.val = 10;
@@ -2028,6 +2046,24 @@
         updateUI();
     }
 
+    /** Opens THE MIME choice modal (show on Mime's device; use ready prompt when multiple humans hot-seat). */
+    function showMimeHauntRedirectModal(attacker, mime, card, handIdx, otherNeighbour) {
+        gameState.pendingMimeRedirect = {
+            attacker: attacker,
+            mime: mime,
+            card: card,
+            handIdx: handIdx,
+            otherNeighbour: otherNeighbour
+        };
+        gameState.selectionMode = 'MIME_DECISION';
+        var mimeModal = document.getElementById('mime-modal');
+        var mimeMsg = document.getElementById('mime-msg');
+        if (mimeMsg) {
+            mimeMsg.textContent = attacker.name + ' is Haunting you with ' + card.r + card.s + '. Discard 1 card to redirect the Ghost to ' + otherNeighbour.name + ', or accept the Haunt on your Shadow.';
+        }
+        if (mimeModal) mimeModal.style.display = 'flex';
+    }
+
     function resolveCryptkeeperBlock(useWall) {
         var pb = gameState.pendingCryptkeeperBlock;
         var ckModal = document.getElementById('cryptkeeper-modal');
@@ -2051,6 +2087,48 @@
         updateUI();
     }
 
+    function resolveExorcistSiphonChoice(choice) {
+        var modal = document.getElementById('exorcist-siphon-modal');
+        if (modal) modal.style.display = 'none';
+        var pe = gameState.pendingExorcistFinish;
+        gameState.pendingExorcistFinish = null;
+        if (!pe) return;
+        var p = pe.p;
+        var t = pe.t;
+        var cEx = pe.c;
+        var g1 = pe.g1;
+        var g2 = pe.g2;
+        var idx1 = pe.idx1;
+        var idx2 = pe.idx2;
+        t.shadow.splice(Math.max(idx1, idx2), 1);
+        t.shadow.splice(Math.min(idx1, idx2), 1);
+        gameState.lastDiscardByPlayerId = t.id;
+        var s1 = computeSiphon(p, cEx, g1);
+        var s2 = computeSiphon(p, cEx, g2);
+        if (choice === 1 && s1) {
+            p.candle.push(g1);
+            gameState.discard.push(g2);
+        } else if (choice === 2 && s2) {
+            gameState.discard.push(g1);
+            p.candle.push(g2);
+        } else {
+            gameState.discard.push(g1);
+            gameState.discard.push(g2);
+        }
+        var cix = gameState.pendingExorcistCardIdx;
+        if (cix != null && p.hand[cix]) p.hand.splice(cix, 1);
+        else { var ix = p.hand.indexOf(cEx); if (ix >= 0) p.hand.splice(ix, 1); }
+        gameState.lastDiscardByPlayerId = p.id;
+        gameState.discard.push(cEx);
+        log(p.name + ' (THE EXORCIST) Cleanse: 2 ghosts.');
+        gameState.pendingExorcistFirstOwner = null;
+        gameState.pendingExorcistFirstIdx = null;
+        gameState.pendingExorcistCardIdx = null;
+        gameState.selectionMode = null;
+        finishAction();
+        updateUI();
+    }
+
     function resolvePhantomCancelWithCard(discardIdx) {
         var pm = gameState.pendingPhantomCancel;
         if (!pm || !pm.target || discardIdx < 0 || discardIdx >= pm.target.hand.length) return;
@@ -2068,7 +2146,60 @@
         updateUI();
     }
 
+    function resolveHexCancel(allowHaunt) {
+        var hexModal = document.getElementById('hex-modal');
+        if (hexModal) hexModal.style.display = 'none';
+        var pm = gameState.pendingHexCancel;
+        if (!pm) return;
+        if (allowHaunt) {
+            gameState.pendingHexCancel = null;
+            checkSaltInterrupt(pm.attacker, pm.target, pm.card, pm.hauntContinuation);
+        } else {
+            var act = gameState.players[gameState.activeIdx];
+            if (pm.target.type === 'human' && act && pm.target.id !== act.id && countHumanPlayers() > 1) {
+                showReadyPrompt(pm.target, 'Pass the device to ' + pm.target.name + ' to reveal a matching card (THE HEX).', function () {
+                    gameState.selectionMode = 'HEX_DISCARD';
+                    log('Click the card in your hand that matches the Haunt rank to cancel (THE HEX).');
+                    updateUI();
+                });
+            } else {
+                gameState.selectionMode = 'HEX_DISCARD';
+                log('Click the card in your hand that matches the Haunt rank to cancel (THE HEX).');
+                updateUI();
+            }
+        }
+    }
+
+    function resolveHexCancelWithCard(discardIdx) {
+        var pm = gameState.pendingHexCancel;
+        if (!pm || !pm.target || discardIdx < 0 || discardIdx >= pm.target.hand.length) return;
+        var revealed = pm.target.hand[discardIdx];
+        if (!revealed || revealed.r !== pm.card.r) {
+            showAlertModal('That card does not match the Haunting card\'s rank.', 'THE HEX');
+            return;
+        }
+        var discarded = pm.target.hand.splice(discardIdx, 1)[0];
+        gameState.lastDiscardByPlayerId = pm.target.id;
+        gameState.discard.push(discarded);
+        var attIdx = pm.handIdx;
+        if (attIdx == null || !pm.attacker.hand[attIdx]) attIdx = pm.attacker.hand.indexOf(pm.card);
+        if (attIdx < 0 || !pm.attacker.hand[attIdx]) return;
+        var played = pm.attacker.hand.splice(attIdx, 1)[0];
+        gameState.lastDiscardByPlayerId = pm.attacker.id;
+        gameState.discard.push(played);
+        log(pm.target.name + ' (THE HEX) cancelled Haunt! Both cards → The Dark.');
+        gameState.pendingHexCancel = null;
+        gameState.selectionMode = null;
+        clearTargetMode();
+        finishAction();
+        updateUI();
+    }
+
     function selectCard(idx) {
+        if (gameState.pendingHexCancel && gameState.selectionMode === 'HEX_DISCARD') {
+            resolveHexCancelWithCard(idx);
+            return;
+        }
         if (gameState.pendingPhantomCancel && gameState.selectionMode === 'PHANTOM_DISCARD') {
             resolvePhantomCancelWithCard(idx);
             return;
@@ -2373,39 +2504,29 @@
             finishAction();
             return;
         }
-        var n = getNeighbours(p);
-        if (t !== n.left && t !== n.right) return;
-        if (t.class && t.class.name === 'THE HEX' && t.type === 'ai') {
-            var hexIdx = -1;
-            for (var h = 0; h < t.hand.length; h++) { if (t.hand[h].r === c.r) { hexIdx = h; break; } }
-            if (hexIdx >= 0 && Math.random() < 0.5) {
-                p.hand.splice(idx, 1);
-                gameState.lastDiscardByPlayerId = p.id;
-                gameState.discard.push(c);
-                gameState.lastDiscardByPlayerId = t.id;
-                gameState.discard.push(t.hand.splice(hexIdx, 1)[0]);
-                log(t.name + ' (THE HEX) cancelled Haunt! Both discarded.');
-                clearTargetMode();
-                finishAction();
-                return;
-            }
-        }
+        var nb = getNeighbours(p);
+        if (t !== nb.left && t !== nb.right) return;
         if (t.class && t.class.name === 'THE MIME' && t.hand.length >= 1 && t.type === 'ai' && Math.random() < 0.5) {
             var jesterTarget = t;
             var discardIdx = Math.floor(Math.random() * t.hand.length);
             gameState.lastDiscardByPlayerId = t.id;
             gameState.discard.push(t.hand.splice(discardIdx, 1)[0]);
-            t = n.left === t ? n.right : n.left;
+            t = nb.left === t ? nb.right : nb.left;
             if (!t) return;
             log(jesterTarget.name + ' (THE MIME) redirected Haunt to ' + t.name + '.');
         }
-        if (t.class && t.class.name === 'THE MIME' && t.hand.length >= 1 && t.type === 'human' && n.left && n.right) {
-            var otherNeighbour = n.left === t ? n.right : n.left;
-            gameState.pendingMimeRedirect = { attacker: p, mime: t, card: c, handIdx: idx, otherNeighbour: otherNeighbour };
-            var mimeModal = document.getElementById('mime-modal');
-            var mimeMsg = document.getElementById('mime-msg');
-            if (mimeMsg) mimeMsg.textContent = 'Discard 1 card to redirect this Haunt to ' + otherNeighbour.name + '?';
-            if (mimeModal) mimeModal.style.display = 'flex';
+        var mimeOtherNeighbour = nb.left === t ? nb.right : (nb.right === t ? nb.left : null);
+        if (t.class && t.class.name === 'THE MIME' && t.hand.length >= 1 && t.type === 'human' && mimeOtherNeighbour && mimeOtherNeighbour.id !== t.id) {
+            function openMimeDecision() {
+                showMimeHauntRedirectModal(p, t, c, idx, mimeOtherNeighbour);
+                updateUI();
+            }
+            var mimeHumans = countHumanPlayers();
+            if (mimeHumans > 1) {
+                showReadyPrompt(t, 'Pass the device to ' + t.name + ' (THE MIME). They choose whether to redirect this Haunt.', openMimeDecision);
+            } else {
+                openMimeDecision();
+            }
             return;
         }
         var hauntContinuation = function () {
@@ -2465,6 +2586,32 @@
             clearTargetMode();
             finishAction();
         };
+        if (t.class && t.class.name === 'THE HEX' && t.hand.length >= 1) {
+            var hexMatchIdx = -1;
+            for (var hx = 0; hx < t.hand.length; hx++) { if (t.hand[hx].r === c.r) { hexMatchIdx = hx; break; } }
+            if (hexMatchIdx >= 0) {
+                if (t.type === 'ai') {
+                    if (Math.random() < 0.5) {
+                        p.hand.splice(idx, 1);
+                        gameState.lastDiscardByPlayerId = p.id;
+                        gameState.discard.push(c);
+                        gameState.lastDiscardByPlayerId = t.id;
+                        gameState.discard.push(t.hand.splice(hexMatchIdx, 1)[0]);
+                        log(t.name + ' (THE HEX) cancelled Haunt! Both discarded.');
+                        clearTargetMode();
+                        finishAction();
+                        return;
+                    }
+                } else {
+                    gameState.pendingHexCancel = { attacker: p, target: t, card: c, handIdx: idx, hauntContinuation: hauntContinuation };
+                    var hexModal = document.getElementById('hex-modal');
+                    var hexMsg = document.getElementById('hex-msg');
+                    if (hexMsg) hexMsg.textContent = p.name + ' Haunts with ' + c.r + '. Reveal a matching rank from your hand to cancel? (Both cards go to The Dark.)';
+                    if (hexModal) hexModal.style.display = 'flex';
+                    return;
+                }
+            }
+        }
         if (t.class && t.class.name === 'THE UNSEEN' && t.hand.length >= 1 && !t.phantomCancelUsedThisTurn) {
             if (t.type === 'ai') {
                 if (Math.random() < 0.5) {
@@ -2564,6 +2711,7 @@
         var c = p.hand[idx];
 
         if (c.r === 'Q') {
+            gameState.pendingQueenHandIdx = idx;
             document.getElementById('queen-modal').style.display = 'flex';
             return;
         }
@@ -2593,9 +2741,11 @@
         }
         if (c.r === '3') {
             var n3 = getNeighbours(p);
-            var t3 = (n3.left && n3.right) ? (Math.random() < 0.5 ? n3.left : n3.right) : (n3.left || n3.right);
-            if (!t3 || t3.isDead) { showAlertModal('No neighbour to target.', 'Cast'); return; }
-            executeCast(p, c, t3, null);
+            if (!n3.left && !n3.right) { showAlertModal('No neighbour to target.', 'Cast'); return; }
+            gameState.pendingAction = 'cast';
+            gameState.pendingCardIdx = idx;
+            gameState.selectionMode = 'SELECT_TARGET';
+            updateUI();
             return;
         }
         if (['4', '6', 'J'].indexOf(c.r) >= 0) {
@@ -2606,18 +2756,6 @@
                 viewHandAllNeighboursForClaim(p, idx);
                 return;
             }
-            gameState.pendingAction = 'cast';
-            gameState.pendingCardIdx = idx;
-            gameState.selectionMode = 'SELECT_TARGET';
-            updateUI();
-            return;
-        }
-        if (c.r === '9') {
-            var n = getNeighbours(p);
-            if (p.class && p.class.name === 'THE OCCULTIST') {
-                var alive = gameState.players.filter(function (pl) { return !pl.isDead && pl.id !== p.id; });
-                if (alive.length === 0) { showAlertModal('No one to target.', 'Possess'); return; }
-            } else if (!n.left && !n.right) { showAlertModal('No neighbour to target.', 'Possess'); return; }
             gameState.pendingAction = 'cast';
             gameState.pendingCardIdx = idx;
             gameState.selectionMode = 'SELECT_TARGET';
@@ -2887,9 +3025,18 @@
                 break;
             case '7':
                 if (p.shadow.length > ghostIdx) {
+                    var gh7 = p.shadow.splice(ghostIdx, 1)[0];
+                    var sip7 = computeSiphon(p, c, gh7);
                     gameState.lastDiscardByPlayerId = p.id;
-                    gameState.discard.push(p.shadow.splice(ghostIdx, 1)[0]);
-                    log('Cleanse used.');
+                    if (sip7) {
+                        p.candle.push(gh7);
+                        log(p.name + ' Cleanse: Siphoned ghost to Candle.');
+                        if (typeof window.playSFX === 'function') window.playSFX('cleanse');
+                    } else {
+                        gameState.discard.push(gh7);
+                        log(p.name + ' Cleanse: Ghost destroyed to The Dark.');
+                        if (typeof window.playSFX === 'function') window.playSFX('banish');
+                    }
                 }
                 break;
             case '6':
@@ -3077,18 +3224,49 @@
                     var idx2 = idx;
                     var g1 = t.shadow[idx1];
                     var g2 = t.shadow[idx2];
+                    var cEx = p.hand[gameState.pendingExorcistCardIdx];
+                    if (!cEx || cEx.r !== '7') { clearTargetMode(); updateUI(); return; }
+                    var s1 = computeSiphon(p, cEx, g1);
+                    var s2 = computeSiphon(p, cEx, g2);
+                    function spendExorcistSeven() {
+                        var cix = gameState.pendingExorcistCardIdx;
+                        if (cix != null && p.hand[cix]) p.hand.splice(cix, 1);
+                        else { var ix = p.hand.indexOf(cEx); if (ix >= 0) p.hand.splice(ix, 1); }
+                        gameState.lastDiscardByPlayerId = p.id;
+                        gameState.discard.push(cEx);
+                    }
+                    if (s1 && s2 && p.type === 'human') {
+                        gameState.pendingExorcistFinish = { p: p, t: t, c: cEx, g1: g1, g2: g2, idx1: idx1, idx2: idx2 };
+                        var b1 = document.getElementById('exorcist-siphon-btn-1');
+                        var b2 = document.getElementById('exorcist-siphon-btn-2');
+                        if (b1) b1.textContent = 'Siphon ' + g1.r + g1.s;
+                        if (b2) b2.textContent = 'Siphon ' + g2.r + g2.s;
+                        var em = document.getElementById('exorcist-siphon-modal');
+                        if (em) em.style.display = 'flex';
+                        return;
+                    }
                     t.shadow.splice(Math.max(idx1, idx2), 1);
                     t.shadow.splice(Math.min(idx1, idx2), 1);
-                    var siphoned = false;
                     gameState.lastDiscardByPlayerId = t.id;
-                    if (g1.s !== '♠') { p.candle.push(g1); siphoned = true; } else { gameState.discard.push(g1); }
-                    if (g2.s !== '♠' && !siphoned) { p.candle.push(g2); siphoned = true; } else { gameState.discard.push(g2); }
-                    p.hand.splice(p.hand.indexOf(c), 1);
-                    gameState.lastDiscardByPlayerId = p.id;
-                    gameState.discard.push(c);
-                    log(p.name + ' (THE EXORCIST) Cleanse: 2 ghosts, Siphoned one.');
+                    var which = 0;
+                    if (s1 && !s2) which = 1;
+                    else if (!s1 && s2) which = 2;
+                    else if (s1 && s2) which = 1;
+                    if (which === 1) {
+                        p.candle.push(g1);
+                        gameState.discard.push(g2);
+                    } else if (which === 2) {
+                        gameState.discard.push(g1);
+                        p.candle.push(g2);
+                    } else {
+                        gameState.discard.push(g1);
+                        gameState.discard.push(g2);
+                    }
+                    spendExorcistSeven();
+                    log(p.name + ' (THE EXORCIST) Cleanse: 2 ghosts.');
                     gameState.pendingExorcistFirstOwner = null;
                     gameState.pendingExorcistFirstIdx = null;
+                    gameState.pendingExorcistCardIdx = null;
                     gameState.selectionMode = null;
                     finishAction();
                 }
@@ -3167,8 +3345,14 @@
             log(p.name + ' SIPHON! Healed +1. Candle: ' + p.candle.length);
         } else {
             if (plagueOwner && plagueOwner.class && plagueOwner.class.name === 'THE PLAGUE') {
-                var nT = getNeighbours(t);
-                var other = (nT.left && nT.left.id !== p.id ? nT.left : null) || (nT.right && nT.right.id !== p.id ? nT.right : null);
+                var nP = getNeighbours(plagueOwner);
+                var other = null;
+                if (nP.left && nP.left.id === p.id) other = nP.right;
+                else if (nP.right && nP.right.id === p.id) other = nP.left;
+                else {
+                    if (nP.left && nP.left.id !== p.id) other = nP.left;
+                    else other = nP.right;
+                }
                 if (other && !other.isDead && other.id !== plagueOwner.id) {
                     other.shadow.push(ghost);
                     log(p.name + ' Banished ' + ghost.r + ghost.s + ' but PLAGUE: moved to ' + other.name + '.');
@@ -3341,9 +3525,23 @@
                 var el = mkCard(gameState.discard[idx]);
                 el.onclick = function () {
                     var p = gameState.players[gameState.activeIdx];
-                    p.hand.push(gameState.discard.splice(idx, 1)[0]);
-                    var qIdx = gameState.selectedIdxs[0];
-                    if (p.hand.length > qIdx) { gameState.lastDiscardByPlayerId = p.id; gameState.discard.push(p.hand.splice(qIdx, 1)[0]); }
+                    var chosen = gameState.discard[idx];
+                    var realIdx = chosen ? gameState.discard.indexOf(chosen) : -1;
+                    if (realIdx < 0) return;
+                    var taken = gameState.discard.splice(realIdx, 1)[0];
+                    var qi = gameState.pendingQueenHandIdx;
+                    if (qi == null || !p.hand[qi] || p.hand[qi].r !== 'Q') {
+                        qi = -1;
+                        for (var z = 0; z < p.hand.length; z++) {
+                            if (p.hand[z].r === 'Q') { qi = z; break; }
+                        }
+                    }
+                    if (qi < 0 || !p.hand[qi]) return;
+                    var queenPlayed = p.hand.splice(qi, 1)[0];
+                    gameState.lastDiscardByPlayerId = p.id;
+                    gameState.discard.push(queenPlayed);
+                    p.hand.push(taken);
+                    gameState.pendingQueenHandIdx = null;
                     document.getElementById('queen-modal').style.display = 'none';
                     log(p.name + ' Exhumed a card.');
                     if (typeof window.playSFX === 'function') window.playSFX('draw');
@@ -3356,10 +3554,15 @@
 
     function queenRekindle() {
         var p = gameState.players[gameState.activeIdx];
-        if (gameState.selectedIdxs.length === 1) {
+        var qi = gameState.pendingQueenHandIdx;
+        if (qi != null && p.hand[qi] && p.hand[qi].r === 'Q') {
+            gameState.lastDiscardByPlayerId = p.id;
+            gameState.discard.push(p.hand.splice(qi, 1)[0]);
+        } else if (gameState.selectedIdxs.length === 1) {
             gameState.lastDiscardByPlayerId = p.id;
             gameState.discard.push(p.hand.splice(gameState.selectedIdxs[0], 1)[0]);
         }
+        gameState.pendingQueenHandIdx = null;
         for (var i = 0; i < 2 && gameState.discard.length; i++) {
             p.candle.unshift(gameState.discard.shift());
         }
@@ -3454,9 +3657,23 @@
 
     function actionClass() {
         var p = gameState.players[gameState.activeIdx];
-        if (p.class && p.class.name === 'THE GRIMOIRE OF REJECTION') {
+        if (!p || !p.class) return;
+        if (p.class.name === 'THE GRIMOIRE OF REJECTION') {
             if (gameState.grimoireRejectionRank == null) { openGrimoireRejectionModal(); return; }
             showAlertModal('THE GRIMOIRE OF REJECTION: Cannot change the written name until it has been consumed.', 'Ability');
+            return;
+        }
+        if (p.class.name === 'THE MIMIC') {
+            if (p.usedMimic) {
+                showAlertModal('THE MIMIC: Once per game. Already used.', 'Ability');
+                return;
+            }
+            var nMim = getNeighbours(p);
+            if (!nMim.left && !nMim.right) { showAlertModal('No neighbour to target.', 'Ability'); return; }
+            gameState.pendingAction = 'class';
+            gameState.pendingCardIdx = null;
+            gameState.selectionMode = 'SELECT_TARGET';
+            updateUI();
             return;
         }
         if (gameState.selectedIdxs.length !== 1) return;
@@ -3507,19 +3724,6 @@
         }
         if (p.class.name === 'THE WATCHER') {
             showClassDesc(p.class);
-            return;
-        }
-        if (p.class.name === 'THE MIMIC' && !p.usedMimic) {
-            var n = getNeighbours(p);
-            if (!n.left && !n.right) { showAlertModal('No neighbour to target.', 'Ability'); return; }
-            gameState.pendingAction = 'class';
-            gameState.pendingCardIdx = null;
-            gameState.selectionMode = 'SELECT_TARGET';
-            updateUI();
-            return;
-        }
-        if (p.class.name === 'THE MIMIC' && p.usedMimic) {
-            showAlertModal('THE MIMIC: Once per game. Already used.', 'Ability');
             return;
         }
         if (p.class.name === 'THE CRYPTKEEPER') {
@@ -3938,7 +4142,9 @@
     window.resolvePhantomCancelWithCard = resolvePhantomCancelWithCard;
     window.resolveMimeRedirect = resolveMimeRedirect;
     window.resolveMimeRedirectWithCard = resolveMimeRedirectWithCard;
+    window.resolveHexCancel = resolveHexCancel;
     window.resolveCryptkeeperBlock = resolveCryptkeeperBlock;
+    window.resolveExorcistSiphonChoice = resolveExorcistSiphonChoice;
     window.resolveUsererSwap = resolveUsererSwap;
     window.resolveOracle = resolveOracle;
     window.resolveSeerChoice = resolveSeerChoice;
