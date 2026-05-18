@@ -234,7 +234,7 @@
     }
 
     var CHEATSHEET_TURN_DARK = '<li>Candle empty at any moment → Consumed immediately (lose).</li>';
-    var CHEATSHEET_POSSESSION_DARK = '<li>3 Ghosts same suit → Possessed (lose). THE SUFFERER needs 4. Checked <strong>as soon as</strong> you hit the threshold (Haunt, BOO!, etc.), not only at end of turn.</li>';
+    var CHEATSHEET_POSSESSION_DARK = '<li>3 Ghosts same suit → Possessed (lose) at <strong>end of your turn</strong> only. THE SUFFERER needs 4. Ghosts added on others’ turns wait until your turn ends.</li>';
     var CHEATSHEET_REST = '<section class="cs-section"><h3>Actions</h3><ul class="cs-list"><li><strong>Haunt</strong> — Number card to a neighbour\'s Shadow.</li><li><strong>Banish</strong> — Match/beat a Ghost in your Shadow.</li><li><strong>Panic</strong> — Flip top of Candle vs Ghost.</li><li><strong>Séance</strong> — Pair → heal 4 from Dark.</li><li><strong>Cast</strong> (number cards) / <strong>Summon</strong> (face cards & Jokers) — Use card effect (see Grimoire).</li><li><strong>Flicker</strong> — Shuffle hand, draw 3.</li><li><strong>Ability</strong> — Class power.</li><li><strong>Abstain</strong> — Skip your Ritual action (uses your action this turn).</li></ul></section>' +
         '<section class="cs-section"><h3>Targeting</h3><p>Most effects target one of your two Neighbours (left/right) unless a card or class says otherwise (e.g. <strong>Drain (4)</strong> hits all neighbours; THE OCCULTIST 9 = any player).</p></section>' +
         '<section class="cs-section"><h3>Grimoire</h3><table class="cs-table"><tr><td>A or 1</td><td>Reprieve</td><td>At the start of your turn you may play the Ace to skip the Haunting phase (you do not Burn); you then Draw and perform the Ritual as normal.</td></tr><tr><td>2</td><td>Greed</td><td>Draw 3 to your hand.</td></tr><tr><td>3</td><td>Scare</td><td>Choose a neighbour; they shuffle hand, discard 2 to The Dark.</td></tr><tr><td>4</td><td>Drain</td><td>All neighbours: take top 2 of each Candle, put on top of yours.</td></tr><tr><td>5</td><td>Salt</td><td>Reaction: cancel any player’s Action except Ace (both to The Dark). The 5 can also be used to Haunt (strength 5).</td></tr><tr><td>6</td><td>Sight</td><td>View a neighbour\'s hand and take two cards.</td></tr><tr><td>7</td><td>Cleanse</td><td>Destroy 1 Ghost (to The Dark or Siphon to your Candle).</td></tr><tr><td>8</td><td>Recall</td><td>Take a Ghost from any Shadow to your hand.</td></tr><tr><td>9</td><td>Possess</td><td>Move a Ghost from your Shadow to a neighbour\'s Shadow.</td></tr><tr><td>10</td><td>Rekindle</td><td>Top 3 from The Dark to your Candle, then shuffle Candle.</td></tr><tr><td>J</td><td>Mirror</td><td>Choose a neighbour and swap your Shadow with their Shadow.</td></tr><tr><td>Q</td><td>Medium</td><td>Search Dark, take 1 (numbers or faces; no Joker), OR bottom 2 (no search) → Candle then shuffle.</td></tr><tr><td>K</td><td>Purge</td><td>Banish all Ghosts in your Shadow (to The Dark / Siphon).</td></tr><tr><td>★</td><td>BOO!</td><td>Others Burn until number (to The Dark); number → Ghost in their Shadow.</td></tr></table></section>';
@@ -3908,6 +3908,8 @@
             if (gameState.isGameOver) return;
         }
         if (checkPossession(p.shadow, p)) {
+            var possThreshold = getPossessionThreshold(p);
+            log(p.name + ' POSSESSED! (' + possThreshold + ' same suit at end of turn.)');
             if (handleDeath(p)) return;
         }
         var n = gameState.turnOrder.length;
@@ -3985,14 +3987,9 @@
         return cnt['♠'] >= threshold || cnt['♥'] >= threshold || cnt['♣'] >= threshold || cnt['♦'] >= threshold;
     }
 
-    /** In Dark Ritual, 3+ ghosts same suit = Possessed immediately (not just at end of turn). THE SUFFERER needs 4. */
+    /** Possession is evaluated at end of turn only—not when ghosts are added mid-round. */
     function checkPossessionInstantIfDark(player) {
-        if (!gameState.darkMode || !player || player.isDead) return false;
-        if (!checkPossession(player.shadow, player)) return false;
-        var threshold = getPossessionThreshold(player);
-        log(player.name + ' POSSESSED! (' + threshold + ' same suit—instant.)');
-        handleDeath(player);
-        return true;
+        return false;
     }
 
     function gameOver(msg) {
