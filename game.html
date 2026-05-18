@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="css/variables.css">
     <link rel="stylesheet" href="css/game.css">
 </head>
-<body class="game-page">
+<body class="game-page dark-mode">
 
     <nav class="game-nav">
         <a href="index.html">Home</a>
@@ -35,7 +35,7 @@
     <div id="setup-modal" class="modal" style="display:flex;">
         <div class="modal-content">
             <h2 style="color:var(--accent-color)">SETUP RITUAL</h2>
-            <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:14px; text-align:center;">When the game starts you'll choose the <strong>Empty Candle rule</strong>: <strong>Standard ritual</strong> (check at end of turn) or <strong>Dark ritual</strong> (eliminated immediately). <a href="manual.html#ritual-type" target="_blank" rel="noopener" style="color:var(--accent-color);">Manual → Ritual type</a></p>
+            <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:14px; text-align:center;">An <strong>empty Candle</strong> eliminates you <strong>immediately</strong>—even mid-turn. <a href="manual.html#ritual-type" target="_blank" rel="noopener" style="color:var(--accent-color);">Manual → Empty Candle rule</a></p>
             <div id="local-setup">
                 <p style="margin-bottom:6px; font-size:0.9rem;"><strong>Number of players:</strong> <span id="player-count-buttons"></span></p>
                 <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:10px;">Determines which classes appear in the random 3-card draw (2–6 players: 35 classes; 7+: 38 classes).</p>
@@ -54,17 +54,6 @@
             <h2 id="class-select-title">CHOOSE CURSE</h2>
             <div id="class-options" style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;"></div>
             <button type="button" class="game-btn" onclick="goBackToSetup()" style="margin-top:20px;">⬅ BACK</button>
-        </div>
-    </div>
-
-    <div id="dark-mode-modal" class="modal" style="z-index:2500;">
-        <div class="modal-content" style="border-color:var(--accent-color);">
-            <h2 style="color:var(--accent-color)">CHOOSE RULE</h2>
-            <p style="margin-bottom:16px;">How should an empty Candle be handled?</p>
-            <div style="display:flex; gap:16px; justify-content:center; flex-wrap:wrap;">
-                <button type="button" class="game-btn" onclick="chooseDarkMode(false)">STANDARD RITUAL<br><small>Check at end of turn</small></button>
-                <button type="button" class="game-btn" style="background:#333; color:#ccc;" onclick="chooseDarkMode(true)">DARK RITUAL<br><small>Eliminated immediately</small></button>
-            </div>
         </div>
     </div>
 
@@ -99,15 +88,6 @@
         </div>
     </div>
 
-    <div id="exchange-dark-modal" class="modal" style="display:none;">
-        <div class="modal-content">
-            <h2 id="exchange-dark-modal-title" style="color:var(--accent-color)">EXCHANGE — Pick a number card from The Dark</h2>
-            <p id="exchange-dark-modal-desc" style="margin-bottom:12px;">Choose any number card (A–10) to swap with your ghost. Face cards and Jokers are not valid.</p>
-            <div id="exchange-dark-cards" class="card-grid"></div>
-            <button type="button" class="game-btn" style="margin-top:12px;" onclick="closeExchangeDarkModal()">CANCEL</button>
-        </div>
-    </div>
-    
     <div id="hand-view-modal" class="modal">
         <div class="modal-content" style="border-color:var(--ice-color);">
             <h2 style="color:var(--ice-color)">SIGHT REVEALED</h2>
@@ -294,7 +274,7 @@
     <div id="userer-swap-modal" class="modal" style="display:none;">
         <div class="modal-content" style="border-color:var(--class-color);">
             <h2 style="color:var(--class-color)">THE USERER</h2>
-            <p id="userer-swap-msg">Choose a card from their hand to swap with your card.</p>
+            <p id="userer-swap-msg">Choose cards to take from their hand (2 total). They will then Draw 1 from their Candle.</p>
             <div id="userer-swap-cards" class="card-grid" style="margin-top:14px;"></div>
         </div>
     </div>

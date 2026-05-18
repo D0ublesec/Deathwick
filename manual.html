@@ -130,23 +130,11 @@
             </div>
 
             <h3 id="ritual-type">The Empty Candle Rule</h3>
-            <p>Agree before play how an <strong>empty Candle</strong> (no cards left to burn) is handled.</p>
+            <p>If your Candle has <strong>no cards</strong> when the rules require you to take one from it, you are <strong>Consumed by the Darkness immediately</strong>—even mid-turn. There is no “last full turn” if you burn or spend your last card at the wrong time.</p>
             <ul class="setup-list">
-                <li><strong>Standard ritual (checkpoints only):</strong>
-                    <ul>
-                        <li>We only test your Candle at the <strong>start</strong> and <strong>end</strong> of your turn—not after every single card you spend.</li>
-                        <li><strong>Start of turn:</strong> You need at least <strong>one Candle card per ghost</strong> to complete the Haunting (Burn). If you have <strong>fewer Candle cards than ghosts</strong>, you are <strong>Consumed immediately</strong>—no Burn, Draw, or action.</li>
-                        <li>If you have enough to Burn, you may still end up with an <strong>empty Candle mid-turn</strong> (e.g. Rekindle, effects, or drawing when you had exactly enough). That is allowed: you finish <strong>this</strong> turn (your Ritual and The Burden). If your Candle is <strong>still empty after The Burden</strong>, you are Consumed then.</li>
-                        <li>If you have Candle left after Burn, <strong>Draw 1</strong>; if your Candle is empty right after Burn, you take your <strong>action without drawing</strong>.</li>
-                    </ul>
-                </li>
-                <li><strong>Dark ritual (live Candle):</strong>
-                    <ul>
-                        <li>The moment your Candle has <strong>no cards</strong> when the rules require you to take one from it, you are <strong>Consumed immediately</strong>—even mid-turn. No “last full turn” if you burn or spend your last card at the wrong time.</li>
-                        <li>Examples: you cannot finish Burning for all ghosts if you run out partway; you cannot Draw from an empty Candle; an effect that needs Candle fails and you die if that leaves you empty when a card was required.</li>
-                    </ul>
-                </li>
-                <li>Digital: choose Standard or Dark ritual when starting a match (after class selection).</li>
+                <li><strong>On your turn:</strong> The first moment your Candle is empty when you need a card (to Burn during the Haunting, to Draw, or because an effect used one), you are Consumed. You do not get to finish your action or take a last turn.</li>
+                <li><strong>When it is not your turn:</strong> If your Candle becomes empty because cards were removed or burned while it is not your turn (e.g. <strong>BOO!</strong>, <strong>Drain</strong>), you are Consumed immediately.</li>
+                <li><strong>Possession:</strong> If you receive a third ghost of the same suit, you are Possessed and eliminated at that moment—not only at end of turn.</li>
             </ul>
         </section>
 
@@ -301,7 +289,7 @@
             </div>
             <dl class="passage-terms">
                 <dt class="game-term">Neighbours</dt>
-                <dd>The two players immediately to your left and right in the circle. You can only Haunt, Drain, etc. a neighbour unless a card says otherwise.</dd>
+                <dd>The two players immediately to your left and right in the circle. Most effects target one neighbour unless a card says otherwise (e.g. <strong>Drain (4)</strong> hits <strong>all</strong> neighbours).</dd>
                 <dt class="game-term">Shadow</dt>
                 <dd>The player area in front of you where ghost cards reside. Place <strong>ghosts vertically</strong> (portrait) in the Shadow and <strong>Walls horizontally</strong> (landscape) so ghosts and Walls are easy to tell apart. For each ghost there, you <strong>Burn</strong> one card from your Candle at the start of your turn.</dd>
                 <dt class="game-term">Burn</dt>
@@ -360,9 +348,9 @@
             <p>Discard down to your hand limit (usually 5 cards).</p>
             <h3>Am I Alive?</h3>
             <p><strong>Candle check:</strong> If your Candle is empty, you are <strong>Consumed by the Darkness</strong> and are eliminated.</p>
-            <p><strong>Possession check:</strong> If you have <strong>3 or more ghosts of the same suit</strong> in your Shadow (Walls do not count as ghosts), you are <strong>Possessed</strong> and lose immediately. In the <strong>Dark ritual</strong>, this is checked <strong>as soon as</strong> you receive a third ghost of the same suit (e.g. from a Haunt, BOO!, or ghost pass), not only at end of turn.</p>
+            <p><strong>Possession check:</strong> If you have <strong>3 or more ghosts of the same suit</strong> in your Shadow (Walls do not count as ghosts), you are <strong>Possessed</strong> and lose immediately. <strong>The Sufferer</strong> needs <strong>4</strong> of the same suit. This is checked <strong>as soon as</strong> you reach the threshold (e.g. from a Haunt, BOO!, or ghost pass), not only at end of turn.</p>
             <p><strong>When you die:</strong> When you are eliminated (Consumed or Possessed), any ghosts in your Shadow are split evenly between your two neighbours. If the number is odd, you decide who gets the extra ghost. See <a href="#faq-death-ghosts">FAQ: When a player is eliminated</a> for details.</p>
-            <p><em>Note:</em> At the <strong>start</strong> of your turn (The Haunting), you burn one card per ghost before you draw. If your Candle is empty when you must burn, you are Consumed then. If your Candle becomes empty <strong>during</strong> your turn, see <a href="#faq">FAQ</a> for the optional ruling.</p>
+            <p><em>Note:</em> At the <strong>start</strong> of your turn (The Haunting), you burn one card per ghost before you draw. If your Candle is empty when you must burn, you are Consumed then. If your Candle becomes empty <strong>at any point during</strong> your turn, you are also Consumed immediately (see <a href="#ritual-type">The Empty Candle Rule</a>).</p>
         </section>
 
         <section id="grimoire">
@@ -377,11 +365,11 @@
                 <thead><tr><th>Card</th><th>Rank</th><th>Name</th><th>Effect</th></tr></thead>
                 <tbody>
                     <tr><td><img class="grimoire-card-img" src="images/cards/ranks/ace/deathwick_ace_spades.png" alt="Ace of Spades"></td><td>A or 1</td><td>REPRIEVE</td><td class="grimoire-effect">At the start of your turn you may play the Ace to skip the Haunting phase (you do not Burn this turn); you then Draw and perform the Ritual as normal.</td></tr>
-                    <tr><td><img class="grimoire-card-img" src="images/cards/ranks/two/deathwick_2_spades.png" alt="2 of Spades"></td><td>2</td><td>GREED</td><td class="grimoire-effect">Draw 2 cards to your hand.</td></tr>
+                    <tr><td><img class="grimoire-card-img" src="images/cards/ranks/two/deathwick_2_spades.png" alt="2 of Spades"></td><td>2</td><td>GREED</td><td class="grimoire-effect">Draw 3 cards to your hand.</td></tr>
                     <tr><td><img class="grimoire-card-img" src="images/cards/ranks/three/deathwick_3_spades.png" alt="3 of Spades"></td><td>3</td><td>SCARE</td><td class="grimoire-effect">Choose a neighbour. They shuffle their hand and blindly discard 2 cards to The Dark.</td></tr>
-                    <tr><td><img class="grimoire-card-img" src="images/cards/ranks/four/deathwick_4_spades.png" alt="4 of Spades"></td><td>4</td><td>DRAIN</td><td class="grimoire-effect">Choose a neighbour. Take the top card of their Candle and put it on top of your Candle.</td></tr>
+                    <tr><td><img class="grimoire-card-img" src="images/cards/ranks/four/deathwick_4_spades.png" alt="4 of Spades"></td><td>4</td><td>DRAIN</td><td class="grimoire-effect"><strong>All neighbours:</strong> take the top 2 cards of each Candle and put them on top of your Candle.</td></tr>
                     <tr><td><img class="grimoire-card-img" src="images/cards/ranks/five/deathwick_5_spades.png" alt="5 of Spades"></td><td>5</td><td>SALT</td><td class="grimoire-effect"><strong>Reaction:</strong> Cancel any player’s Action (except the Ace); your Salt and their card go to The Dark (see Salt section below).</td></tr>
-                    <tr><td><img class="grimoire-card-img" src="images/cards/ranks/six/deathwick_6_spades.png" alt="6 of Spades"></td><td>6</td><td>SIGHT</td><td class="grimoire-effect">Choose a neighbour; <strong>view their hand</strong> and take <strong>one card of your choice</strong> to your hand.</td></tr>
+                    <tr><td><img class="grimoire-card-img" src="images/cards/ranks/six/deathwick_6_spades.png" alt="6 of Spades"></td><td>6</td><td>SIGHT</td><td class="grimoire-effect">Choose a neighbour; <strong>view their hand</strong> and take <strong>two cards of your choice</strong> to your hand.</td></tr>
                     <tr><td><img class="grimoire-card-img" src="images/cards/ranks/seven/deathwick_7_spades.png" alt="7 of Spades"></td><td>7</td><td>CLEANSE</td><td class="grimoire-effect">Destroy 1 ghost from your Shadow (to the top of The Dark, or to the bottom of your Candle if Siphon: your 7’s <strong>suit</strong> matches the ghost’s suit; <span class="suit-spades">♠</span> cannot be Siphoned).</td></tr>
                     <tr><td><img class="grimoire-card-img" src="images/cards/ranks/eight/deathwick_8_spades.png" alt="8 of Spades"></td><td>8</td><td>RECALL</td><td class="grimoire-effect">Take a ghost from any Shadow and add it to your hand.</td></tr>
                     <tr><td><img class="grimoire-card-img" src="images/cards/ranks/nine/deathwick_9_spades.png" alt="9 of Spades"></td><td>9</td><td>POSSESS</td><td class="grimoire-effect">Move a ghost from your Shadow to a neighbour's Shadow.</td></tr>
@@ -401,11 +389,11 @@
                     <thead><tr><th>Rank</th><th>Name</th><th>Effect</th></tr></thead>
                     <tbody>
                         <tr><td>A or 1</td><td>Reprieve</td><td class="manual-ref-effect">At start of turn: play Ace to skip the Haunting phase (no Burn); then Draw and perform the Ritual as normal.</td></tr>
-                        <tr><td>2</td><td>Greed</td><td class="manual-ref-effect">Draw 2 to your hand.</td></tr>
+                        <tr><td>2</td><td>Greed</td><td class="manual-ref-effect">Draw 3 to your hand.</td></tr>
                         <tr><td>3</td><td>Scare</td><td class="manual-ref-effect">Choose a neighbour; they shuffle hand, discard 2 to The Dark.</td></tr>
-                        <tr><td>4</td><td>Drain</td><td class="manual-ref-effect">Choose a neighbour; take top of their Candle, put on top of yours.</td></tr>
+                        <tr><td>4</td><td>Drain</td><td class="manual-ref-effect">All neighbours: take top 2 of each Candle, put on top of yours.</td></tr>
                         <tr><td>5</td><td>Salt</td><td class="manual-ref-effect">Reaction: cancel any player’s Action except Ace (both to The Dark). The 5 can also be used to Haunt (strength 5).</td></tr>
-                        <tr><td>6</td><td>Sight</td><td class="manual-ref-effect">View a neighbour's hand and take one card.</td></tr>
+                        <tr><td>6</td><td>Sight</td><td class="manual-ref-effect">View a neighbour's hand and take two cards.</td></tr>
                         <tr><td>7</td><td>Cleanse</td><td class="manual-ref-effect">Destroy 1 Ghost (to The Dark or Siphon to your Candle if suit matches; ♠ cannot be Siphoned).</td></tr>
                         <tr><td>8</td><td>Recall</td><td class="manual-ref-effect">Take a Ghost from any Shadow to your hand.</td></tr>
                         <tr><td>9</td><td>Possess</td><td class="manual-ref-effect">Move a Ghost from your Shadow to a neighbour's Shadow.</td></tr>
@@ -473,29 +461,19 @@
                 <li>If the number is <strong>odd</strong>, the <strong>eliminated player</strong> decides who gets the extra ghost (e.g. 5 ghosts → 2 to one, 3 to the other; the dead player chooses which neighbour gets 3).</li>
                 <li>If they have no ghosts, nothing is passed. If they have only one neighbour (e.g. 2-player game and one just died), all ghosts go to that remaining neighbour.</li>
             </ul>
-            <p>In the <strong>Dark ritual</strong>, Possession is checked as soon as a ghost is added—so if receiving ghosts from a dead player’s distribution gives you 3+ of one suit, you are Possessed immediately (see <a href="#faq">Possession</a>).</p>
+            <p>Possession is checked as soon as a ghost is added—so if receiving ghosts from a dead player’s distribution gives you 3+ of one suit, you are Possessed immediately (see <a href="#faq">Possession</a>).</p>
             <h3>Consumed by the Darkness</h3>
-            <p><strong>When does an empty Candle eliminate you?</strong> It depends which ritual you agreed at setup (see <a href="#ritual-type">The Empty Candle Rule</a>).</p>
+            <p><strong>When does an empty Candle eliminate you?</strong> See <a href="#ritual-type">The Empty Candle Rule</a>.</p>
             <p><strong>Summary:</strong></p>
             <ul class="manual-bullets">
-                <li><strong>Any time, any turn:</strong> If your Candle becomes <strong>empty</strong> because cards were <strong>burned or removed when it was not your turn</strong> (e.g. BOO!, Drain), you are <strong>Consumed immediately</strong>. This is not delayed by Standard ritual timing.</li>
-                <li><strong>Standard ritual</strong> — On <strong>your</strong> turn we check at <strong>start</strong> and <strong>end</strong>. If you run out of Candle <em>during</em> your own turn (e.g. after an action), you are <strong>not</strong> eliminated until end of turn; you finish your action, The Burden, then we check. So you get a last turn.</li>
-                <li><strong>Dark ritual</strong> — On <strong>your</strong> turn, if your Candle is empty <strong>at any moment</strong> (e.g. when you must Burn, when you must Draw, or mid-turn), you are <strong>Consumed immediately</strong>. No second chances.</li>
-            </ul>
-            <p><strong>Standard ritual in detail:</strong></p>
-            <ul class="manual-bullets">
-                <li><strong>Start of turn:</strong> If you have fewer Candle cards than ghosts (e.g. 0 cards + 1 ghost, or 1 card + 2 ghosts), you are Consumed immediately—you do not Burn, Draw, or act. If you have enough, you Burn one per ghost, then Draw 1 only if you have Candle left (otherwise you act without drawing), then do your Ritual and The Burden.</li>
-                <li><strong>End of turn:</strong> If your Candle is empty after The Burden, you are Consumed. If your Candle became empty <em>during</em> your turn (e.g. you had 1 card and used Rekindle), you still finish the turn; we check at end of turn and then you are Consumed. Most groups play it this way so the player gets their full turn.</li>
-            </ul>
-            <p><strong>Dark ritual in detail:</strong> The first moment your Candle is empty when you need a card (to Burn, to Draw, or because an effect used one), you are Consumed. You do not get to finish your action or take a last turn.</p>
-            <ul class="manual-bullets">
-                <li>The digital version lets you pick Standard or Dark ritual when starting a match.</li>
+                <li><strong>Any time, any turn:</strong> If your Candle becomes <strong>empty</strong> because cards were <strong>burned or removed when it was not your turn</strong> (e.g. BOO!, Drain), you are <strong>Consumed immediately</strong>.</li>
+                <li><strong>On your turn:</strong> If your Candle is empty <strong>at any moment</strong> (e.g. when you must Burn, when you must Draw, or mid-turn), you are <strong>Consumed immediately</strong>. No second chances—you do not get to finish your action or take a last turn.</li>
             </ul>
             <h3>Possession</h3>
             <ul class="manual-bullets">
-                <li>At the <strong>end of your turn</strong> (after your one action and after discarding down to hand limit), check your <strong>Shadow</strong>.</li>
-                <li>If you have <strong>3 or more ghosts of the same suit</strong>, you are <strong>Possessed</strong> and lose immediately. You have your whole turn to Banish, Siphon, Recall, or otherwise reduce your Shadow before this check.</li>
-                <li><strong>Dark ritual:</strong> Possession is also checked <strong>immediately</strong> whenever a ghost is added to your Shadow (e.g. from a Haunt, BOO!, Possess, Plague, or when a dead player’s ghosts pass to you). If that addition gives you 3+ of one suit, you are Possessed and eliminated at that moment.</li>
+                <li>If you have <strong>3 or more ghosts of the same suit</strong> in your Shadow, you are <strong>Possessed</strong> and lose immediately. <strong>The Sufferer</strong> needs <strong>4</strong> of the same suit.</li>
+                <li>Possession is checked <strong>immediately</strong> whenever a ghost is added to your Shadow (e.g. from a Haunt, BOO!, Possess, Plague, or when a dead player’s ghosts pass to you). If that addition gives you 3+ of one suit, you are Possessed and eliminated at that moment.</li>
+                <li>At the <strong>end of your turn</strong> (after your one action and after discarding down to hand limit), we also check your Shadow—so if you still have 3+ of one suit then, you are Possessed.</li>
             </ul>
             <h3>Cast vs Summon</h3>
             <ul class="manual-bullets">
@@ -524,8 +502,11 @@
                 <li><strong>Banish vs The Clown.</strong> Ghosts that The Clown Haunted reject <strong>Banish</strong> with a <strong>number card</strong> other than <strong>Cast Cleanse (7)</strong>—the play is blocked. You can still use a <strong>Jack</strong>, <strong>Queen</strong>, or <strong>King</strong> either as <strong>Banish</strong> (one ghost, value 10) or as <strong>Summon</strong> (Mirror, Medium, Purge, etc.).</li>
                 <li><strong>Walls (The Cryptkeeper).</strong> Walls are face-down cards in The Cryptkeeper’s Shadow—lay them <strong>horizontally</strong> (ghosts in the Shadow stay <strong>vertical</strong>). They <strong>cannot</strong> be Banished, Recalled, Cleanse, or Possessed; they can only be discarded by The Cryptkeeper to cancel a Haunt onto them (ghost and Wall both go to The Dark). Walls do not cause Burn; only ghosts do. You cannot Panic against a Wall.</li>
                 <li><strong>Mirror (J) vs The Cryptkeeper.</strong> The Jack (Mirror) <strong>can</strong> target The Cryptkeeper. You swap your entire Shadow with theirs, so you can trade your ghosts for their Walls (they get your ghosts; you get their Walls). Walls still cannot be Banished, Recalled, or Cleanse.</li>
-                <li><strong>The Doomreader.</strong> Up to once per turn, you may discard 1 card to The Dark to swap any card in your Shadow (that you choose) with any ranked card (A–10) from The Dark. You choose which ghost to swap and which number card from The Dark; the two are exchanged.</li>
-                <li><strong>Drain (4) vs The Skeptic.</strong> The Skeptic is immune to Drain. The effect fizzles (no card is taken); the 4 is still discarded to The Dark.</li>
+                <li><strong>The Doomreader.</strong> Up to once per turn, you may discard 1 card to The Dark to exile one ghost from your Shadow to The Dark. No Banish check is required and you cannot Siphon—the ghost is simply destroyed.</li>
+                <li><strong>The Watcher.</strong> When you cast a 6 (Sight), you see <strong>both</strong> neighbours’ hands and may take up to <strong>2 cards from each</strong> (4 total). You may stop early by closing the hand view once you have taken all you want.</li>
+                <li><strong>The Usurer.</strong> As your action, choose a neighbour; take <strong>2 cards</strong> from their hand to yours, then they <strong>Draw 1</strong> from their Candle (if any). You do not discard a card and do not give them a card in return.</li>
+                <li><strong>The Sufferer.</strong> You need <strong>4 ghosts of the same suit</strong> in your Shadow to be Possessed (everyone else needs 3).</li>
+                <li><strong>Drain (4) vs The Skeptic.</strong> The Skeptic is immune to Drain. No cards are taken from that neighbour; the 4 is still discarded to The Dark. Other neighbours are still Drained normally.</li>
                 <li><strong>The Plague.</strong> When a ghost that The Plague Haunted is Banished (and not Siphoned), that ghost goes to the <strong>Banisher’s other neighbour’s</strong> Shadow (the neighbour who did not receive the ghost). If that neighbour is The Plague, the ghost goes to The Dark instead (The Plague cannot receive from this effect).</li>
                 <li><strong>The Witness.</strong> The Witness cannot win. If only two players remain and one is The Witness, <strong>both lose</strong> (no winner). In a 2‑player game with The Witness, there is no winner.</li>
                 <li><strong>Haunt vs The Unseen.</strong> Once per <strong>that attacker's turn</strong>, when a neighbour would Haunt The Unseen, they may discard 1 card to The Dark to cancel the Haunt (both cards go to The Dark). One cancel per attacker's turn, not only once per round.</li>
