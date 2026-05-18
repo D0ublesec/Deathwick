@@ -21,7 +21,7 @@ window.CLASSES = [
     { name: "THE OCCULTIST", desc: "Your 9 (Possess) can choose any player, not just neighbours. When you Possess to a non-neighbour, add 1 card from the top of The Dark to the bottom of your Candle." },
     { name: "THE ORACLE", desc: "Precognition: Once per turn at the start of your turn (before Burning), you may look at the top card of your Candle and put it on top or on the bottom." },
     { name: "THE PLAGUE", desc: "If a Ghost you Haunted is Banished, it moves to your other neighbour's Shadow instead of The Dark. You cannot receive Ghosts from this effect (they go to The Dark instead)." },
-    { name: "THE PRIEST", desc: "When you Banish a Ghost, you may draw 1 card. (Does not trigger on Siphon)." },
+    { name: "THE PRIEST", desc: "When you Banish a Ghost, take the top card of The Dark into your hand before your Banish card and the destroyed Ghost are added to The Dark." },
     { name: "THE PYROMANIAC", desc: "Discard a Red card to the top of The Dark to choose a neighbour; they Burn 2 cards (to the top of The Dark). Once per turn; counts as your action." },
     { name: "THE RAVENOUS", desc: "When you play a 2 (Greed), you may choose a neighbour and steal 2 cards from their hand to yours instead of drawing." },
     { name: "THE REAPER", desc: "When a neighbour Banishes a Ghost from their Shadow without Siphoning (Ghost goes to The Dark), you may add that Ghost to the bottom of your Candle instead." },

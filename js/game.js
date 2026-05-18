@@ -3248,16 +3248,16 @@
                     return;
                 }
                 if (canBanish(c, ghost)) {
+                    t.shadow.splice(idx, 1);
+                    var isSiphonB = computeSiphon(p, c, ghost);
+                    applyPriestBanishBonus(p);
+                    var plagueOwnerB = ghost.hauntedBy != null ? gameState.players[ghost.hauntedBy] : null;
                     p.hand.splice(gameState.selectedIdxs[0], 1);
                     gameState.lastDiscardByPlayerId = p.id;
                     gameState.discard.push(c);
-                    t.shadow.splice(idx, 1);
-                    var isSiphonB = computeSiphon(p, c, ghost);
-                    var plagueOwnerB = ghost.hauntedBy != null ? gameState.players[ghost.hauntedBy] : null;
                     resolveBanishResult(p, ghost, isSiphonB, plagueOwnerB, t);
                     gameState.pendingAction = null;
                     gameState.selectionMode = null;
-                    if (gameState.pendingPriestDraw) { showPriestDrawModal(); return; }
                     finishAction();
                 } else {
                     showAlertModal('Card too weak to banish that ghost.', 'Banish');
@@ -3365,15 +3365,15 @@
                 return;
             }
             if (canBanish(c, ghost)) {
+                t.shadow.splice(idx, 1);
+                var isSiphon = computeSiphon(p, c, ghost);
+                applyPriestBanishBonus(p);
+                var plagueOwner = ghost.hauntedBy != null ? gameState.players[ghost.hauntedBy] : null;
                 p.hand.splice(gameState.selectedIdxs[0], 1);
                 gameState.lastDiscardByPlayerId = p.id;
                 gameState.discard.push(c);
-                t.shadow.splice(idx, 1);
-                var isSiphon = computeSiphon(p, c, ghost);
-                var plagueOwner = ghost.hauntedBy != null ? gameState.players[ghost.hauntedBy] : null;
                 resolveBanishResult(p, ghost, isSiphon, plagueOwner, t);
                 gameState.selectionMode = null;
-                if (gameState.pendingPriestDraw) { showPriestDrawModal(); return; }
                 finishAction();
             } else {
                 showAlertModal('Card too weak to banish that ghost.', 'Banish');
@@ -3399,6 +3399,14 @@
         if (c.r === '7' && c.s === ghost.s) return true;
         if (ghost.isFace && (c.r === '10' || c.isFace) && c.s === ghost.s) return true;
         return false;
+    }
+
+    function applyPriestBanishBonus(p) {
+        if (!p.class || p.class.name !== 'THE PRIEST' || gameState.discard.length === 0) return;
+        var priestCard = gameState.discard.pop();
+        p.hand.push(priestCard);
+        log(p.name + ' (THE PRIEST) took ' + priestCard.r + (priestCard.s || '') + ' from the top of The Dark.');
+        if (typeof window.playSFX === 'function') window.playSFX('draw');
     }
 
     function resolveBanishResult(p, ghost, isSiphon, plagueOwner, t) {
@@ -3437,22 +3445,7 @@
                     log(p.name + ' Banished ' + ghost.r + ghost.s);
                 }
             }
-            if (p.class && p.class.name === 'THE PRIEST') gameState.pendingPriestDraw = p;
         }
-    }
-
-    function showPriestDrawModal() {
-        var modal = document.getElementById('priest-draw-modal');
-        if (modal) modal.style.display = 'flex';
-    }
-
-    function resolvePriestDraw(draw) {
-        var modal = document.getElementById('priest-draw-modal');
-        if (modal) modal.style.display = 'none';
-        var p = gameState.pendingPriestDraw;
-        gameState.pendingPriestDraw = null;
-        if (p && draw) drawCards(p, 1);
-        finishAction();
     }
 
     function openGrimoireRejectionModal() {
@@ -4188,7 +4181,6 @@
     window.queenExhume = queenExhume;
     window.queenRekindle = queenRekindle;
     window.closeHandView = closeHandView;
-    window.resolvePriestDraw = resolvePriestDraw;
     window.closeGrimoireRejectionModal = closeGrimoireRejectionModal;
     window.setGrimoireRejection = setGrimoireRejection;
     window.goBackToSetup = goBackToSetup;
