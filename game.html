@@ -163,18 +163,6 @@
         </div>
     </div>
 
-    <div id="exorcist-siphon-modal" class="modal" style="z-index:3000;">
-        <div class="modal-content" style="border-color:var(--accent-color);">
-            <h2 style="color:var(--accent-color)">THE EXORCIST</h2>
-            <p>Both ghosts can be Siphoned. You may Siphon only one to your Candle; the other goes to The Dark.</p>
-            <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap; flex-direction:column; align-items:center;">
-                <button type="button" class="game-btn" id="exorcist-siphon-btn-1" onclick="resolveExorcistSiphonChoice(1)">Siphon first ghost</button>
-                <button type="button" class="game-btn" id="exorcist-siphon-btn-2" onclick="resolveExorcistSiphonChoice(2)">Siphon second ghost</button>
-                <button type="button" class="game-btn" style="background:#444;" onclick="resolveExorcistSiphonChoice(0)">Siphon neither (both to The Dark)</button>
-            </div>
-        </div>
-    </div>
-
     <div id="settings-modal" class="modal">
         <div class="modal-content" style="border-color:var(--border-color);">
             <h2 style="color:var(--accent-color)">SETTINGS</h2>
@@ -241,7 +229,7 @@
     <div id="grimoire-rejection-modal" class="modal" style="display:none;">
         <div class="modal-content">
             <h2 style="color:var(--magic-color)">THE GRIMOIRE OF REJECTION</h2>
-            <p>Write down a card to reject (next time it's played, cancel it). Does not count as action.</p>
+            <p>Write down a card to reject (next time it's played, cancel it). Does not use your Ritual action. You cannot write the same name twice in a row—alternating is fine (e.g. Ace, 5, Ace).</p>
             <div id="grimoire-rank-buttons" class="card-grid" style="margin-top:12px;"></div>
             <button type="button" class="game-btn" style="margin-top:12px; background:#444;" onclick="closeGrimoireRejectionModal()">Skip</button>
         </div>

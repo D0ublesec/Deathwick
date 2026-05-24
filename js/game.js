@@ -764,7 +764,7 @@
         if (!p) return;
         p.occultistPossessBonusUsedThisTurn = false;
         p.phantomCancelUsedThisTurn = false;
-        p.fatalistUsedThisTurn = false;
+        p.doomreaderUsedThisTurn = false;
         gameState.funeralBellTriggeredThisTurn = false;
         if (p.type === 'human') {
             var aceIdx = -1;
@@ -966,18 +966,20 @@
             return false;
         }
         if (neighbours.left && neighbours.left.class && neighbours.left.class.name === 'THE VULTURE') {
+            var vLeft = 0;
             for (var v = 0; v < 5 && gameState.discard.length; v++) {
-                var idx = Math.floor(Math.random() * gameState.discard.length);
-                neighbours.left.candle.push(gameState.discard.splice(idx, 1)[0]);
+                neighbours.left.candle.push(gameState.discard.pop());
+                vLeft++;
             }
-            log(neighbours.left.name + ' (THE VULTURE) took 5 from The Dark.');
+            if (vLeft) log(neighbours.left.name + ' (THE VULTURE) took ' + vLeft + ' from the top of The Dark.');
         }
         if (neighbours.right && neighbours.right.class && neighbours.right.class.name === 'THE VULTURE' && neighbours.right.id !== (neighbours.left && neighbours.left.id)) {
+            var vRight = 0;
             for (var v2 = 0; v2 < 5 && gameState.discard.length; v2++) {
-                var idx2 = Math.floor(Math.random() * gameState.discard.length);
-                neighbours.right.candle.push(gameState.discard.splice(idx2, 1)[0]);
+                neighbours.right.candle.push(gameState.discard.pop());
+                vRight++;
             }
-            log(neighbours.right.name + ' (THE VULTURE) took 5 from The Dark.');
+            if (vRight) log(neighbours.right.name + ' (THE VULTURE) took ' + vRight + ' from the top of The Dark.');
         }
         if (neighbours.left && neighbours.left.class && neighbours.left.class.name === 'THE GRAVEDIGGER') {
             while (p.candle.length) neighbours.left.candle.push(p.candle.shift());
@@ -1925,10 +1927,11 @@
             (humanPlayer.class.name === 'THE GRIMOIRE OF REJECTION' && gameState.grimoireRejectionRank == null) ||
             (humanPlayer.class.name === 'THE MIMIC' && !humanPlayer.usedMimic) ||
             humanPlayer.class.name === 'THE USERER'));
+        var doomreaderAbilityUsed = !!(humanPlayer.class && humanPlayer.class.name === 'THE DOOMREADER' && humanPlayer.doomreaderUsedThisTurn);
         if (btnHaunt) btnHaunt.disabled = inTargetMode || !isHumanTurn || !isSingle || gameState.turnPhase !== 'ACTION';
         if (btnBanish) btnBanish.disabled = inTargetMode || !isHumanTurn || !isSingle || gameState.turnPhase !== 'ACTION';
         if (btnCast) btnCast.disabled = inTargetMode || !isHumanTurn || !isSingle || gameState.turnPhase !== 'ACTION';
-        if (btnClass) btnClass.disabled = inTargetMode || !isHumanTurn || gameState.turnPhase !== 'ACTION' || (!isSingle && !canUseClassAbilityWithoutCard);
+        if (btnClass) btnClass.disabled = inTargetMode || !isHumanTurn || gameState.turnPhase !== 'ACTION' || doomreaderAbilityUsed || (!isSingle && !canUseClassAbilityWithoutCard);
         if (btnSeance) btnSeance.disabled = inTargetMode || !isHumanTurn || !isDouble || gameState.turnPhase !== 'ACTION';
         if (btnFlicker) btnFlicker.disabled = inTargetMode || !isHumanTurn || gameState.turnPhase !== 'ACTION';
         var hasGhosts = humanPlayer.shadow.some(function (g) { return !g.isWall; });
@@ -1953,7 +1956,7 @@
         if (modalHaunt) modalHaunt.disabled = inTargetMode || !isHumanTurn || !isSingle || gameState.turnPhase !== 'ACTION';
         if (modalBanish) modalBanish.disabled = inTargetMode || !isHumanTurn || !isSingle || gameState.turnPhase !== 'ACTION';
         if (modalCast) modalCast.disabled = inTargetMode || !isHumanTurn || !isSingle || gameState.turnPhase !== 'ACTION';
-        if (modalClass) modalClass.disabled = inTargetMode || !isHumanTurn || gameState.turnPhase !== 'ACTION' || (!isSingle && !canUseClassAbilityWithoutCard);
+        if (modalClass) modalClass.disabled = inTargetMode || !isHumanTurn || gameState.turnPhase !== 'ACTION' || doomreaderAbilityUsed || (!isSingle && !canUseClassAbilityWithoutCard);
         if (modalSeance) modalSeance.disabled = inTargetMode || !isHumanTurn || !isDouble || gameState.turnPhase !== 'ACTION';
         if (modalFlicker) modalFlicker.disabled = inTargetMode || !isHumanTurn || gameState.turnPhase !== 'ACTION';
         if (modalPanic) modalPanic.disabled = inTargetMode || !isHumanTurn || !hasGhosts || gameState.turnPhase !== 'ACTION';
@@ -1989,7 +1992,7 @@
             gameState.selectionMode = null;
             var mimeHauntContinuation = function () {
                 var cardCopy = { r: pm.card.r, s: pm.card.s, val: pm.card.val, isFace: pm.card.isFace };
-                if (pm.attacker.class && pm.attacker.class.name === 'THE WARLOCK' && (pm.card.isFace || pm.card.r === 'JOKER')) cardCopy.val = 10;
+                if (pm.attacker.class && pm.attacker.class.name === 'THE WARLOCK' && (pm.card.isFace || pm.card.r === 'JOKER' || pm.card.r === '★')) cardCopy.val = 10;
                 cardCopy.hauntedBy = pm.attacker.id;
                 if (!gameState.lastDamageTo) gameState.lastDamageTo = {};
                 gameState.lastDamageTo[pm.mime.id] = pm.attacker.id;
@@ -2068,46 +2071,44 @@
         updateUI();
     }
 
-    function resolveExorcistSiphonChoice(choice) {
-        var modal = document.getElementById('exorcist-siphon-modal');
-        if (modal) modal.style.display = 'none';
-        var pe = gameState.pendingExorcistFinish;
-        gameState.pendingExorcistFinish = null;
-        if (!pe) return;
-        var p = pe.p;
-        var t = pe.t;
-        var cEx = pe.c;
-        var g1 = pe.g1;
-        var g2 = pe.g2;
-        var idx1 = pe.idx1;
-        var idx2 = pe.idx2;
+    function applyExorcistCleanse(p, t, cEx, idx1, idx2) {
+        var g1 = t.shadow[idx1];
+        var g2 = t.shadow[idx2];
         t.shadow.splice(Math.max(idx1, idx2), 1);
         t.shadow.splice(Math.min(idx1, idx2), 1);
         gameState.lastDiscardByPlayerId = t.id;
-        var s1 = computeSiphon(p, cEx, g1);
-        var s2 = computeSiphon(p, cEx, g2);
-        if (choice === 1 && s1) {
-            p.candle.push(g1);
-            gameState.discard.push(g2);
-        } else if (choice === 2 && s2) {
-            gameState.discard.push(g1);
-            p.candle.push(g2);
-        } else {
-            gameState.discard.push(g1);
-            gameState.discard.push(g2);
-        }
+        var s1 = g1.s !== '♠';
+        var s2 = g2.s !== '♠';
+        if (s1) p.candle.push(g1);
+        else gameState.discard.push(g1);
+        if (s2) p.candle.push(g2);
+        else gameState.discard.push(g2);
         var cix = gameState.pendingExorcistCardIdx;
         if (cix != null && p.hand[cix]) p.hand.splice(cix, 1);
         else { var ix = p.hand.indexOf(cEx); if (ix >= 0) p.hand.splice(ix, 1); }
         gameState.lastDiscardByPlayerId = p.id;
         gameState.discard.push(cEx);
-        log(p.name + ' (THE EXORCIST) Cleanse: 2 ghosts.');
+        if (typeof window.playSFX === 'function') window.playSFX(s1 || s2 ? 'cleanse' : 'banish');
+        var siphonNote = s1 && s2 ? ' Both Siphoned.' : (s1 || s2 ? ' One Siphoned.' : '');
+        log(p.name + ' (THE EXORCIST) Cleanse: 2 ghosts.' + siphonNote);
         gameState.pendingExorcistFirstOwner = null;
         gameState.pendingExorcistFirstIdx = null;
         gameState.pendingExorcistCardIdx = null;
         gameState.selectionMode = null;
         finishAction();
         updateUI();
+    }
+
+    function finishClassAbility() {
+        gameState.selectedIdxs = [];
+        gameState.selectionMode = null;
+        gameState.selectionTarget = null;
+        gameState.pendingAction = null;
+        gameState.pendingCardIdx = null;
+        gameState.pendingGhostIdx = null;
+        gameState.pendingDoomreader = null;
+        updateUI();
+        if (gameState.isOnline && gameState.isHost && typeof gameState.broadcastState === 'function') gameState.broadcastState();
     }
 
     function resolvePhantomCancelWithCard(discardIdx) {
@@ -2359,7 +2360,7 @@
         var p = gameState.players[gameState.activeIdx];
         var idx = gameState.selectedIdxs[0];
         var c = p.hand[idx];
-        var isWarlockHaunt = p.class && p.class.name === 'THE WARLOCK' && (c.isFace || c.r === 'JOKER');
+        var isWarlockHaunt = p.class && p.class.name === 'THE WARLOCK' && (c.isFace || c.r === 'JOKER' || c.r === '★');
         if ((c.isFace || c.r === 'JOKER') && !isWarlockHaunt) {
             showAlertModal('Face cards and Jokers must be Summoned, not Haunted.', 'Haunt');
             return;
@@ -2455,6 +2456,12 @@
                 updateUI();
                 return;
             }
+            if (c.r === 'J' && mirrorBlockedBySealbinder(p, t)) {
+                showAlertModal('A Shadow contains a Ghost Haunted by THE SEALBINDER; Mirror cannot move it.', 'Blocked');
+                clearTargetMode();
+                updateUI();
+                return;
+            }
             executeCast(p, c, t, null);
             clearTargetMode();
             finishAction();
@@ -2484,7 +2491,7 @@
             gameState.lastDiscardByPlayerId = p.id;
             gameState.discard.push(c);
             log('THE GRIMOIRE OF REJECTION cancelled ' + (c.r === '★' ? 'JOKER' : c.r + c.s) + '!');
-            gameState.grimoireRejectionRank = null;
+            consumeGrimoireRejectionWritten();
             clearTargetMode();
             finishAction();
             return;
@@ -2516,7 +2523,7 @@
         }
         var hauntContinuation = function () {
             var cardCopy = { r: c.r, s: c.s, val: c.val, isFace: c.isFace };
-            if (p.class && p.class.name === 'THE WARLOCK' && (c.isFace || c.r === 'JOKER')) cardCopy.val = 10;
+            if (p.class && p.class.name === 'THE WARLOCK' && (c.isFace || c.r === 'JOKER' || c.r === '★')) cardCopy.val = 10;
             cardCopy.hauntedBy = p.id;
             var architectHasWall = t.shadow.some(function (g) { return g.isWall; });
             if (t.class && t.class.name === 'THE CRYPTKEEPER' && architectHasWall) {
@@ -2645,6 +2652,24 @@
         if (!card || card.isWall) return 0;
         if (card.isFace || card.r === 'J' || card.r === 'Q' || card.r === 'K') return 10;
         return card.val;
+    }
+
+    function isSealbinderHauntedGhost(ghost) {
+        if (!ghost || ghost.isWall || ghost.hauntedBy == null) return false;
+        var haunter = gameState.players[ghost.hauntedBy];
+        return !!(haunter && haunter.class && haunter.class.name === 'THE SEALBINDER');
+    }
+
+    function shadowHasSealbinderGhost(shadow) {
+        if (!shadow) return false;
+        for (var si = 0; si < shadow.length; si++) {
+            if (isSealbinderHauntedGhost(shadow[si])) return true;
+        }
+        return false;
+    }
+
+    function mirrorBlockedBySealbinder(player, target) {
+        return shadowHasSealbinderGhost(player && player.shadow) || shadowHasSealbinderGhost(target && target.shadow);
     }
 
     function actionBanish() {
@@ -3012,12 +3037,17 @@
             gameState.lastDiscardByPlayerId = p.id;
             gameState.discard.push(c);
             log('THE GRIMOIRE OF REJECTION cancelled ' + (c.r === '★' ? 'JOKER' : c.r + (c.s || '')) + '!');
-            gameState.grimoireRejectionRank = null;
+            consumeGrimoireRejectionWritten();
             gameState.selectionMode = null;
             finishAction();
             return;
         }
         var handIdx = p.hand.indexOf(c);
+        if (c.r === 'J' && target && mirrorBlockedBySealbinder(p, target)) {
+            showAlertModal('A Shadow contains a Ghost Haunted by THE SEALBINDER; Mirror cannot move it.', 'Blocked');
+            gameState.selectionMode = null;
+            return;
+        }
         if (handIdx > -1) {
             p.hand.splice(handIdx, 1);
             gameState.lastDiscardByPlayerId = p.id;
@@ -3125,8 +3155,15 @@
                         var isNonNeighbour = target !== nOcc.left && target !== nOcc.right;
                         if (isNonNeighbour && !p.occultistPossessBonusUsedThisTurn && gameState.discard.length) {
                             p.occultistPossessBonusUsedThisTurn = true;
-                            p.candle.push(gameState.discard.pop());
-                            log(p.name + ' (THE OCCULTIST) Possess to non-neighbour this turn: +1 to Candle.');
+                            var occAdded = 0;
+                            for (var oi = 0; oi < 2 && gameState.discard.length; oi++) {
+                                p.candle.push(gameState.discard.pop());
+                                occAdded++;
+                            }
+                            if (occAdded) {
+                                log(p.name + ' (THE OCCULTIST) Possess to non-neighbour this turn: +' + occAdded + ' to Candle.');
+                                if (typeof window.playSFX === 'function') window.playSFX('draw');
+                            }
                         }
                     }
                 }
@@ -3223,7 +3260,7 @@
             gameState.selectionMode = null;
             log(p.name + ' (THE DOOMREADER) exiled a ghost to The Dark.');
             if (typeof window.playSFX === 'function') window.playSFX('banish');
-            finishAction();
+            finishClassAbility();
             return;
         }
 
@@ -3285,53 +3322,9 @@
                 if (ownerId === gameState.pendingExorcistFirstOwner && idx !== gameState.pendingExorcistFirstIdx) {
                     var idx1 = gameState.pendingExorcistFirstIdx;
                     var idx2 = idx;
-                    var g1 = t.shadow[idx1];
-                    var g2 = t.shadow[idx2];
                     var cEx = p.hand[gameState.pendingExorcistCardIdx];
                     if (!cEx || cEx.r !== '7') { clearTargetMode(); updateUI(); return; }
-                    var s1 = computeSiphon(p, cEx, g1);
-                    var s2 = computeSiphon(p, cEx, g2);
-                    function spendExorcistSeven() {
-                        var cix = gameState.pendingExorcistCardIdx;
-                        if (cix != null && p.hand[cix]) p.hand.splice(cix, 1);
-                        else { var ix = p.hand.indexOf(cEx); if (ix >= 0) p.hand.splice(ix, 1); }
-                        gameState.lastDiscardByPlayerId = p.id;
-                        gameState.discard.push(cEx);
-                    }
-                    if (s1 && s2 && p.type === 'human') {
-                        gameState.pendingExorcistFinish = { p: p, t: t, c: cEx, g1: g1, g2: g2, idx1: idx1, idx2: idx2 };
-                        var b1 = document.getElementById('exorcist-siphon-btn-1');
-                        var b2 = document.getElementById('exorcist-siphon-btn-2');
-                        if (b1) b1.textContent = 'Siphon ' + g1.r + g1.s;
-                        if (b2) b2.textContent = 'Siphon ' + g2.r + g2.s;
-                        var em = document.getElementById('exorcist-siphon-modal');
-                        if (em) em.style.display = 'flex';
-                        return;
-                    }
-                    t.shadow.splice(Math.max(idx1, idx2), 1);
-                    t.shadow.splice(Math.min(idx1, idx2), 1);
-                    gameState.lastDiscardByPlayerId = t.id;
-                    var which = 0;
-                    if (s1 && !s2) which = 1;
-                    else if (!s1 && s2) which = 2;
-                    else if (s1 && s2) which = 1;
-                    if (which === 1) {
-                        p.candle.push(g1);
-                        gameState.discard.push(g2);
-                    } else if (which === 2) {
-                        gameState.discard.push(g1);
-                        p.candle.push(g2);
-                    } else {
-                        gameState.discard.push(g1);
-                        gameState.discard.push(g2);
-                    }
-                    spendExorcistSeven();
-                    log(p.name + ' (THE EXORCIST) Cleanse: 2 ghosts.');
-                    gameState.pendingExorcistFirstOwner = null;
-                    gameState.pendingExorcistFirstIdx = null;
-                    gameState.pendingExorcistCardIdx = null;
-                    gameState.selectionMode = null;
-                    finishAction();
+                    applyExorcistCleanse(p, t, cEx, idx1, idx2);
                 }
                 return;
             }
@@ -3448,6 +3441,13 @@
         }
     }
 
+    function consumeGrimoireRejectionWritten() {
+        if (gameState.grimoireRejectionRank != null) {
+            gameState.grimoireRejectionLastRank = gameState.grimoireRejectionRank;
+            gameState.grimoireRejectionRank = null;
+        }
+    }
+
     function openGrimoireRejectionModal() {
         var p = gameState.players[gameState.activeIdx];
         if (!p || !p.class || p.class.name !== 'THE GRIMOIRE OF REJECTION') return;
@@ -3456,6 +3456,7 @@
         if (!container) return;
         container.innerHTML = '';
         var ranks = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'JOKER'];
+        var lastRank = gameState.grimoireRejectionLastRank;
         for (var ri = 0; ri < ranks.length; ri++) {
             var r = ranks[ri];
             (function (rank) {
@@ -3463,7 +3464,13 @@
                 btn.type = 'button';
                 btn.className = 'game-btn';
                 btn.textContent = rank;
-                btn.onclick = function () { setGrimoireRejection(rank); };
+                if (lastRank != null && rank === lastRank) {
+                    btn.disabled = true;
+                    btn.style.opacity = '0.45';
+                    btn.title = 'Cannot write the same name twice in a row';
+                } else {
+                    btn.onclick = function () { setGrimoireRejection(rank); };
+                }
                 container.appendChild(btn);
             })(r);
         }
@@ -3472,12 +3479,15 @@
     }
 
     function setGrimoireRejection(rank) {
+        if (gameState.grimoireRejectionLastRank != null && rank === gameState.grimoireRejectionLastRank) {
+            showAlertModal('You cannot write the same name twice in a row (you may alternate—e.g. Ace, 5, Ace).', 'THE GRIMOIRE OF REJECTION');
+            return;
+        }
         gameState.grimoireRejectionRank = rank;
         closeGrimoireRejectionModal();
         var p = gameState.players[gameState.activeIdx];
         if (p) log(p.name + ' (THE GRIMOIRE OF REJECTION) wrote down ' + rank + '.');
-        updateUI();
-        finishAction();
+        finishClassAbility();
     }
 
     function closeGrimoireRejectionModal() {
@@ -3669,13 +3679,13 @@
         var c = p.hand[idx];
 
         if (p.class.name === 'THE DOOMREADER') {
-            if (p.fatalistUsedThisTurn) { showAlertModal('THE DOOMREADER: Up to once per turn. Already used this turn.', 'Ability'); return; }
+            if (p.doomreaderUsedThisTurn) { showAlertModal('THE DOOMREADER: Up to once per turn. Already used this turn.', 'Ability'); return; }
             var ghostCount = p.shadow.filter(function (g) { return !g.isWall; }).length;
             if (ghostCount === 0) { showAlertModal('No ghosts in your Shadow to exile.', 'Ability'); return; }
             p.hand.splice(idx, 1);
             gameState.lastDiscardByPlayerId = p.id;
             gameState.discard.push(c);
-            p.fatalistUsedThisTurn = true;
+            p.doomreaderUsedThisTurn = true;
             gameState.pendingDoomreader = true;
             gameState.selectionMode = 'SELECT_GHOST';
             gameState.selectionTarget = p.id;
@@ -3753,7 +3763,7 @@
             p.usedMimic = true;
             log(p.name + ' (THE MIMIC) swapped Candles with ' + t.name + '.');
             clearTargetMode();
-            finishAction();
+            finishClassAbility();
             return;
         }
         if (p.class.name === 'THE USERER') {
@@ -4063,10 +4073,10 @@
                 if (gameState.isGameOver) return;
                 if (ai.class && ai.class.name === 'THE GRIMOIRE OF REJECTION' && gameState.grimoireRejectionRank == null && Math.random() < 0.25) {
                     var grRanks = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'JOKER'];
-                    gameState.grimoireRejectionRank = grRanks[Math.floor(Math.random() * grRanks.length)];
+                    var grPick = grRanks.filter(function (r) { return r !== gameState.grimoireRejectionLastRank; });
+                    if (!grPick.length) grPick = grRanks;
+                    gameState.grimoireRejectionRank = grPick[Math.floor(Math.random() * grPick.length)];
                     log(ai.name + ' (THE GRIMOIRE OF REJECTION) wrote down ' + gameState.grimoireRejectionRank + '.');
-                    finishAction();
-                    return;
                 }
                 var targets = getNeighbours(ai);
                 var t = Math.random() > 0.5 ? targets.left : targets.right;
@@ -4080,7 +4090,7 @@
                 if (numCard && t) {
                     checkSaltInterrupt(ai, t, numCard, function () {
                         var cardCopy = { r: numCard.r, s: numCard.s, val: numCard.val, isFace: numCard.isFace };
-                        if (ai.class && ai.class.name === 'THE WARLOCK' && (numCard.isFace || numCard.r === 'JOKER')) cardCopy.val = 10;
+                        if (ai.class && ai.class.name === 'THE WARLOCK' && (numCard.isFace || numCard.r === 'JOKER' || numCard.r === '★')) cardCopy.val = 10;
                         cardCopy.hauntedBy = ai.id;
                         var architectHasWall = t.shadow.some(function (g) { return g.isWall; });
                         if (t.class && t.class.name === 'THE CRYPTKEEPER' && architectHasWall) {
@@ -4153,7 +4163,6 @@
     window.resolveMimeRedirectWithCard = resolveMimeRedirectWithCard;
     window.resolveHexCancel = resolveHexCancel;
     window.resolveCryptkeeperBlock = resolveCryptkeeperBlock;
-    window.resolveExorcistSiphonChoice = resolveExorcistSiphonChoice;
     window.resolveUsererSwap = resolveUsererSwap;
     window.resolveOracle = resolveOracle;
     window.resolveSeerChoice = resolveSeerChoice;
