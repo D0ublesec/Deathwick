@@ -845,6 +845,129 @@ th {
 @media print {
     nav { display: none; }
     #manual-view { display: block; }
+    .manual-section-controls { display: none; }
+    .manual-section-body { display: block !important; }
+}
+
+/* Collapsible manual sections */
+.manual-section-controls {
+    display: flex;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 1.25rem;
+}
+
+.manual-toc {
+    margin: 0 0 1.75rem 0;
+    padding: 16px 20px;
+    background: var(--bg-elevated, #1e1e28);
+    border: 1px solid var(--border-color);
+    border-left: 4px solid var(--accent-color);
+    border-radius: var(--radius-sm);
+}
+
+.manual-toc-title {
+    margin: 0 0 10px 0;
+    padding: 0;
+    border: none;
+    font-family: var(--font-heading);
+    font-size: 1.15rem;
+    color: var(--accent-color);
+}
+
+.manual-toc-list {
+    margin: 0;
+    padding-left: 1.25rem;
+    columns: 2;
+    column-gap: 2rem;
+}
+
+.manual-toc-list li {
+    margin-bottom: 6px;
+    break-inside: avoid;
+}
+
+@media (max-width: 640px) {
+    .manual-toc-list {
+        columns: 1;
+    }
+}
+
+.manual-section-controls .tool-btn {
+    margin: 0;
+}
+
+.manual-section {
+    margin-bottom: 0.5rem;
+}
+
+.manual-section.is-collapsed {
+    margin-bottom: 0.25rem;
+}
+
+h2.manual-section-toggle {
+    margin-top: 1.75em;
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+.manual-section.is-collapsed h2.manual-section-toggle {
+    margin-top: 0.75em;
+    margin-bottom: 0;
+}
+
+.manual-section-toggle-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    margin: 0;
+    padding: 0 0 10px 0;
+    border: none;
+    border-bottom: 1px solid var(--border-color);
+    background: none;
+    font-family: var(--font-heading);
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--accent-color);
+    letter-spacing: 0.03em;
+    text-align: left;
+    cursor: pointer;
+    transition: color var(--transition-fast);
+}
+
+.manual-section-toggle-btn:hover,
+.manual-section-toggle-btn:focus-visible {
+    color: var(--highlight);
+    outline: none;
+}
+
+.manual-section-toggle-btn:focus-visible {
+    box-shadow: 0 0 0 2px var(--accent-color);
+    border-radius: 2px;
+}
+
+.manual-section-chevron {
+    flex-shrink: 0;
+    width: 1rem;
+    font-size: 0.75rem;
+    line-height: 1;
+    opacity: 0.85;
+    transition: transform 0.2s ease;
+}
+
+.manual-section.is-expanded .manual-section-chevron {
+    transform: rotate(90deg);
+}
+
+.manual-section-body {
+    padding-top: 0.5em;
+}
+
+.manual-section.is-collapsed .manual-section-body {
+    display: none;
 }
 
 @media (max-width: 640px) {

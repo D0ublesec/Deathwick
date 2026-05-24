@@ -35,15 +35,19 @@
     <div id="setup-modal" class="modal" style="display:flex;">
         <div class="modal-content">
             <h2 style="color:var(--accent-color)">SETUP RITUAL</h2>
-            <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:14px; text-align:center;">An <strong>empty Candle</strong> eliminates you <strong>immediately</strong>—even mid-turn. <a href="manual.html#ritual-type" target="_blank" rel="noopener" style="color:var(--accent-color);">Manual → Empty Candle rule</a></p>
+            <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:14px; text-align:center;">An <strong>empty Candle</strong> eliminates you <strong>immediately</strong>, even mid-turn. <a href="manual.html#ritual-type" target="_blank" rel="noopener" style="color:var(--accent-color);">Manual → Empty Candle rule</a></p>
             <div id="local-setup">
                 <p style="margin-bottom:6px; font-size:0.9rem;"><strong>Number of players:</strong> <span id="player-count-buttons"></span></p>
-                <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:10px;">Determines which classes appear in the random 3-card draw (2–6 players: 35 classes; 7+: 38 classes).</p>
+                <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:10px;">Determines which curses appear in the random 3-card draw (2–6 players: 35 curses; 7+: 38 curses).</p>
                 <div id="player-setup-list" style="margin-bottom:10px;"></div>
                 <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;">
                     <button type="button" class="game-btn" onclick="addPlayerSlot()">+ ADD PLAYER</button>
                     <button type="button" class="game-btn" style="background:var(--bg-elevated); color:var(--text-muted);" onclick="clearAllSetupNames()">CLEAR ALL NAMES</button>
                 </div>
+                <label style="display:flex; align-items:flex-start; gap:8px; margin-bottom:12px; font-size:0.85rem; text-align:left; cursor:pointer;">
+                    <input type="checkbox" id="setup-salt-targeted-only" style="margin-top:3px;" onchange="setSaltOnlyWhenTargeted(this.checked)">
+                    <span><strong>Optional:</strong> Salt only when targeted (house rule; see <a href="manual.html#faq" target="_blank" rel="noopener" style="color:var(--accent-color);">manual</a>).</span>
+                </label>
                 <button type="button" class="game-btn magic" onclick="startClassSelection()">NEXT</button>
             </div>
         </div>
@@ -60,8 +64,8 @@
     <div id="first-player-modal" class="modal" style="display:none; z-index:2600;">
         <div class="modal-content" style="border-color:var(--accent-color);">
             <h2 style="color:var(--accent-color)">DECIDE TURN ORDER</h2>
-            <p style="margin-bottom:8px;">Choose who goes first. This sets the full turn order. Class selection will then follow that order (first in turn order picks class first; last to pick sees everyone else’s choices—minor advantage).</p>
-            <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:14px;">In online play, agree at the table (e.g. last nightmare, ghost story, horror film) then select that player—or use Random. Only the host sees this in an online game.</p>
+            <p style="margin-bottom:8px;">Choose who goes first. This sets the full turn order. Curse selection will then follow that order (first in turn order picks first; last to pick sees everyone else's choices, a minor advantage).</p>
+            <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:14px;">In online play, agree at the table (e.g. last nightmare, ghost story, horror film) then select that player, or use Random. Only the host sees this in an online game.</p>
             <div id="first-player-options" style="display:flex; flex-direction:column; gap:10px; align-items:center;"></div>
             <button type="button" class="game-btn" style="margin-top:12px;" onclick="chooseFirstPlayerRandom()">RANDOM</button>
         </div>
@@ -70,7 +74,7 @@
     <div id="queen-modal" class="modal">
         <div class="modal-content">
             <h2 style="color:var(--magic-color)">THE MEDIUM'S TRANCE</h2>
-            <button type="button" class="game-btn" onclick="queenExhume()">EXHUME (Search The Dark — take 1)</button>
+            <button type="button" class="game-btn" onclick="queenExhume()">EXHUME (Search The Dark, take 1)</button>
             <button type="button" class="game-btn" onclick="queenRekindle()">REKINDLE (Bottom 2 from Dark → Candle, shuffle)</button>
             <div id="exhume-area" class="card-grid"></div>
         </div>
@@ -167,6 +171,12 @@
         <div class="modal-content" style="border-color:var(--border-color);">
             <h2 style="color:var(--accent-color)">SETTINGS</h2>
             <div class="settings-row" style="margin-bottom:16px;">
+                <label style="display:flex; align-items:flex-start; gap:8px; cursor:pointer;">
+                    <input type="checkbox" id="settings-salt-targeted-only" style="margin-top:3px;" onchange="setSaltOnlyWhenTargeted(this.checked)">
+                    <span>Salt only when targeted (optional house rule)</span>
+                </label>
+            </div>
+            <div class="settings-row" style="margin-bottom:16px;">
                 <label style="display:block; margin-bottom:8px;">Ritual theme</label>
                 <div style="display:flex; gap:10px;">
                     <button type="button" class="game-btn" id="theme-btn-fire" onclick="setRitualTheme('fire')">FIRE</button>
@@ -190,7 +200,7 @@
 
     <div id="class-desc-modal" class="modal">
         <div class="modal-content class-desc-modal-content" style="border-color:var(--magic-color);">
-            <h2 id="class-desc-title" style="color:var(--magic-color)">CLASS</h2>
+            <h2 id="class-desc-title" style="color:var(--magic-color)">CURSE</h2>
             <img id="class-desc-card" class="class-desc-card-img" src="" alt="" style="display:none;">
             <p id="class-desc-text"></p>
             <button type="button" class="game-btn" onclick="closeClassDesc()">CLOSE</button>
@@ -229,7 +239,7 @@
     <div id="grimoire-rejection-modal" class="modal" style="display:none;">
         <div class="modal-content">
             <h2 style="color:var(--magic-color)">THE GRIMOIRE OF REJECTION</h2>
-            <p>Write down a card to reject (next time it's played, cancel it). Does not use your Ritual action. You cannot write the same name twice in a row—alternating is fine (e.g. Ace, 5, Ace).</p>
+            <p>Write down a card to reject (next time it's played, cancel it). Does not use your Ritual action. Same name cannot follow itself (e.g. Ace, then 5, then Ace is fine).</p>
             <div id="grimoire-rank-buttons" class="card-grid" style="margin-top:12px;"></div>
             <button type="button" class="game-btn" style="margin-top:12px; background:#444;" onclick="closeGrimoireRejectionModal()">Skip</button>
         </div>
@@ -248,11 +258,19 @@
         </div>
     </div>
 
-    <div id="userer-swap-modal" class="modal" style="display:none;">
+    <div id="usurer-swap-modal" class="modal" style="display:none;">
         <div class="modal-content" style="border-color:var(--class-color);">
-            <h2 style="color:var(--class-color)">THE USERER</h2>
-            <p id="userer-swap-msg">Choose cards to take from their hand (2 total). They will then Draw 1 from their Candle.</p>
-            <div id="userer-swap-cards" class="card-grid" style="margin-top:14px;"></div>
+            <h2 style="color:var(--class-color)">THE USURER</h2>
+            <p id="usurer-swap-msg">Choose cards to take from their hand (2 total). They will then Draw 1 from their Candle.</p>
+            <div id="usurer-swap-cards" class="card-grid" style="margin-top:14px;"></div>
+        </div>
+    </div>
+
+    <div id="plague-spread-modal" class="modal" style="display:none; z-index:3000;">
+        <div class="modal-content" style="border-color:var(--accent-color);">
+            <h2 style="color:var(--accent-color)">THE PLAGUE</h2>
+            <p>Choose a neighbour to receive this plagued ghost:</p>
+            <div id="plague-spread-options" style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-top:14px;"></div>
         </div>
     </div>
 

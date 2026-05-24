@@ -51,8 +51,40 @@
         broadcastState: null,
         displayName: null,
         showAllPlayers: false,
-        viewPreferenceSet: false
+        viewPreferenceSet: false,
+        saltOnlyWhenTargeted: false
     };
+    var GAME_SETTINGS_KEY = 'finalFlickerGameSettings';
+
+    function loadGameSettings() {
+        try {
+            var raw = localStorage.getItem(GAME_SETTINGS_KEY);
+            if (raw) {
+                var o = JSON.parse(raw);
+                if (typeof o.saltOnlyWhenTargeted === 'boolean') gameState.saltOnlyWhenTargeted = o.saltOnlyWhenTargeted;
+            }
+        } catch (e) {}
+    }
+
+    function saveGameSettings() {
+        try {
+            localStorage.setItem(GAME_SETTINGS_KEY, JSON.stringify({ saltOnlyWhenTargeted: !!gameState.saltOnlyWhenTargeted }));
+        } catch (e) {}
+    }
+
+    function syncSaltSettingUI() {
+        var setupCb = document.getElementById('setup-salt-targeted-only');
+        var settingsCb = document.getElementById('settings-salt-targeted-only');
+        if (setupCb) setupCb.checked = !!gameState.saltOnlyWhenTargeted;
+        if (settingsCb) settingsCb.checked = !!gameState.saltOnlyWhenTargeted;
+    }
+
+    window.setSaltOnlyWhenTargeted = function (enabled) {
+        gameState.saltOnlyWhenTargeted = !!enabled;
+        saveGameSettings();
+        syncSaltSettingUI();
+    };
+    window.syncSaltSettingUI = syncSaltSettingUI;
     var saltCallback = null;
     var readyCallback = null;
     var aiTimer = null;
@@ -235,7 +267,8 @@
 
     var CHEATSHEET_TURN_DARK = '<li>Candle empty at any moment → Consumed immediately (lose).</li>';
     var CHEATSHEET_POSSESSION_DARK = '<li>3 Ghosts same suit → Possessed (lose) at <strong>end of your turn</strong> only. THE SUFFERER needs 4. Ghosts added on others’ turns wait until your turn ends.</li>';
-    var CHEATSHEET_REST = '<section class="cs-section"><h3>Actions</h3><ul class="cs-list"><li><strong>Haunt</strong> — Number card to a neighbour\'s Shadow.</li><li><strong>Banish</strong> — Match/beat a Ghost in your Shadow.</li><li><strong>Panic</strong> — Flip top of Candle vs Ghost.</li><li><strong>Séance</strong> — Pair → heal 4 from Dark.</li><li><strong>Cast</strong> (number cards) / <strong>Summon</strong> (face cards & Jokers) — Use card effect (see Grimoire).</li><li><strong>Flicker</strong> — Shuffle hand, draw 3.</li><li><strong>Ability</strong> — Class power.</li><li><strong>Abstain</strong> — Skip your Ritual action (uses your action this turn).</li></ul></section>' +
+    var CHEATSHEET_REST = '<section class="cs-section"><h3>Actions</h3><ul class="cs-list"><li><strong>Haunt:</strong> number card to a neighbour\'s Shadow.</li><li><strong>Banish:</strong> match/beat a Ghost in your Shadow.</li><li><strong>Panic:</strong> flip top of Candle vs Ghost.</li><li><strong>Séance:</strong> pair → heal 4 from The Dark.</li><li><strong>Cast</strong> (number cards) / <strong>Summon</strong> (face cards &amp; Jokers): use card effect (see Grimoire).</li><li><strong>Flicker:</strong> shuffle hand, draw 3.</li><li><strong>Ability:</strong> curse power.</li><li><strong>Abstain:</strong> skip your Ritual action (uses your action this turn).</li></ul></section>' +
+        '<section class="cs-section"><h3>Banish &amp; Siphon</h3><ul class="cs-list"><li><strong>Banish:</strong> play a card on a ghost in your Shadow (equal or higher value; suit tier breaks ties).</li><li><strong>Siphon (Heal):</strong> when your Banish card\'s rank matches the ghost (or Cleanse 7 suit matches), put the ghost on the bottom of your Candle instead of The Dark. Spades cannot be Siphoned.</li><li><strong>Face cards:</strong> J, Q, and K only. <strong>Jokers</strong> are separate (Summoned for BOO!). <strong>The Warlock</strong> may Haunt with a face card or Joker (strength 10).</li></ul></section>' +
         '<section class="cs-section"><h3>Targeting</h3><p>Most effects target one of your two Neighbours (left/right) unless a card or class says otherwise (e.g. <strong>Drain (4)</strong> hits all neighbours; THE OCCULTIST 9 = any player).</p></section>' +
         '<section class="cs-section"><h3>Grimoire</h3><table class="cs-table"><tr><td>A or 1</td><td>Reprieve</td><td>At the start of your turn you may play the Ace to skip the Haunting phase (you do not Burn); you then Draw and perform the Ritual as normal.</td></tr><tr><td>2</td><td>Greed</td><td>Draw 3 to your hand.</td></tr><tr><td>3</td><td>Scare</td><td>Choose a neighbour; they shuffle hand, discard 2 to The Dark.</td></tr><tr><td>4</td><td>Drain</td><td>Take the top two cards from each neighbour\'s Candle and place them on your Candle.</td></tr><tr><td>5</td><td>Salt</td><td>Reaction: cancel any player’s Action except Ace (both to The Dark). The 5 can also be used to Haunt (strength 5).</td></tr><tr><td>6</td><td>Sight</td><td>View a neighbour\'s hand and take two cards.</td></tr><tr><td>7</td><td>Cleanse</td><td>Banish 1 Ghost (to The Dark or Siphon to your Candle).</td></tr><tr><td>8</td><td>Recall</td><td>Take a Ghost from any Shadow to your hand.</td></tr><tr><td>9</td><td>Possess</td><td>Move a Ghost from your Shadow to a neighbour\'s Shadow.</td></tr><tr><td>10</td><td>Rekindle</td><td>Top 3 from The Dark to your Candle, then shuffle Candle.</td></tr><tr><td>J</td><td>Mirror</td><td>Choose a neighbour and swap your Shadow with their Shadow.</td></tr><tr><td>Q</td><td>Medium</td><td>Search Dark, take 1 (numbers or faces; no Joker), OR bottom 2 (no search) → Candle then shuffle.</td></tr><tr><td>K</td><td>Purge</td><td>Banish all Ghosts in your Shadow (to The Dark / Siphon).</td></tr><tr><td>★</td><td>BOO!</td><td>Others Burn until number (to The Dark); number → Ghost in their Shadow.</td></tr></table></section>';
 
@@ -402,7 +435,7 @@
         b7.className = 'game-btn player-count-btn';
         b7.dataset.count = '7plus';
         b7.textContent = '7+';
-        b7.title = '7 or more players — all classes in the draw';
+        b7.title = '7 or more players: all curses in the draw';
         b7.onclick = function () { setPlayerCount(7); };
         container.appendChild(b7);
         updatePlayerCountButtonsState();
@@ -747,7 +780,7 @@
             runStartOfTurnPhase();
             if (!gameState.isGameOver) updateUI();
         } else {
-            log('— ' + p.name + "'s turn —");
+            log(p.name + "'s turn");
             startAITurn(p);
         }
     }
@@ -756,7 +789,7 @@
         if (gameState.players.length === 2) {
             var hasWitness = gameState.players.some(function (pl) { return pl.class && pl.class.name === 'THE WITNESS'; });
             if (hasWitness) {
-                gameOver('No winner—THE WITNESS in a 2-player game.');
+                gameOver('No winner: THE WITNESS in a 2-player game.');
                 return;
             }
         }
@@ -1033,7 +1066,7 @@
             if (gameState.players.length === 2) {
                 var hasWitness = alive.some(function (pl) { return pl.class && pl.class.name === 'THE WITNESS'; });
                 if (hasWitness) {
-                    gameOver('No winner—THE WITNESS in a 2-player game.');
+                    gameOver('No winner: THE WITNESS in a 2-player game.');
                     return true;
                 }
             }
@@ -1044,7 +1077,7 @@
             if (witnessPlayer && alive.length === 2) {
                 var otherPlayer = alive[0] === witnessPlayer ? alive[1] : alive[0];
                 otherPlayer.isDead = true;
-                log(otherPlayer.name + ' also loses—THE WITNESS!');
+                log(otherPlayer.name + ' also loses (THE WITNESS).');
                 return handleDeath(otherPlayer);
             }
         }
@@ -1074,7 +1107,7 @@
         alive = gameState.players.filter(function (pl) { return !pl.isDead; });
         if (alive.length === 1) {
             if (alive[0].class && alive[0].class.name === 'THE WITNESS') {
-                gameOver('No winner—THE WITNESS cannot win.');
+                gameOver('No winner: THE WITNESS cannot win.');
                 return true;
             }
             if (typeof window.playSFX === 'function') window.playSFX('win');
@@ -1219,7 +1252,7 @@
         '10': { name: 'Rekindle', effect: 'Take the top 3 cards from The Dark and put them on top of your Candle.' },
         'J': { name: 'Mirror', effect: 'Choose a neighbour and swap your Shadow with their Shadow.' },
         'Q': { name: 'Medium', effect: 'Choose: search The Dark and take 1 card of your choice to your hand (number cards or face cards J/Q/K; not a Joker), OR take the bottom 2 cards from The Dark without searching, add them to your Candle, then shuffle your Candle.' },
-        'K': { name: 'Purge', effect: 'Banish all Ghosts in your Shadow (to the top of The Dark; Siphon if suit matches the King\'s suit and not Spades—Siphoned to bottom of your Candle).' },
+        'K': { name: 'Purge', effect: 'Banish all Ghosts in your Shadow (to the top of The Dark; Siphon if suit matches the King\'s suit and not Spades; Siphoned to bottom of your Candle).' },
         'JOKER': { name: 'BOO!', effect: 'Each other player Burns from the top of their Candle until they reveal a number (burned cards go to the top of The Dark; the number becomes a Ghost in their Shadow).' }
     };
 
@@ -1926,7 +1959,7 @@
         var canUseClassAbilityWithoutCard = !!(humanPlayer.class && (
             (humanPlayer.class.name === 'THE GRIMOIRE OF REJECTION' && gameState.grimoireRejectionRank == null) ||
             (humanPlayer.class.name === 'THE MIMIC' && !humanPlayer.usedMimic) ||
-            humanPlayer.class.name === 'THE USERER'));
+            humanPlayer.class.name === 'THE USURER'));
         var doomreaderAbilityUsed = !!(humanPlayer.class && humanPlayer.class.name === 'THE DOOMREADER' && humanPlayer.doomreaderUsedThisTurn);
         if (btnHaunt) btnHaunt.disabled = inTargetMode || !isHumanTurn || !isSingle || gameState.turnPhase !== 'ACTION';
         if (btnBanish) btnBanish.disabled = inTargetMode || !isHumanTurn || !isSingle || gameState.turnPhase !== 'ACTION';
@@ -1993,7 +2026,7 @@
             var mimeHauntContinuation = function () {
                 var cardCopy = { r: pm.card.r, s: pm.card.s, val: pm.card.val, isFace: pm.card.isFace };
                 if (pm.attacker.class && pm.attacker.class.name === 'THE WARLOCK' && (pm.card.isFace || pm.card.r === 'JOKER' || pm.card.r === '★')) cardCopy.val = 10;
-                cardCopy.hauntedBy = pm.attacker.id;
+                tagHauntedGhost(cardCopy, pm.attacker, pm.target);
                 if (!gameState.lastDamageTo) gameState.lastDamageTo = {};
                 gameState.lastDamageTo[pm.mime.id] = pm.attacker.id;
                 pm.mime.shadow.push(cardCopy);
@@ -2524,7 +2557,7 @@
         var hauntContinuation = function () {
             var cardCopy = { r: c.r, s: c.s, val: c.val, isFace: c.isFace };
             if (p.class && p.class.name === 'THE WARLOCK' && (c.isFace || c.r === 'JOKER' || c.r === '★')) cardCopy.val = 10;
-            cardCopy.hauntedBy = p.id;
+            tagHauntedGhost(cardCopy, p, t);
             var architectHasWall = t.shadow.some(function (g) { return g.isWall; });
             if (t.class && t.class.name === 'THE CRYPTKEEPER' && architectHasWall) {
                 if (t.type === 'ai') {
@@ -3116,16 +3149,8 @@
                 if (p.shadow.length > ghostIdx) {
                     var gh7 = p.shadow.splice(ghostIdx, 1)[0];
                     var sip7 = computeSiphon(p, c, gh7);
-                    gameState.lastDiscardByPlayerId = p.id;
-                    if (sip7) {
-                        p.candle.push(gh7);
-                        log(p.name + ' Cleanse: Siphoned ghost to Candle.');
-                        if (typeof window.playSFX === 'function') window.playSFX('cleanse');
-                    } else {
-                        gameState.discard.push(gh7);
-                        log(p.name + ' Cleanse: Ghost banished to The Dark.');
-                        if (typeof window.playSFX === 'function') window.playSFX('banish');
-                    }
+                    var plagueOwner7 = gh7.hauntedBy != null ? gameState.players[gh7.hauntedBy] : null;
+                    resolveBanishResult(p, gh7, sip7, plagueOwner7, p, function () {});
                 }
                 break;
             case '6':
@@ -3292,10 +3317,12 @@
                     p.hand.splice(gameState.selectedIdxs[0], 1);
                     gameState.lastDiscardByPlayerId = p.id;
                     gameState.discard.push(c);
-                    resolveBanishResult(p, ghost, isSiphonB, plagueOwnerB, t);
-                    gameState.pendingAction = null;
-                    gameState.selectionMode = null;
-                    finishAction();
+                    resolveBanishResult(p, ghost, isSiphonB, plagueOwnerB, t, function () {
+                        gameState.pendingAction = null;
+                        gameState.selectionMode = null;
+                        finishAction();
+                    });
+                    return;
                 } else {
                     showAlertModal('Card too weak to banish that ghost.', 'Banish');
                 }
@@ -3365,9 +3392,10 @@
                 p.hand.splice(gameState.selectedIdxs[0], 1);
                 gameState.lastDiscardByPlayerId = p.id;
                 gameState.discard.push(c);
-                resolveBanishResult(p, ghost, isSiphon, plagueOwner, t);
-                gameState.selectionMode = null;
-                finishAction();
+                resolveBanishResult(p, ghost, isSiphon, plagueOwner, t, function () {
+                    gameState.selectionMode = null;
+                    finishAction();
+                });
             } else {
                 showAlertModal('Card too weak to banish that ghost.', 'Banish');
             }
@@ -3402,43 +3430,117 @@
         if (typeof window.playSFX === 'function') window.playSFX('draw');
     }
 
-    function resolveBanishResult(p, ghost, isSiphon, plagueOwner, t) {
+    function tagHauntedGhost(cardCopy, haunter, target) {
+        cardCopy.hauntedBy = haunter.id;
+        if (haunter.class && haunter.class.name === 'THE PLAGUE') {
+            cardCopy.plagueVisited = [target.id];
+        }
+    }
+
+    function getPlagueSpreadTargets(banisher, ghost, plagueOwner) {
+        var visited = ghost.plagueVisited ? ghost.plagueVisited.slice() : [];
+        if (visited.indexOf(banisher.id) < 0) visited.push(banisher.id);
+        ghost.plagueVisited = visited;
+        var neighbours = getNeighbours(banisher);
+        var candidates = [];
+        [neighbours.left, neighbours.right].forEach(function (n) {
+            if (n && !n.isDead && n.id !== plagueOwner.id && visited.indexOf(n.id) < 0) {
+                candidates.push(n);
+            }
+        });
+        return candidates;
+    }
+
+    function applyPlagueSpread(banisher, ghost, plagueOwner, onComplete) {
+        var candidates = getPlagueSpreadTargets(banisher, ghost, plagueOwner);
+        if (candidates.length === 0) {
+            gameState.lastDiscardByPlayerId = banisher.id;
+            gameState.discard.push(ghost);
+            log(banisher.name + ' Banished ' + ghost.r + ghost.s + ' (THE PLAGUE: no new target; ghost → The Dark).');
+            if (onComplete) onComplete();
+            return;
+        }
+        function deliverTo(target) {
+            if (ghost.plagueVisited.indexOf(target.id) < 0) ghost.plagueVisited.push(target.id);
+            target.shadow.push(ghost);
+            log(banisher.name + ' Banished ' + ghost.r + ghost.s + ' but THE PLAGUE spread it to ' + target.name + '.');
+            if (checkPossessionInstantIfDark(target)) {
+                if (onComplete) onComplete();
+                return;
+            }
+            if (onComplete) onComplete();
+        }
+        if (candidates.length === 1) {
+            deliverTo(candidates[0]);
+            return;
+        }
+        if (banisher.type === 'human') {
+            gameState.pendingPlagueSpread = { banisher: banisher, ghost: ghost, plagueOwner: plagueOwner, candidates: candidates, onComplete: onComplete };
+            var modal = document.getElementById('plague-spread-modal');
+            var opts = document.getElementById('plague-spread-options');
+            if (opts) {
+                opts.innerHTML = '';
+                candidates.forEach(function (cand) {
+                    var btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = 'game-btn';
+                    btn.textContent = cand.name;
+                    btn.onclick = function () { resolvePlagueSpread(cand.id); };
+                    opts.appendChild(btn);
+                });
+            }
+            if (modal) modal.style.display = 'flex';
+            return;
+        }
+        deliverTo(candidates[Math.floor(Math.random() * candidates.length)]);
+    }
+
+    function resolvePlagueSpread(targetId) {
+        var pending = gameState.pendingPlagueSpread;
+        var modal = document.getElementById('plague-spread-modal');
+        if (modal) modal.style.display = 'none';
+        if (!pending) return;
+        gameState.pendingPlagueSpread = null;
+        var target = gameState.players[targetId];
+        if (!target || target.isDead) {
+            gameState.lastDiscardByPlayerId = pending.banisher.id;
+            gameState.discard.push(pending.ghost);
+            if (pending.onComplete) pending.onComplete();
+            return;
+        }
+        if (pending.ghost.plagueVisited.indexOf(target.id) < 0) pending.ghost.plagueVisited.push(target.id);
+        target.shadow.push(pending.ghost);
+        log(pending.banisher.name + ' Banished ' + pending.ghost.r + pending.ghost.s + ' but THE PLAGUE spread it to ' + target.name + '.');
+        if (checkPossessionInstantIfDark(target)) {
+            if (pending.onComplete) pending.onComplete();
+            return;
+        }
+        if (pending.onComplete) pending.onComplete();
+    }
+
+    function resolveBanishResult(p, ghost, isSiphon, plagueOwner, t, onComplete) {
         if (typeof window.playSFX === 'function') window.playSFX(isSiphon ? 'cleanse' : 'banish');
         if (isSiphon) {
             p.candle.push(ghost);
             log(p.name + ' SIPHON! Healed +1. Candle: ' + p.candle.length);
-        } else {
-            if (plagueOwner && plagueOwner.class && plagueOwner.class.name === 'THE PLAGUE') {
-                var nP = getNeighbours(plagueOwner);
-                var other = null;
-                if (nP.left && nP.left.id === p.id) other = nP.right;
-                else if (nP.right && nP.right.id === p.id) other = nP.left;
-                else {
-                    if (nP.left && nP.left.id !== p.id) other = nP.left;
-                    else other = nP.right;
-                }
-                if (other && !other.isDead && other.id !== plagueOwner.id) {
-                    other.shadow.push(ghost);
-                    log(p.name + ' Banished ' + ghost.r + ghost.s + ' but PLAGUE: moved to ' + other.name + '.');
-                    if (checkPossessionInstantIfDark(other)) return;
-                } else {
-                    gameState.lastDiscardByPlayerId = p.id;
-                    gameState.discard.push(ghost);
-                    log(p.name + ' Banished ' + ghost.r + ghost.s + (other && other.id === plagueOwner.id ? ' (THE PLAGUE cannot receive spread).' : ''));
-                }
-            } else {
-                var n = getNeighbours(p);
-                var reaperNeighbour = (n.left && n.left.class && n.left.class.name === 'THE REAPER') ? n.left : (n.right && n.right.class && n.right.class.name === 'THE REAPER') ? n.right : null;
-                if (reaperNeighbour && !reaperNeighbour.isDead) {
-                    reaperNeighbour.candle.push(ghost);
-                    log(p.name + ' Banished ' + ghost.r + ghost.s + '; ' + reaperNeighbour.name + ' (THE REAPER) took it to Candle.');
-                } else {
-                    gameState.lastDiscardByPlayerId = p.id;
-                    gameState.discard.push(ghost);
-                    log(p.name + ' Banished ' + ghost.r + ghost.s);
-                }
-            }
+            if (onComplete) onComplete();
+            return;
         }
+        if (plagueOwner && plagueOwner.class && plagueOwner.class.name === 'THE PLAGUE') {
+            applyPlagueSpread(p, ghost, plagueOwner, onComplete || function () {});
+            return;
+        }
+        var n = getNeighbours(p);
+        var reaperNeighbour = (n.left && n.left.class && n.left.class.name === 'THE REAPER') ? n.left : (n.right && n.right.class && n.right.class.name === 'THE REAPER') ? n.right : null;
+        if (reaperNeighbour && !reaperNeighbour.isDead) {
+            reaperNeighbour.candle.push(ghost);
+            log(p.name + ' Banished ' + ghost.r + ghost.s + '; ' + reaperNeighbour.name + ' (THE REAPER) took it to Candle.');
+        } else {
+            gameState.lastDiscardByPlayerId = p.id;
+            gameState.discard.push(ghost);
+            log(p.name + ' Banished ' + ghost.r + ghost.s);
+        }
+        if (onComplete) onComplete();
     }
 
     function consumeGrimoireRejectionWritten() {
@@ -3480,7 +3582,7 @@
 
     function setGrimoireRejection(rank) {
         if (gameState.grimoireRejectionLastRank != null && rank === gameState.grimoireRejectionLastRank) {
-            showAlertModal('You cannot write the same name twice in a row (you may alternate—e.g. Ace, 5, Ace).', 'THE GRIMOIRE OF REJECTION');
+            showAlertModal('Same name cannot follow itself (e.g. Ace, then 5, then Ace is fine).', 'THE GRIMOIRE OF REJECTION');
             return;
         }
         gameState.grimoireRejectionRank = rank;
@@ -3665,7 +3767,7 @@
             updateUI();
             return;
         }
-        if (p.class.name === 'THE USERER') {
+        if (p.class.name === 'THE USURER') {
             var nUs = getNeighbours(p);
             if (!nUs.left && !nUs.right) { showAlertModal('No neighbour to target.', 'Ability'); return; }
             gameState.pendingAction = 'class';
@@ -3766,11 +3868,11 @@
             finishClassAbility();
             return;
         }
-        if (p.class.name === 'THE USERER') {
+        if (p.class.name === 'THE USURER') {
             if (t !== n.left && t !== n.right) { clearTargetMode(); updateUI(); return; }
-            if (!t || t.hand.length === 0) { showAlertModal(t.name + ' has no cards in hand.', 'THE USERER'); clearTargetMode(); updateUI(); return; }
-            gameState.pendingUsererSwap = { p: p, t: t, taken: 0, need: 2 };
-            openUsererSwapModal(t);
+            if (!t || t.hand.length === 0) { showAlertModal(t.name + ' has no cards in hand.', 'THE USURER'); clearTargetMode(); updateUI(); return; }
+            gameState.pendingUsurerSwap = { p: p, t: t, taken: 0, need: 2 };
+            openUsurerSwapModal(t);
             return;
         }
         if (idx == null || !p.hand[idx]) { clearTargetMode(); updateUI(); return; }
@@ -3788,27 +3890,27 @@
         }
     }
 
-    function finishUsererCollect(pu) {
+    function finishUsurerCollect(pu) {
         var taken = pu.taken || 0;
-        log(pu.p.name + ' (THE USERER) took ' + taken + ' card(s) from ' + pu.t.name + "'s hand.");
+        log(pu.p.name + ' (THE USURER) took ' + taken + ' card(s) from ' + pu.t.name + "'s hand.");
         if (pu.t.candle.length) {
             pu.t.hand.push(pu.t.candle.shift());
-            log(pu.t.name + ' drew 1 from Candle (THE USERER).');
+            log(pu.t.name + ' drew 1 from Candle (THE USURER).');
             if (typeof window.playSFX === 'function') window.playSFX('draw');
         } else {
             log(pu.t.name + ' had no Candle left to draw.');
         }
-        gameState.pendingUsererSwap = null;
+        gameState.pendingUsurerSwap = null;
         clearTargetMode();
         finishAction();
         updateUI();
     }
 
-    function openUsererSwapModal(target) {
-        var pu = gameState.pendingUsererSwap;
-        var msg = document.getElementById('userer-swap-msg');
-        var container = document.getElementById('userer-swap-cards');
-        var modal = document.getElementById('userer-swap-modal');
+    function openUsurerSwapModal(target) {
+        var pu = gameState.pendingUsurerSwap;
+        var msg = document.getElementById('usurer-swap-msg');
+        var container = document.getElementById('usurer-swap-cards');
+        var modal = document.getElementById('usurer-swap-modal');
         if (!container || !modal || !pu) return;
         var taken = pu.taken || 0;
         var need = pu.need || 2;
@@ -3822,16 +3924,16 @@
             (function (cardIdx) {
                 var el = mkCard(target.hand[cardIdx]);
                 el.style.cursor = 'pointer';
-                el.onclick = function () { resolveUsererSwap(cardIdx); };
+                el.onclick = function () { resolveUsurerSwap(cardIdx); };
                 container.appendChild(el);
             })(i);
         }
         modal.style.display = 'flex';
     }
 
-    function resolveUsererSwap(cardIdx) {
-        var pu = gameState.pendingUsererSwap;
-        var modal = document.getElementById('userer-swap-modal');
+    function resolveUsurerSwap(cardIdx) {
+        var pu = gameState.pendingUsurerSwap;
+        var modal = document.getElementById('usurer-swap-modal');
         if (!pu || cardIdx < 0 || cardIdx >= pu.t.hand.length) return;
         var take = pu.t.hand.splice(cardIdx, 1)[0];
         pu.p.hand.push(take);
@@ -3839,11 +3941,11 @@
         var need = pu.need || 2;
         if (pu.taken < need && pu.t.hand.length > 0) {
             if (modal) modal.style.display = 'none';
-            openUsererSwapModal(pu.t);
+            openUsurerSwapModal(pu.t);
             return;
         }
         if (modal) modal.style.display = 'none';
-        finishUsererCollect(pu);
+        finishUsurerCollect(pu);
     }
 
     function actionPanic() {
@@ -4091,7 +4193,7 @@
                     checkSaltInterrupt(ai, t, numCard, function () {
                         var cardCopy = { r: numCard.r, s: numCard.s, val: numCard.val, isFace: numCard.isFace };
                         if (ai.class && ai.class.name === 'THE WARLOCK' && (numCard.isFace || numCard.r === 'JOKER' || numCard.r === '★')) cardCopy.val = 10;
-                        cardCopy.hauntedBy = ai.id;
+                        tagHauntedGhost(cardCopy, ai, t);
                         var architectHasWall = t.shadow.some(function (g) { return g.isWall; });
                         if (t.class && t.class.name === 'THE CRYPTKEEPER' && architectHasWall) {
                             var wallIdx = -1;
@@ -4163,7 +4265,8 @@
     window.resolveMimeRedirectWithCard = resolveMimeRedirectWithCard;
     window.resolveHexCancel = resolveHexCancel;
     window.resolveCryptkeeperBlock = resolveCryptkeeperBlock;
-    window.resolveUsererSwap = resolveUsererSwap;
+    window.resolveUsurerSwap = resolveUsurerSwap;
+    window.resolvePlagueSpread = resolvePlagueSpread;
     window.resolveOracle = resolveOracle;
     window.resolveSeerChoice = resolveSeerChoice;
     window.actionHaunt = actionHaunt;
@@ -4233,6 +4336,8 @@
         }
     });
     document.addEventListener('DOMContentLoaded', function () {
+        loadGameSettings();
+        syncSaltSettingUI();
         drawTableSurface();
         var muteBtn = document.getElementById('btn-mute');
         if (muteBtn && typeof window.toggleMute === 'function') {

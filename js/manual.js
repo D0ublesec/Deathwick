@@ -25,7 +25,7 @@
         var label = '2–6 player';
         if (manualPoolSize === 2) label = '2-player (restricted)';
         else if (manualPoolSize === 38) label = '7+ player';
-        el.textContent = 'Drawing from ' + manualClassPool.length + ' classes (' + label + ' pool).';
+        el.textContent = 'Drawing from ' + manualClassPool.length + ' curses (' + label + ' pool).';
     }
 
     function updatePoolButtons() {
@@ -87,7 +87,7 @@
             return;
         }
         res.style.display = 'block';
-        var html = '<p class="picked-classes-heading">Selected classes (reference until Reset):</p>';
+        var html = '<p class="picked-classes-heading">Selected curses (reference until Reset):</p>';
         pickedClasses.forEach(function (cls, idx) {
             var label = (cls.playerLabel || ('Player ' + (idx + 1)));
             var safeLabel = label.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
@@ -112,7 +112,7 @@
 
     window.drawClassesManual = function () {
         if (manualClassPool.length < 3) {
-            alert('Reset required (need at least 3 classes).');
+            alert('Reset required (need at least 3 curses).');
             return;
         }
         var idx1 = Math.floor(Math.random() * manualClassPool.length);
@@ -191,7 +191,7 @@
     }
 
     function populateManual() {
-        var section = document.getElementById('classes');
+        var section = document.getElementById('curses');
         var grid = document.getElementById('manual-class-grid');
         if (!section || !grid) return;
 
@@ -199,7 +199,7 @@
         if (!searchWrap) {
             var input = document.createElement('input');
             input.type = 'search';
-            input.placeholder = 'Search classes by name or description…';
+            input.placeholder = 'Search curses by name or description…';
             input.id = 'manual-class-search';
             input.className = 'manual-class-search-input';
             input.setAttribute('aria-label', 'Search classes');
@@ -229,6 +229,83 @@
     loadFromStorage();
     updatePoolStatus();
     updatePoolButtons();
+
+    (function initManualCollapsible() {
+        var manualView = document.getElementById('manual-view');
+        if (!manualView) return;
+
+        var sections = manualView.querySelectorAll('section[id]');
+
+        function toggleSection(section, expand) {
+            section.classList.toggle('is-expanded', expand);
+            section.classList.toggle('is-collapsed', !expand);
+            var btn = section.querySelector('.manual-section-toggle-btn');
+            if (btn) btn.setAttribute('aria-expanded', expand ? 'true' : 'false');
+        }
+
+        sections.forEach(function (section) {
+            var h2 = section.querySelector(':scope > h2');
+            if (!h2) return;
+
+            var body = document.createElement('div');
+            body.className = 'manual-section-body';
+            body.id = section.id + '-body';
+
+            var node = h2.nextElementSibling;
+            while (node) {
+                var next = node.nextElementSibling;
+                body.appendChild(node);
+                node = next;
+            }
+
+            section.classList.add('manual-section', 'is-collapsed');
+            h2.classList.add('manual-section-toggle');
+
+            var titleText = h2.textContent;
+            h2.textContent = '';
+            var btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'manual-section-toggle-btn';
+            btn.setAttribute('aria-expanded', 'false');
+            btn.setAttribute('aria-controls', body.id);
+            btn.innerHTML = '<span class="manual-section-chevron" aria-hidden="true">&#9654;</span><span class="manual-section-title">' + titleText + '</span>';
+            h2.appendChild(btn);
+            section.appendChild(body);
+
+            btn.addEventListener('click', function () {
+                toggleSection(section, section.classList.contains('is-collapsed'));
+            });
+        });
+
+        function expandAll() {
+            sections.forEach(function (section) { toggleSection(section, true); });
+        }
+
+        function collapseAll() {
+            sections.forEach(function (section) { toggleSection(section, false); });
+        }
+
+        var expandBtn = document.getElementById('manual-expand-all');
+        var collapseBtn = document.getElementById('manual-collapse-all');
+        if (expandBtn) expandBtn.addEventListener('click', expandAll);
+        if (collapseBtn) collapseBtn.addEventListener('click', collapseAll);
+
+        function expandForHash() {
+            var hash = location.hash.slice(1);
+            if (hash === 'classes') hash = 'curses';
+            if (!hash) return;
+            var target = document.getElementById(hash);
+            if (!target) return;
+            var section = target.closest('section');
+            if (section) toggleSection(section, true);
+            requestAnimationFrame(function () {
+                target.scrollIntoView({ block: 'start' });
+            });
+        }
+
+        expandForHash();
+        window.addEventListener('hashchange', expandForHash);
+    })();
 
     (function initCardPreview() {
         var preview = document.getElementById('grimoire-card-preview');

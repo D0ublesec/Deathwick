@@ -196,6 +196,7 @@
         if (sfxVal) sfxVal.textContent = sfxVolume;
         if (musicSlider) musicSlider.oninput = function () { window.setMusicVolume(parseInt(musicSlider.value, 10)); if (musicVal) musicVal.textContent = musicVolume; };
         if (sfxSlider) sfxSlider.oninput = function () { sfxVolume = parseInt(sfxSlider.value, 10); if (sfxVal) sfxVal.textContent = sfxVolume; saveSettings(); };
+        if (typeof window.syncSaltSettingUI === 'function') window.syncSaltSettingUI();
         if (modal) modal.style.display = 'flex';
     };
 
