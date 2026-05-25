@@ -35,7 +35,7 @@
 
     function applyClassToPlayer(p, cls) {
         p.class = cls;
-        if (cls.name === 'THE VOODOO DOLL') p.voodooSuits = ['♣', '♦']; /* two lowest suits (suit tier) */
+        if (cls.name === 'THE VOODOO DOLL') p.voodooSuits = ['♠', '♣', '♦']; /* all suits except Hearts */
     }
 
     function resolveClassPickFromOffer(p, className, choices, pool) {
@@ -348,7 +348,7 @@
     var CHEATSHEET_REST = '<section class="cs-section"><h3>Ritual actions</h3><ul class="cs-list"><li><strong>Haunt:</strong> number card to a neighbour\'s Shadow.</li><li><strong>Banish:</strong> match/beat a Ghost in your Shadow.</li><li><strong>Séance:</strong> pair → heal 4 from The Dark.</li><li><strong>Cast</strong> (number cards) / <strong>Summon</strong> (face cards &amp; Jokers): use card effect (see Grimoire).</li><li><strong>Flicker:</strong> shuffle hand, draw 3.</li><li><strong>Ability:</strong> class power.</li><li><strong>Abstain:</strong> skip your Ritual action (uses your action this turn).</li></ul></section>' +
         '<section class="cs-section"><h3>Banish &amp; Siphon</h3><ul class="cs-list"><li><strong>Banish:</strong> play a card on a ghost in your Shadow (equal or higher value; suit tier breaks ties).</li><li><strong>Siphon (Heal):</strong> when your Banish card\'s rank matches the ghost (or Cleanse 7 suit matches), put the ghost on the bottom of your Candle instead of The Dark. Spades cannot be Siphoned.</li><li><strong>Face cards:</strong> J, Q, and K only. <strong>Jokers</strong> are separate (Summoned for BOO!). <strong>The Warlock</strong> may Haunt with a face card or Joker (strength 10).</li></ul></section>' +
         '<section class="cs-section"><h3>Targeting</h3><p>Most effects target one of your two Neighbours (left/right) unless a card or class says otherwise (e.g. <strong>Drain (4)</strong> hits all neighbours; <strong>Greed (2)</strong> = any player; THE OCCULTIST 9 = any player).</p></section>' +
-        '<section class="cs-section"><h3>Grimoire</h3><table class="cs-table"><tr><td>A or 1</td><td>Reprieve</td><td>At the start of your turn you may play the Ace to skip the Haunting phase (you do not Burn); you then Draw and perform the Ritual as normal.</td></tr><tr><td>2</td><td>Greed</td><td>Choose any player; they draw 2 from their Candle. You then take another Ritual action.</td></tr><tr><td>3</td><td>Scare</td><td>Choose a neighbour; they shuffle hand, discard 2 to The Dark.</td></tr><tr><td>4</td><td>Drain</td><td>Take the top two cards from each neighbour\'s Candle and place them on your Candle.</td></tr><tr><td>5</td><td>Salt</td><td>Reaction: cancel any player’s Action except Ace (both to The Dark). The 5 can also be used to Haunt (strength 5).</td></tr><tr><td>6</td><td>Sight</td><td>View a neighbour\'s hand and take two cards.</td></tr><tr><td>7</td><td>Cleanse</td><td>Banish 1 Ghost (to The Dark or Siphon to your Candle).</td></tr><tr><td>8</td><td>Recall</td><td>Take a Ghost from any Shadow to your hand.</td></tr><tr><td>9</td><td>Possess</td><td>Move a Ghost from your Shadow to a neighbour\'s Shadow.</td></tr><tr><td>10</td><td>Rekindle</td><td>Top 3 from The Dark to your Candle, then shuffle Candle.</td></tr><tr><td>J</td><td>Mirror</td><td>Choose a neighbour and swap your Shadow with their Shadow.</td></tr><tr><td>Q</td><td>Medium</td><td>Search Dark, take 1 (numbers or faces; no Joker), OR bottom 2 (no search) → Candle then shuffle.</td></tr><tr><td>K</td><td>Purge</td><td>Banish all Ghosts in your Shadow (to The Dark / Siphon).</td></tr><tr><td>★</td><td>BOO!</td><td>Others Burn until number (to The Dark); number → Ghost in their Shadow.</td></tr></table></section>';
+        '<section class="cs-section"><h3>Grimoire</h3><table class="cs-table"><tr><td>A or 1</td><td>Reprieve</td><td>At the start of your turn you may play the Ace to skip the Haunting phase (you do not Burn); you then Draw and perform the Ritual as normal.</td></tr><tr><td>2</td><td>Greed</td><td>Choose any player; they draw 2 from their Candle. You then take another Ritual action.</td></tr><tr><td>3</td><td>Scare</td><td>Choose a neighbour; they shuffle hand, blindly discard 2 to The Dark.</td></tr><tr><td>4</td><td>Drain</td><td>Take the top two cards from each neighbour\'s Candle and place them on your Candle.</td></tr><tr><td>5</td><td>Salt</td><td>Reaction: cancel any player’s Action except Ace (both to The Dark). The 5 can also be used to Haunt (strength 5).</td></tr><tr><td>6</td><td>Sight</td><td>View a neighbour\'s hand and take two cards.</td></tr><tr><td>7</td><td>Cleanse</td><td>Banish 1 Ghost (to The Dark or Siphon to your Candle).</td></tr><tr><td>8</td><td>Recall</td><td>Take a Ghost from any Shadow to your hand.</td></tr><tr><td>9</td><td>Possess</td><td>Move a Ghost from your Shadow to a neighbour\'s Shadow.</td></tr><tr><td>10</td><td>Rekindle</td><td>Top 3 from The Dark to your Candle, then shuffle Candle.</td></tr><tr><td>J</td><td>Mirror</td><td>Choose a neighbour and swap your Shadow with their Shadow.</td></tr><tr><td>Q</td><td>Medium</td><td>Search Dark, take 1 (numbers or faces; no Joker), OR bottom 2 (no search) → Candle then shuffle.</td></tr><tr><td>K</td><td>Purge</td><td>Banish all Ghosts in your Shadow (to The Dark / Siphon).</td></tr><tr><td>★</td><td>BOO!</td><td>Others Burn until number (to The Dark); number → Ghost in their Shadow.</td></tr></table></section>';
 
     function getCheatsheetHTML() {
         return '<section class="cs-section"><h3>Win</h3><p>Be the last player with a lit Candle.</p></section>' +
@@ -3188,13 +3188,13 @@
                     numDiscard = Math.min(numDiscard, target.hand.length);
                     var discardedLog = [];
                     for (var d = 0; d < numDiscard; d++) {
-                        var discardIdx = p.class && p.class.name === 'THE SADIST' ? 0 : Math.floor(Math.random() * target.hand.length);
+                        var discardIdx = Math.floor(Math.random() * target.hand.length);
                         var discarded = target.hand.splice(discardIdx, 1)[0];
                         gameState.lastDiscardByPlayerId = target.id;
                         gameState.discard.push(discarded);
                         discardedLog.push(discarded.r + discarded.s);
                     }
-                    log(p.name + ' Scare: ' + target.name + ' discarded ' + discardedLog.join(', ') + (p.class && p.class.name === 'THE SADIST' ? ' (THE SADIST chose).' : '.'));
+                    log(p.name + ' Scare: ' + target.name + ' discarded ' + discardedLog.join(', ') + (p.class && p.class.name === 'THE SADIST' ? ' (THE SADIST: 3 cards).' : '.'));
                 }
                 break;
             case '2':
