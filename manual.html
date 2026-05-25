@@ -110,10 +110,10 @@
                 <li>Deal exactly <strong>27 cards</strong> (half a deck) to each player. This is your <strong>Candle</strong>.</li>
                 <li>Place any remaining undealt cards <strong>Face Up</strong> into <strong>THE DARK</strong> (Discard Pile) to start the game.</li>
                 <li>Each player draws <strong>3 cards</strong> from their Candle into their hand; this is their <strong>starting hand</strong>.</li>
-                <li><strong>Turn order:</strong> Decide who goes first (class selection will follow this order; see <a href="#class-selection">Class selection</a> below).
+                <li><strong>Turn order:</strong> Decide who goes first (class selection follows this order; see <a href="#class-selection">Class selection</a> below).
                     <ul>
-                        <li><strong>Physical (choose one):</strong> Last person to <strong>light a candle</strong> goes first; or last person to <strong>tell a ghost story</strong> goes first; or last person to <strong>watch a horror movie</strong> goes first. Alternatively, <strong>The Chilling Touch:</strong> all players touch the hand of the person to their left; the player with the <strong>Coldest Hands</strong> goes first.</li>
-                        <li><strong>Digital / online:</strong> Host chooses who starts, or Random.</li>
+                        <li><strong>Physical (choose one tiebreaker):</strong> Last person to <strong>light a candle</strong>; or last to <strong>tell a ghost story</strong>; or last to <strong>watch a horror movie</strong>; or <strong>The Chilling Touch</strong> (coldest hands). The player who wins that tiebreaker then chooses whether to <strong>go first</strong> (pick first in class selection and act first each round) or <strong>go last</strong> (pick last in class selection and act last each round). Both have advantages and disadvantages.</li>
+                        <li><strong>Digital / online:</strong> Agree who won the tiebreaker at the table, then select that player and whether they go first or last; or use Random.</li>
                     </ul>
                 </li>
                 <li style="border: 1px solid var(--accent-color); padding: 10px; border-radius: 4px; background: #2a1a1a;">
@@ -126,12 +126,13 @@
                 </li>
             </ol>
 
-            <h3 id="ritual-type">The Empty Candle Rule</h3>
-            <p>If your Candle has <strong>no cards</strong> when the rules require you to take one from it, you are <strong>Consumed by the Darkness immediately</strong>, even mid-turn. There is no “last full turn” if you burn or spend your last card at the wrong time.</p>
+            <h3 id="ritual-type">Consumed by the Darkness (Empty Candle)</h3>
+            <p>You are <strong>Consumed by the Darkness</strong> only when your Candle is empty at one of these two checks:</p>
             <ul class="setup-list">
-                <li><strong>On your turn:</strong> The first moment your Candle is empty when you need a card (to Burn during the Haunting, to Draw, or because an effect used one), you are Consumed. You do not get to finish your action or take a last turn.</li>
-                <li><strong>When it is not your turn:</strong> If your Candle becomes empty because cards were removed or burned while it is not your turn (e.g. <strong>BOO!</strong>, <strong>Drain</strong>), you are Consumed immediately.</li>
+                <li><strong>The Draw:</strong> At the start of your turn, after the Haunting, you must Draw 1 from your Candle. If it is empty, you are Consumed.</li>
+                <li><strong>Am I Alive?</strong> At the end of your turn, after The Burden, if your Candle is empty, you are Consumed.</li>
             </ul>
+            <p>Running out of cards during the Haunting, mid-action, or on another player’s turn does <strong>not</strong> eliminate you on the spot—you are checked at Draw or at the end of your turn only.</p>
 
             <h3 id="possession-rule">Possession</h3>
             <p>Possession works differently from an empty Candle. You are <strong>not</strong> eliminated the moment a ghost is added outside your turn. <strong>Possession is checked only at the end of your turn</strong> (after your one action and The Burden).</p>
@@ -144,7 +145,7 @@
         <section id="class-selection">
             <h2>Class Selection</h2>
             <h3 id="calling">The Calling</h3>
-            <p>Once turn order is set, each player chooses a class. <strong>Class selection follows turn order</strong>: the player who goes first picks first, then the next in order, and so on. Each is offered <strong>3 random classes</strong> and chooses one (the last to pick sees all previous choices, a minor advantage).</p>
+            <p>Once turn order is set, each player chooses a class. <strong>Class selection follows turn order</strong>: the player who goes first picks first, then the next in order, and so on. Each is offered <strong>3 random classes</strong> and chooses one (the last to pick sees all previous choices—a minor advantage). The tiebreaker winner may choose to go first or last when setting turn order.</p>
             <p style="border: 1px solid var(--accent-color); padding: 10px; border-radius: 4px; background: #1a1a22;"><strong>2-player games:</strong> These classes are excluded from the 2-player pool because they play poorly or feel unsatisfying with only 2 players: <strong>The Mime</strong>, <strong>The Watcher</strong>, <strong>The Occultist</strong>, <strong>The Lich</strong>, <strong>The Plague</strong>, <strong>The Vulture</strong>, <strong>The Witness</strong>. The digital game and the Random Selector below remove them automatically when you choose 2 players.</p>
             <h4 style="margin-top:1em;">Classes available by group size</h4>
             <table class="manual-ref-table" style="max-width:32em;">
@@ -367,12 +368,18 @@
                 <dd>For tie-breaking: <span class="suit-spades">♠</span> &gt; <span class="suit-hearts">♥</span> &gt; <span class="suit-clubs">♣</span> &gt; <span class="suit-diamonds">♦</span> (Spades, Hearts, Clubs, Diamonds).</dd>
             </dl>
             <h3>The Haunting</h3>
-            <p>Look at your <strong>Shadow</strong>. For <strong>each ghost</strong> in your Shadow, <strong>burn 1 card</strong> from the top of your Candle (place it face up on top of The Dark). The Haunting phase can be skipped if you invoke the <strong>Ace (Reprieve)</strong> at the start of your turn: play the Ace to skip Burning this turn, then Draw and perform the Ritual as normal.</p>
+            <p>Look at your <strong>Shadow</strong>. The Haunting phase can be skipped if you invoke the <strong>Ace (Reprieve)</strong> at the start of your turn: play the Ace to skip Burning this turn, then Draw and perform the Ritual as normal.</p>
+            <p>If you have <strong>any ghosts</strong> in your Shadow, choose once before you Burn:</p>
+            <ul class="setup-list">
+                <li><strong>Endure</strong> — Burn one card from your Candle for each ghost (face up on top of The Dark), then continue your turn.</li>
+                <li><strong>Panic</strong> — Choose one ghost in your Shadow and reveal the <strong>top card of your Candle</strong> (you do not look first). Compare: number cards use rank (Ace = 1); J, Q, K count as <strong>10</strong>; face-rank ghosts count as <strong>10</strong>. <strong>Higher or equal</strong> = success (ghost and revealed card to The Dark). <strong>Lower</strong> = failure (ghost stays; revealed card becomes a new ghost). Then Burn for any ghosts still in your Shadow. You may Panic at most once per turn.</li>
+            </ul>
+            <p class="ritual-action-detail" style="margin-top:0.75rem;"><strong>Joker (Panic):</strong> Instant success; you siphon the ghost (unless it is a Spade). <strong>Walls:</strong> You cannot Panic against a Wall (The Cryptkeeper).</p>
+            <p>If you have <strong>no ghosts</strong>, there is no Burning—proceed to The Draw.</p>
             <h3>The Draw</h3>
             <p><strong>Draw 1 card</strong> from the top of your Candle into your hand.</p>
             <h3>The Ritual</h3>
             <p>Perform <strong>exactly one</strong> of the following actions, or <strong>Abstain</strong>:</p>
-            <p><strong>Candle when it is not your turn:</strong> If your Candle loses cards while it is <strong>not</strong> your turn (for example during another player’s <strong>BOO!</strong>, <strong>Drain</strong>, or similar) and your Candle becomes <strong>empty</strong>, you are <strong>Consumed by the Darkness</strong> immediately.</p>
             <div class="ritual-actions">
                 <div class="ritual-action">
                     <h4 class="ritual-action-name">HAUNT <span class="ritual-action-tag">Attack</span></h4>
@@ -402,13 +409,6 @@
                     <p class="ritual-action-summary">Discard a <strong>matching pair</strong> from your hand to the top of The Dark (two cards of the same rank). Take the <strong>bottom 4 cards</strong> of The Dark and add them to the bottom of your Candle.</p>
                 </div>
                 <div class="ritual-action">
-                    <h4 class="ritual-action-name">PANIC <span class="ritual-action-tag">Desperation</span></h4>
-                    <p class="ritual-action-summary">First, choose <strong>one ghost in your Shadow</strong> to target. Then reveal the <strong>top card of your Candle</strong> (you do not look first). Compare it to <em>that</em> ghost: number cards use their rank (Ace = 1); a revealed Jack, Queen, or King counts as <strong>10</strong> for this comparison; face-rank ghosts likewise count as <strong>10</strong>. <strong>Higher or equal</strong> = success (the ghost is banished to The Dark, and the revealed card goes to The Dark). <strong>Lower</strong> = failure (the original ghost stays, and the <strong>revealed card becomes a new ghost</strong> in your Shadow). If that new ghost is a face card, it is a face-rank ghost (value 10 for future Banish and Panic).</p>
-                    <div class="ritual-action-detail">
-                        <strong>Joker:</strong> Instant success; you siphon the ghost (unless it is a Spade).
-                    </div>
-                </div>
-                <div class="ritual-action">
                     <h4 class="ritual-action-name">ABSTAIN <span class="ritual-action-tag">Skip</span></h4>
                     <p class="ritual-action-summary">If you cannot (or choose not to) perform another Ritual action, you may Abstain. Abstaining uses your action for the turn and has no additional cost.</p>
                 </div>
@@ -416,10 +416,10 @@
             <h3>The Burden</h3>
             <p>Discard down to your hand limit (usually 5 cards).</p>
             <h3>Am I Alive?</h3>
-            <p><strong>Candle check:</strong> If your Candle is empty, you are <strong>Consumed by the Darkness</strong> and are eliminated.</p>
+            <p><strong>Candle check:</strong> If your Candle is empty at the end of your turn, you are <strong>Consumed by the Darkness</strong> and are eliminated (see <a href="#ritual-type">Consumed by the Darkness</a>).</p>
             <p><strong>Possession check:</strong> See <a href="#possession-rule">Possession</a>.</p>
             <p><strong>When you die:</strong> When you are eliminated (Consumed or Possessed), any ghosts in your Shadow are split evenly between your two neighbours. If the number is odd, you decide who gets the extra ghost. See <a href="#faq-death-ghosts">FAQ: When a player is eliminated</a> for details.</p>
-            <p><em>Note:</em> At the <strong>start</strong> of your turn (The Haunting), you burn one card per ghost before you draw. If your Candle is empty when you must burn, you are Consumed then. If your Candle becomes empty <strong>at any point during</strong> your turn, you are also Consumed immediately (see <a href="#ritual-type">The Empty Candle Rule</a>).</p>
+            <p><em>Note:</em> An empty Candle eliminates you only at <strong>The Draw</strong> or <strong>Am I Alive?</strong> (see <a href="#ritual-type">Consumed by the Darkness</a>).</p>
         </section>
 
         <section id="grimoire">
@@ -434,7 +434,7 @@
                 <thead><tr><th>Card</th><th>Rank</th><th>Name</th><th>Effect</th></tr></thead>
                 <tbody>
                     <tr><td><img class="grimoire-card-img" src="images/cards/ranks/ace/deathwick_ace_spades.png" alt="Ace of Spades"></td><td>A or 1</td><td>REPRIEVE</td><td class="grimoire-effect">At the start of your turn you may play the Ace to skip the Haunting phase (you do not Burn this turn); you then Draw and perform the Ritual as normal.</td></tr>
-                    <tr><td><img class="grimoire-card-img" src="images/cards/ranks/two/deathwick_2_spades.png" alt="2 of Spades"></td><td>2</td><td>GREED</td><td class="grimoire-effect">Draw 3 cards to your hand.</td></tr>
+                    <tr><td><img class="grimoire-card-img" src="images/cards/ranks/two/deathwick_2_spades.png" alt="2 of Spades"></td><td>2</td><td>GREED</td><td class="grimoire-effect">Choose any player (including yourself). They draw 2 cards from their Candle to their hand. You then perform an additional Ritual action this turn.</td></tr>
                     <tr><td><img class="grimoire-card-img" src="images/cards/ranks/three/deathwick_3_spades.png" alt="3 of Spades"></td><td>3</td><td>SCARE</td><td class="grimoire-effect">Choose a neighbour. They shuffle their hand and blindly discard 2 cards to The Dark.</td></tr>
                     <tr><td><img class="grimoire-card-img" src="images/cards/ranks/four/deathwick_4_spades.png" alt="4 of Spades"></td><td>4</td><td>DRAIN</td><td class="grimoire-effect">Take the top two cards from each neighbour's Candle and place them on your Candle.</td></tr>
                     <tr><td><img class="grimoire-card-img" src="images/cards/ranks/five/deathwick_5_spades.png" alt="5 of Spades"></td><td>5</td><td>SALT</td><td class="grimoire-effect"><strong>Reaction:</strong> Cancel any player’s Action (except the Ace); your Salt and their card go to The Dark (see Salt section below).</td></tr>
@@ -458,7 +458,7 @@
                     <thead><tr><th>Rank</th><th>Name</th><th>Effect</th></tr></thead>
                     <tbody>
                         <tr><td>A or 1</td><td>Reprieve</td><td class="manual-ref-effect">At start of turn: play Ace to skip the Haunting phase (no Burn); then Draw and perform the Ritual as normal.</td></tr>
-                        <tr><td>2</td><td>Greed</td><td class="manual-ref-effect">Draw 3 to your hand.</td></tr>
+                        <tr><td>2</td><td>Greed</td><td class="manual-ref-effect">Choose any player (including you); they draw 2 from their Candle. You then take another Ritual action.</td></tr>
                         <tr><td>3</td><td>Scare</td><td class="manual-ref-effect">Choose a neighbour; they shuffle hand, discard 2 to The Dark.</td></tr>
                         <tr><td>4</td><td>Drain</td><td class="manual-ref-effect">Take the top two cards from each neighbour's Candle and place them on your Candle.</td></tr>
                         <tr><td>5</td><td>Salt</td><td class="manual-ref-effect">Reaction: cancel any player’s Action except Ace (both to The Dark). The 5 can also be used to Haunt (strength 5).</td></tr>
@@ -533,11 +533,12 @@
             </ul>
             <p>When a player is eliminated, ghosts from their Shadow pass to neighbours as above. Receiving those ghosts does <strong>not</strong> cause instant Possession; you are checked at the <strong>end of your turn</strong> only (see <a href="#possession-rule">Possession</a>).</p>
             <h3>Consumed by the Darkness</h3>
-            <p><strong>When does an empty Candle eliminate you?</strong> See <a href="#ritual-type">The Empty Candle Rule</a>.</p>
+            <p><strong>When does an empty Candle eliminate you?</strong> Only at <strong>The Draw</strong> (cannot draw after the Haunting) or <strong>Am I Alive?</strong> (end of your turn). See <a href="#ritual-type">Consumed by the Darkness</a>.</p>
             <p><strong>Summary:</strong></p>
             <ul class="manual-bullets">
-                <li><strong>Any time, any turn:</strong> If your Candle becomes <strong>empty</strong> because cards were <strong>burned or removed when it was not your turn</strong> (e.g. BOO!, Drain), you are <strong>Consumed immediately</strong>.</li>
-                <li><strong>On your turn:</strong> If your Candle is empty <strong>at any moment</strong> (e.g. when you must Burn, when you must Draw, or mid-turn), you are <strong>Consumed immediately</strong>. No second chances; you do not get to finish your action or take a last turn.</li>
+                <li><strong>The Draw:</strong> After the Haunting, if your Candle is empty when you must Draw 1, you are <strong>Consumed</strong>.</li>
+                <li><strong>Am I Alive?:</strong> At the end of your turn, if your Candle is empty, you are <strong>Consumed</strong>.</li>
+                <li><strong>Not immediate:</strong> Burning with an empty Candle, losing cards on another player’s turn (BOO!, Drain, etc.), or spending your last cards mid-action does not eliminate you until one of the two checks above.</li>
             </ul>
             <h3 id="faq-possession">Possession</h3>
             <p>See <a href="#possession-rule">Possession</a> in setup for the full rule. In short: checked at <strong>end of your turn</strong> only; ghosts added on other players’ turns give you until your turn ends to answer.</p>
@@ -548,21 +549,21 @@
             </ul>
             <h3>Other common questions</h3>
             <ul class="faq-list">
-                <li><strong>What does “once per turn” mean?</strong> It depends on whose turn is relevant. For <strong>your own</strong> abilities (e.g. a class action like The Pyromaniac’s “Once per turn”), it means once per <strong>your</strong> turn; it resets at the start of your next turn. For <strong>reactions to another player</strong> (e.g. <strong>The Unseen</strong> cancelling a Haunt, or <strong>The Hex</strong> cancelling with a matching rank), it means once per <strong>that other player’s turn</strong>; so each different attacker has one chance per their turn to be cancelled; The Unseen can cancel once per attacker per round. See the Edge cases below for Haunt vs The Unseen / The Hex.</li>
+                <li><strong>What does “once per turn” mean?</strong> For <strong>your own</strong> abilities (e.g. The Pyromaniac’s burn, The Doomreader’s banish), it means once per <strong>your</strong> turn; it resets at the start of your next turn. Reactions to someone else’s Haunt (e.g. <strong>The Unseen</strong> or <strong>The Hex</strong>) happen when that Haunt is played—you do not need a separate “once per turn” rule for those.</li>
                 <li><strong>What if I can’t play a valid action?</strong> You may <strong>Abstain</strong> from your Ritual action. This is especially common when your hand is all face cards and Jokers and your class does not allow Haunting with them (see <a href="#faq-haunt-classes">Haunting and class exceptions</a>).</li>
                 <li><strong>The Silence and Salt:</strong> The Silence's actions cannot be interrupted by Salt (5), including when they Summon BOO! (Joker). If The Silence plays a Joker, defenders cannot Salt it.</li>
                 <li><strong>Salt vs BOO! (Joker):</strong> When someone plays BOO! (Joker), <strong>each other player is targeted separately</strong>. Each of those players must Burn until they reveal a number (that number becomes a Ghost in their Shadow), unless they use their <strong>own</strong> Salt. <strong>Each person who wants to avoid the Burn must Salt the BOO! themselves</strong>: your Salt only protects you, not the other players. If you use Salt when BOO! targets you, your Salt goes to The Dark and the BOO! has no effect on you (you do not Burn). The only exception is <strong>The Silence</strong>; if they played the Joker, no one can Salt it.</li>
                 <li><strong>The Mime and Salt:</strong> When The Mime redirects a Haunt to you (you are their other neighbour), that redirect is an action targeting you. You may use <strong>Salt (5)</strong> to cancel it: your Salt and the Mime’s discarded card go to The Dark, and the ghost does not enter your Shadow (it stays in The Mime’s Shadow).</li>
-                <li><strong>The Grimoire of Rejection:</strong> Use your <strong>Ability</strong> to write a card name (this does <strong>not</strong> use your Ritual action). You may reveal it whenever you want to cancel <strong>any player’s</strong> play of that card. The cancel <strong>cannot be interrupted by Salt</strong>. You cannot change the written name until it has been consumed (activated); then you may write a new one on a later turn. <strong>Same name cannot follow itself</strong> (e.g. Ace, then 5, then Ace is fine). You may still perform a Ritual action on the same turn you write.</li>
-                <li><strong>The Voodoo Doll:</strong> When The Voodoo Doll <strong>burns during the Haunting</strong> (start of their turn), the reflection strikes: for each ghost in their Shadow that is Clubs <span class="suit-clubs">♣</span> or Diamonds <span class="suit-diamonds">♦</span>, the player who <strong>Haunted</strong> that ghost must also Burn 1. So the person who Haunted the Voodoo is affected <strong>each turn</strong> (when the Voodoo burns), not only once when the Haunt happened. Only ghosts that were added by a Haunt (number card from hand) are tracked. Spades and Hearts have no effect.</li>
-                <li><strong>Voodoo Doll vs Mirror (J), Possess (9), or BOO! (Joker):</strong> The reflection applies only to ghosts that were <strong>Haunted</strong> onto the Voodoo (so the haunter is tracked). <strong>Mirror</strong>, <strong>Possess</strong>, and <strong>BOO!</strong> do not add a “haunter” in the same way, so they do not trigger the Voodoo reflection when the Voodoo burns. If a card leaves the Voodoo’s Shadow and later re-enters via a Haunt (♣ or ♦), that Haunt is tracked and the attacker will burn 1 each turn when the Voodoo burns.</li>
-                <li><strong>When a Joker (BOO!) is played, how does the Burn work?</strong> <strong>Each other player</strong> is affected separately: each must Burn from the top of their Candle one card at a time until they reveal a <strong>number card</strong> (A–10); that number becomes a Ghost in their Shadow. (Face cards and Jokers go to The Dark and they Burn again.) If their Candle runs out before a number, they are Consumed. <strong>Each player who wants to avoid the Burn must use their own Salt</strong>; one Salt only protects the person who played it, not everyone. (Exception: if The Silence played the Joker, no one can Salt it.)</li>
+                <li><strong>The Grimoire of Rejection:</strong> Use your <strong>Ability</strong> to write a card name (this does <strong>not</strong> use your Ritual action). Reveal it to cancel a <strong>neighbour’s</strong> play of that card only. The cancel <strong>cannot be interrupted by Salt</strong>. You cannot change the written name until it has been consumed (activated); then you may write a new one on a later turn. <strong>Same name cannot follow itself</strong> (e.g. Ace, then 5, then Ace is fine). You may still perform a Ritual action on the same turn you write.</li>
+                <li><strong>The Voodoo Doll:</strong> Each turn at the Haunting, for each ghost in the Voodoo’s Shadow that is <strong>Clubs <span class="suit-clubs">♣</span> or Diamonds <span class="suit-diamonds">♦</span></strong> and was added by a <strong>Haunt</strong> (tracked haunter), that haunter must also Burn 1. Spades and Hearts never reflect. This repeats every turn while that ghost remains.</li>
+                <li><strong>Voodoo Doll — Haunt, Mirror, and Possess:</strong> Only ghosts <strong>Haunted</strong> onto the Voodoo (number-card Haunt with a tracked haunter) can reflect. <strong>Haunting</strong> the Voodoo with <strong>♣ or ♦</strong> marks you as haunter; each of the Voodoo’s turns you Burn 1 while that ghost sits in their Shadow. <strong>Mirror (J)</strong> and <strong>Possess (9)</strong> move ghosts without changing who Haunted them—if a tracked ♣/♦ ghost leaves the Voodoo’s Shadow and returns (swapped back, possessed back, or mirrored again), the same haunter still reflects. <strong>BOO!</strong> and other effects that do not Haunt do not create a haunter and do not reflect.</li>
+                <li><strong>When a Joker (BOO!) is played, how does the Burn work?</strong> <strong>Each other player</strong> is affected separately: each must Burn from the top of their Candle one card at a time until they reveal a <strong>number card</strong> (A–10); that number becomes a Ghost in their Shadow. (Face cards and Jokers go to The Dark and they Burn again.) If their Candle runs out before a number, they are not eliminated immediately—they are checked at <strong>The Draw</strong> or <strong>Am I Alive?</strong> <strong>Each player who wants to avoid the Burn must use their own Salt</strong>; one Salt only protects the person who played it, not everyone. (Exception: if The Silence played the Joker, no one can Salt it.)</li>
                 <li><strong>If two effects happen at once (e.g. death and “when a neighbour dies”), who resolves first?</strong> The active player’s triggers resolve first, then clockwise. If still unclear, rule in favour of the defending player.</li>
                 <li><strong>Concurrent Flames: do the two (or three) players take turns with each other?</strong> No. Each concurrent player takes one full turn (Burn, Draw, One Action, Discard) in parallel; they do not interrupt each other’s turn.</li>
             </ul>
             <h3>Edge cases</h3>
             <ul class="faq-list">
-                <li><strong>Voodoo Doll + Mirror / Possess / Joker.</strong> See FAQ above: reflection happens each turn when the Voodoo burns; only ghosts that were Haunted onto the Voodoo (♣/♦) cause the haunter to burn. Mirror, Possess, and BOO! do not trigger it.</li>
+                <li><strong>Voodoo Doll + Mirror / Possess / Joker.</strong> See FAQ above: ♣/♦ Haunted ghosts reflect each Voodoo turn; Mirror and Possess keep the original haunter when ghosts move; swapping or possessing back does not clear reflection. BOO! does not Haunt and does not reflect.</li>
                 <li><strong>Mirror (J) or Possess (9) vs The Gatekeeper.</strong> Blocked; card not spent.</li>
                 <li><strong>Recall (8), Possess (9), or Mirror (J) vs The Sealbinder.</strong> Ghosts that The Sealbinder Haunted cannot be moved (Possess or Mirror) or returned (Recall). If either Shadow in a Mirror swap contains such a Ghost, the play is blocked; card not spent.</li>
                 <li><strong>Banish vs The Clown.</strong> Ghosts that The Clown Haunted reject <strong>Banish</strong> with a <strong>number card</strong> other than <strong>Cast Cleanse (7)</strong>; the play is blocked. You can still use a <strong>Jack</strong>, <strong>Queen</strong>, or <strong>King</strong> either as <strong>Banish</strong> (one ghost, value 10) or as <strong>Summon</strong> (Mirror, Medium, Purge, etc.).</li>
@@ -580,8 +581,17 @@
                 <li><strong>The Plague.</strong> When a ghost that The Plague Haunted is Banished (and not Siphoned), it spreads to a <strong>neighbour of the Banisher</strong> instead of The Dark. Each time it is Banished again, it passes to one of <strong>that</strong> player’s neighbours. A plagued ghost <strong>cannot visit the same player twice</strong>; when it cannot spread, it goes to The Dark. The Plague cannot receive their own plagued ghosts.</li>
                 <li><strong>The Vulture.</strong> When a <strong>neighbour dies</strong>, add the <strong>top 5</strong> cards from The Dark to the <strong>bottom of your Candle</strong> (if The Dark has fewer than 5, take all that remain).</li>
                 <li><strong>The Witness.</strong> The Witness cannot win. If only two players remain and one is The Witness, <strong>both lose</strong> (no winner). In a 2‑player game with The Witness, there is no winner.</li>
-                <li><strong>Haunt vs The Unseen.</strong> Once per <strong>that attacker's turn</strong>, when a neighbour would Haunt The Unseen, they may discard 1 card to The Dark to cancel the Haunt (both cards go to The Dark). One cancel per attacker's turn, not only once per round.</li>
-                <li><strong>Haunt vs The Hex.</strong> Once per <strong>that attacker's turn</strong>, when a neighbour plays a number card to Haunt The Hex, they may reveal a matching rank from hand to cancel it (both cards go to The Dark). One cancel per attacker's turn, not one per round.</li>
+                <li><strong>Haunt vs The Unseen.</strong> When a neighbour would Haunt The Unseen, they may discard 1 card to The Dark to cancel the Haunt (both cards go to The Dark).</li>
+                <li><strong>Haunt vs The Hex.</strong> When a neighbour plays a <strong>number card</strong> (A–10) to Haunt The Hex, they may reveal a <strong>matching rank</strong> from hand. The Hex's card goes to The Dark; the Haunting card becomes a <strong>ghost in the attacker's Shadow</strong> instead of The Hex's. See below for details.</li>
+                <li><strong>Haunt vs The Hex — resolution order.</strong> When a Haunt targets The Hex: (1) <strong>The Hex</strong> may reflect if they hold a matching rank. (2) If they <strong>Allow Haunt</strong> or have no match, <strong>Salt</strong> and other blocks (Cryptkeeper Wall, etc.) apply as normal. A successful <strong>reflect</strong> resolves the Haunt immediately—the ghost never enters The Hex's Shadow.</li>
+                <li><strong>Haunt vs The Hex — Warlock face Haunts.</strong> <strong>The Warlock</strong> may Haunt with a face card or Joker (strength 10). That is <strong>not</strong> a number-card Haunt, so <strong>The Hex cannot reflect it</strong>. Treat it as a normal Haunt (Salt, Wall, etc.).</li>
+                <li><strong>Haunt vs The Hex — Salt.</strong> <strong>Salt (5)</strong> can cancel a Haunt on The Hex <strong>before</strong> it lands if The Hex does not reflect (or chooses <strong>Allow Haunt</strong>). Salt and the attacker's Haunt card go to The Dark; the attacker's turn ends. <strong>Counter-Salt</strong> works as usual. A completed <strong>Hex reflect</strong> is not an Action and cannot be Salted—the Haunt has already been turned back onto the attacker.</li>
+                <li><strong>Haunt vs The Hex — Concurrent Flames.</strong> With 6+ players, two or three neighbours may Haunt The Hex in the same round (each on their own concurrent turn). Each Haunt is resolved separately.</li>
+                <li><strong>Haunt vs The Hex — The Mime.</strong> If The Mime redirects a Haunt onto The Hex, The Hex reacts as normal. A reflect sends the Haunting card to the <strong>original attacker's Shadow</strong> (the neighbour who played the Haunt card), not The Mime's—unless The Mime was the one Haunting.</li>
+                <li><strong>Haunt vs The Hex — Cryptkeeper Wall.</strong> If The Hex <strong>Allow Haunt</strong>, a Cryptkeeper with a Wall may still block as usual (ghost and Wall to The Dark). A <strong>reflect</strong> never puts a ghost on The Hex, so Walls are not used for the reflect itself—the ghost goes to the <strong>attacker's</strong> Shadow.</li>
+                <li><strong>Haunt vs The Hex — matching rank.</strong> Rank must match exactly (Ace with Ace, 10 with 10). <strong>Suit does not matter</strong> for the reflect. You need the matching rank in hand when the Haunt is played; you cannot reflect after the ghost has already landed.</li>
+                <li><strong>Haunt vs The Hex — no match in hand.</strong> If The Hex has no card of that rank, the ability does not trigger. The Haunt proceeds (Salt, Wall, etc.). Holding only a different rank does not help.</li>
+                <li><strong>Haunt vs The Hex — reflected ghost.</strong> The ghost in the attacker's Shadow counts for their <strong>Haunting</strong> (Burn) and <strong>Possession</strong> like any other ghost. It is treated as a ghost they Haunted onto themselves for tracking (e.g. Voodoo Doll, Plague, Sealbinder rules apply to that ghost on the attacker as usual).</li>
                 <li><strong>Hand limit (e.g. The Hoarder 8):</strong> Discard down at end of your turn. Effects that add cards can push you over until end of that turn.</li>
                 <li><strong>“Top of Candle” effects with no cards:</strong> Effect fizzles (e.g. Drain does nothing).</li>
             </ul>

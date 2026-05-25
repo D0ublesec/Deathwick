@@ -38,7 +38,7 @@
     <div id="setup-modal" class="modal" style="display:flex;">
         <div class="modal-content">
             <h2 style="color:var(--accent-color)">SETUP RITUAL</h2>
-            <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:14px; text-align:center;">An <strong>empty Candle</strong> eliminates you <strong>immediately</strong>, even mid-turn. <a href="manual.html#ritual-type" target="_blank" rel="noopener" style="color:var(--accent-color);">Manual → Empty Candle rule</a></p>
+            <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:14px; text-align:center;">Empty Candle eliminates you only at <strong>The Draw</strong> or <strong>Am I Alive?</strong> <a href="manual.html#ritual-type" target="_blank" rel="noopener" style="color:var(--accent-color);">Manual → Consumed by the Darkness</a></p>
             <div id="local-setup">
                 <p style="margin-bottom:6px; font-size:0.9rem;"><strong>Number of players:</strong> <span id="player-count-buttons"></span></p>
                 <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:10px;">Determines which classes appear in the random 3-card draw (2–6 players: 35 classes; 7+: 38 classes).</p>
@@ -67,10 +67,25 @@
     <div id="first-player-modal" class="modal" style="display:none; z-index:2600;">
         <div class="modal-content" style="border-color:var(--accent-color);">
             <h2 style="color:var(--accent-color)">DECIDE TURN ORDER</h2>
-            <p style="margin-bottom:8px;">Choose who goes first. This sets the full turn order. Class selection will then follow that order (first in turn order picks first; last to pick sees everyone else's choices, a minor advantage).</p>
-            <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:14px;">In online play, agree at the table (e.g. last nightmare, ghost story, horror film) then select that player, or use Random. Only the host sees this in an online game.</p>
+            <p id="first-player-step1-prompt" style="margin-bottom:8px;">Who won the tiebreaker at the table (e.g. last to light a candle)? They choose whether to go <strong>first</strong> or <strong>last</strong> in turn order and class selection.</p>
             <div id="first-player-options" style="display:flex; flex-direction:column; gap:10px; align-items:center;"></div>
+            <div id="first-player-step2" style="display:none; margin-top:12px;">
+                <p id="first-player-step2-label" style="margin-bottom:10px; color:var(--text-muted); font-size:0.9rem;"></p>
+            </div>
+            <p style="font-size:0.85rem; color:var(--text-muted); margin-top:14px;">Online: agree at the table, then select the winner and their choice—or use Random.</p>
             <button type="button" class="game-btn" style="margin-top:12px;" onclick="chooseFirstPlayerRandom()">RANDOM</button>
+        </div>
+    </div>
+
+    <div id="haunting-panic-modal" class="modal" style="display:none; z-index:2550;">
+        <div class="modal-content" style="border-color:var(--accent-color);">
+            <h2 style="color:var(--accent-color)">THE HAUNTING</h2>
+            <p style="margin-bottom:6px;">Ghosts in your Shadow. Choose before you Burn:</p>
+            <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:16px;"><strong>Endure</strong> — Burn for each ghost. <strong>Panic</strong> — flip your top Candle card against one ghost, then Burn for any left.</p>
+            <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+                <button type="button" class="game-btn" style="background:var(--bg-elevated); color:var(--text-muted);" onclick="resolveHauntingPanic(false)">Endure</button>
+                <button type="button" class="game-btn panic" onclick="resolveHauntingPanic(true)">Panic</button>
+            </div>
         </div>
     </div>
 
@@ -162,10 +177,10 @@
     <div id="hex-modal" class="modal" style="z-index:3000;">
         <div class="modal-content" style="border-color:var(--magic-color);">
             <h2 style="color:var(--magic-color)">THE HEX</h2>
-            <p id="hex-msg">Reveal a matching rank from your hand to cancel this Haunt? (Both cards go to The Dark.)</p>
+            <p id="hex-msg">Reveal a matching rank to reflect this Haunt back? Your card goes to The Dark; theirs becomes a ghost in their Shadow.</p>
             <div style="display:flex; gap:20px; justify-content:center; flex-wrap:wrap;">
                 <button type="button" class="game-btn" style="background:#444;" onclick="resolveHexCancel(true)">ALLOW HAUNT</button>
-                <button type="button" class="game-btn" style="background:var(--magic-color); color:black;" onclick="resolveHexCancel(false)">REVEAL MATCH TO CANCEL</button>
+                <button type="button" class="game-btn" style="background:var(--magic-color); color:black;" onclick="resolveHexCancel(false)">REFLECT THE HAUNT</button>
             </div>
         </div>
     </div>
@@ -228,10 +243,10 @@
 
     <div id="oracle-modal" class="modal" style="display:none;">
         <div class="modal-content">
-            <h2 style="color:var(--magic-color)">THE ORACLE - Precognition</h2>
-            <p>Top card of your Candle:</p>
+            <h2 style="color:var(--magic-color)">THE ORACLE</h2>
+            <p>Top of your Candle (before the Haunting):</p>
             <div id="oracle-card-slot" class="card-slot-inline"></div>
-            <p style="margin-top:8px;">Put it on top or on the bottom?</p>
+            <p style="margin-top:8px;">Leave on top or move to the bottom?</p>
             <div style="display:flex; gap:12px; justify-content:center; margin-top:12px;">
                 <button type="button" class="game-btn" onclick="resolveOracle(true)">Keep on top</button>
                 <button type="button" class="game-btn" onclick="resolveOracle(false)">Put on bottom</button>
@@ -242,7 +257,7 @@
     <div id="grimoire-rejection-modal" class="modal" style="display:none;">
         <div class="modal-content">
             <h2 style="color:var(--magic-color)">THE GRIMOIRE OF REJECTION</h2>
-            <p>Write down a card to reject (next time it's played, cancel it). Does not use your Ritual action. Same name cannot follow itself (e.g. Ace, then 5, then Ace is fine).</p>
+            <p>Write down a card to reject (next time a <strong>neighbour</strong> plays it, cancel it). Does not use your Ritual action. Same name cannot follow itself (e.g. Ace, then 5, then Ace is fine).</p>
             <div id="grimoire-rank-buttons" class="card-grid" style="margin-top:12px;"></div>
             <button type="button" class="game-btn" style="margin-top:12px; background:#444;" onclick="closeGrimoireRejectionModal()">Skip</button>
         </div>
@@ -287,7 +302,6 @@
                 <button type="button" class="game-btn magic" id="modal-btn-cast" onclick="actionFromModal(actionCast)">CAST</button>
                 <button type="button" class="game-btn class-ability" id="modal-btn-class" onclick="actionFromModal(actionClass)">ABILITY</button>
                 <button type="button" class="game-btn flicker" id="modal-btn-flicker" onclick="actionFromModal(actionFlicker)">FLICKER</button>
-                <button type="button" class="game-btn panic" id="modal-btn-panic" onclick="actionFromModal(actionPanic)">PANIC</button>
                 <button type="button" class="game-btn" id="modal-btn-pass" onclick="actionFromModal(actionPass)">ABSTAIN</button>
             </div>
             <button type="button" class="game-btn" style="margin-top:12px;" onclick="closeActionsModal()">Close</button>
@@ -374,7 +388,6 @@
             <button type="button" class="game-btn magic" id="btn-cast" onclick="actionCast()">CAST</button>
             <button type="button" class="game-btn class-ability" id="btn-class" onclick="actionClass()">ABILITY</button>
             <button type="button" class="game-btn flicker" id="btn-flicker" onclick="actionFlicker()">FLICKER</button>
-            <button type="button" class="game-btn panic" id="btn-panic" onclick="actionPanic()">PANIC</button>
             <button type="button" class="game-btn" id="btn-pass" onclick="actionPass()">ABSTAIN</button>
         </div>
     </div>
