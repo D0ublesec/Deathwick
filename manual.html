@@ -662,8 +662,14 @@
                 <div class="manual-picked-pin-actions">
                     <button type="button" id="manual-picked-pin-hide" class="tool-btn secondary manual-picked-pin-hide-btn">Hide pin</button>
                     <button type="button" id="manual-picked-pin-fullscreen" class="tool-btn manual-picked-pin-fullscreen-btn">Full screen</button>
+                    <button type="button" id="manual-picked-pin-clear" class="tool-btn secondary manual-picked-pin-clear-btn">Clear classes</button>
+                    <button type="button" id="manual-picked-pin-pick-again" class="tool-btn manual-picked-pin-pick-again-btn">Reset &amp; pick again</button>
                 </div>
             </div>
+            <p class="manual-picked-pin-suit-order" aria-label="Suit tier for tie-breaking: Spades, Hearts, Clubs, Diamonds">
+                <span class="manual-picked-pin-suit-label">Suit tier:</span>
+                <span class="suit-spades">♠</span> &gt; <span class="suit-hearts">♥</span> &gt; <span class="suit-clubs">♣</span> &gt; <span class="suit-diamonds">♦</span>
+            </p>
             <div id="manual-picked-pin-list" class="manual-picked-pin-list" role="tablist" aria-label="Selected classes"></div>
         </div>
     </div>
@@ -673,6 +679,12 @@
         <button type="button" class="manual-picked-fullscreen-close" aria-label="Close">&times;</button>
         <div id="manual-picked-fullscreen-grid" class="manual-picked-fullscreen-grid"></div>
         <div class="manual-picked-fullscreen-footer">
+            <p class="manual-picked-pin-suit-order manual-picked-fullscreen-suit-order" aria-label="Suit tier for tie-breaking: Spades, Hearts, Clubs, Diamonds">
+                <span class="manual-picked-pin-suit-label">Suit tier:</span>
+                <span class="suit-spades">♠</span> &gt; <span class="suit-hearts">♥</span> &gt; <span class="suit-clubs">♣</span> &gt; <span class="suit-diamonds">♦</span>
+            </p>
+            <button type="button" id="manual-picked-fullscreen-clear" class="tool-btn secondary manual-picked-fullscreen-clear-btn">Clear classes</button>
+            <button type="button" id="manual-picked-fullscreen-pick-again" class="tool-btn manual-picked-fullscreen-pick-again-btn">Reset &amp; pick again</button>
             <button type="button" id="manual-picked-fullscreen-exit" class="tool-btn secondary manual-picked-fullscreen-exit-btn">Exit full screen</button>
         </div>
     </div>

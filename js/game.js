@@ -13,7 +13,85 @@
                 return TWO_PLAYER_EXCLUDED_CLASS_NAMES.indexOf(c.name) < 0;
             });
         }
-        return basePool;
+        var taken = {};
+        for (var i = 0; i < gameState.players.length; i++) {
+            var assigned = gameState.players[i].class;
+            if (assigned && assigned.name) taken[assigned.name] = true;
+        }
+        return basePool.filter(function (c) { return !taken[c.name]; });
+    }
+
+    function drawClassChoices(pool, maxChoices) {
+        maxChoices = maxChoices || 3;
+        if (!pool || !pool.length) return [];
+        if (pool.length <= maxChoices) return pool.slice();
+        var c1 = pool[Math.floor(Math.random() * pool.length)];
+        var c2 = c1;
+        while (c2 === c1) c2 = pool[Math.floor(Math.random() * pool.length)];
+        var c3 = c1;
+        while (c3 === c1 || c3 === c2) c3 = pool[Math.floor(Math.random() * pool.length)];
+        return [c1, c2, c3];
+    }
+
+    function applyClassToPlayer(p, cls) {
+        p.class = cls;
+        if (cls.name === 'THE VOODOO DOLL') p.voodooSuits = ['♣', '♦']; /* two lowest suits (suit tier) */
+    }
+
+    function resolveClassPickFromOffer(p, className, choices, pool) {
+        var picked = null;
+        var i;
+        for (i = 0; i < choices.length; i++) {
+            if (choices[i].name === className) {
+                picked = choices[i];
+                break;
+            }
+        }
+        if (!picked && pool.length) {
+            for (i = 0; i < pool.length; i++) {
+                if (pool[i].name === className) {
+                    picked = pool[i];
+                    break;
+                }
+            }
+        }
+        if (!picked && pool.length) picked = pool[0];
+        if (picked) applyClassToPlayer(p, picked);
+    }
+
+    function showClassChoiceModal(p, choices, onSelected) {
+        var modal = document.getElementById('class-modal');
+        var title = document.getElementById('class-select-title');
+        var opts = document.getElementById('class-options');
+        if (!modal || !opts) return;
+        modal.style.display = 'flex';
+        if (title) title.textContent = p.name + ': CHOOSE CLASS';
+        opts.innerHTML = '';
+        choices.forEach(function (c) {
+            var b = document.createElement('div');
+            b.className = 'class-box';
+            var classImgName = getClassImageFilename(c.name);
+            if (classImgName) {
+                var img = document.createElement('img');
+                img.className = 'class-card-img';
+                var classFolder = window.getClassSubfolder ? window.getClassSubfolder(classImgName) : '';
+                img.src = CLASS_IMAGES_BASE + (classFolder ? classFolder + '/' : '') + classImgName + CARD_IMAGE_EXT;
+                img.alt = c.name;
+                img.loading = 'lazy';
+                img.onerror = function () { img.style.display = 'none'; };
+                b.appendChild(img);
+            }
+            var textWrap = document.createElement('div');
+            textWrap.className = 'class-box-text';
+            textWrap.innerHTML = '<span class="class-title">' + c.name + '</span><small>' + c.desc + '</small>';
+            b.appendChild(textWrap);
+            b.onclick = function () {
+                applyClassToPlayer(p, c);
+                modal.style.display = 'none';
+                onSelected();
+            };
+            opts.appendChild(b);
+        });
     }
     var RANKS = window.RANKS;
     var getVal = window.getVal;
@@ -601,61 +679,25 @@
         var p = gameState.players[playerId];
         if (!p) return;
         var pool = getClassPool();
+        if (!pool.length) {
+            pickClassesByTurnOrder(turnOrderIdx + 1);
+            return;
+        }
         if (p.type === 'ai') {
-            p.class = pool[Math.floor(Math.random() * pool.length)];
-            if (p.class.name === 'THE VOODOO DOLL') p.voodooSuits = ['♣', '♦']; /* two lowest suits */
+            applyClassToPlayer(p, pool[Math.floor(Math.random() * pool.length)]);
             pickClassesByTurnOrder(turnOrderIdx + 1);
             return;
         }
         if (p.isRemote && typeof window.onRequestRemoteClass === 'function') {
-            var c1 = pool[Math.floor(Math.random() * pool.length)];
-            var c2 = c1;
-            while (c2 === c1) c2 = pool[Math.floor(Math.random() * pool.length)];
-            var c3 = c1;
-            while (c3 === c1 || c3 === c2) c3 = pool[Math.floor(Math.random() * pool.length)];
-            window.onRequestRemoteClass(playerId, [c1, c2, c3], function (className) {
-                p.class = CLASSES.filter(function (c) { return c.name === className; })[0] || CLASSES[0];
+            var remoteChoices = drawClassChoices(pool);
+            window.onRequestRemoteClass(playerId, remoteChoices, function (className) {
+                resolveClassPickFromOffer(p, className, remoteChoices, pool);
                 pickClassesByTurnOrder(turnOrderIdx + 1);
             });
             return;
         }
-        var modal = document.getElementById('class-modal');
-        var title = document.getElementById('class-select-title');
-        var opts = document.getElementById('class-options');
-        if (!modal || !opts) return;
-        modal.style.display = 'flex';
-        if (title) title.textContent = p.name + ': CHOOSE CLASS';
-        opts.innerHTML = '';
-        var c1 = pool[Math.floor(Math.random() * pool.length)];
-        var c2 = c1;
-        while (c2 === c1) c2 = pool[Math.floor(Math.random() * pool.length)];
-        var c3 = c1;
-        while (c3 === c1 || c3 === c2) c3 = pool[Math.floor(Math.random() * pool.length)];
-        [c1, c2, c3].forEach(function (c) {
-            var b = document.createElement('div');
-            b.className = 'class-box';
-            var classImgName = getClassImageFilename(c.name);
-            if (classImgName) {
-                var img = document.createElement('img');
-                img.className = 'class-card-img';
-                var classFolder = window.getClassSubfolder ? window.getClassSubfolder(classImgName) : '';
-                img.src = CLASS_IMAGES_BASE + (classFolder ? classFolder + '/' : '') + classImgName + CARD_IMAGE_EXT;
-                img.alt = c.name;
-                img.loading = 'lazy';
-                img.onerror = function () { img.style.display = 'none'; };
-                b.appendChild(img);
-            }
-            var textWrap = document.createElement('div');
-            textWrap.className = 'class-box-text';
-            textWrap.innerHTML = '<span class="class-title">' + c.name + '</span><small>' + c.desc + '</small>';
-            b.appendChild(textWrap);
-            b.onclick = function () {
-                p.class = c;
-                if (c.name === 'THE VOODOO DOLL') p.voodooSuits = ['♣', '♦']; /* two lowest suits (suit tier) */
-                modal.style.display = 'none';
-                pickClassesByTurnOrder(turnOrderIdx + 1);
-            };
-            opts.appendChild(b);
+        showClassChoiceModal(p, drawClassChoices(pool), function () {
+            pickClassesByTurnOrder(turnOrderIdx + 1);
         });
     }
 
@@ -666,61 +708,25 @@
         }
         var p = gameState.players[idx];
         var pool = getClassPool();
+        if (!pool.length) {
+            pickClasses(idx + 1);
+            return;
+        }
         if (p.type === 'ai') {
-            p.class = pool[Math.floor(Math.random() * pool.length)];
-            if (p.class.name === 'THE VOODOO DOLL') p.voodooSuits = ['♣', '♦']; /* two lowest suits */
+            applyClassToPlayer(p, pool[Math.floor(Math.random() * pool.length)]);
             pickClasses(idx + 1);
             return;
         }
         if (p.isRemote && typeof window.onRequestRemoteClass === 'function') {
-            var c1 = pool[Math.floor(Math.random() * pool.length)];
-            var c2 = c1;
-            while (c2 === c1) c2 = pool[Math.floor(Math.random() * pool.length)];
-            var c3 = c1;
-            while (c3 === c1 || c3 === c2) c3 = pool[Math.floor(Math.random() * pool.length)];
-            window.onRequestRemoteClass(idx, [c1, c2, c3], function (className) {
-                p.class = CLASSES.filter(function (c) { return c.name === className; })[0] || CLASSES[0];
+            var remoteChoicesLegacy = drawClassChoices(pool);
+            window.onRequestRemoteClass(idx, remoteChoicesLegacy, function (className) {
+                resolveClassPickFromOffer(p, className, remoteChoicesLegacy, pool);
                 pickClasses(idx + 1);
             });
             return;
         }
-        var modal = document.getElementById('class-modal');
-        var title = document.getElementById('class-select-title');
-        var opts = document.getElementById('class-options');
-        if (!modal || !opts) return;
-        modal.style.display = 'flex';
-        if (title) title.textContent = p.name + ': CHOOSE CLASS';
-        opts.innerHTML = '';
-        var c1 = pool[Math.floor(Math.random() * pool.length)];
-        var c2 = c1;
-        while (c2 === c1) c2 = pool[Math.floor(Math.random() * pool.length)];
-        var c3 = c1;
-        while (c3 === c1 || c3 === c2) c3 = pool[Math.floor(Math.random() * pool.length)];
-        [c1, c2, c3].forEach(function (c) {
-            var b = document.createElement('div');
-            b.className = 'class-box';
-            var classImgName = getClassImageFilename(c.name);
-            if (classImgName) {
-                var img = document.createElement('img');
-                img.className = 'class-card-img';
-                var classFolder = window.getClassSubfolder ? window.getClassSubfolder(classImgName) : '';
-                img.src = CLASS_IMAGES_BASE + (classFolder ? classFolder + '/' : '') + classImgName + CARD_IMAGE_EXT;
-                img.alt = c.name;
-                img.loading = 'lazy';
-                img.onerror = function () { img.style.display = 'none'; };
-                b.appendChild(img);
-            }
-            var textWrap = document.createElement('div');
-            textWrap.className = 'class-box-text';
-            textWrap.innerHTML = '<span class="class-title">' + c.name + '</span><small>' + c.desc + '</small>';
-            b.appendChild(textWrap);
-            b.onclick = function () {
-                p.class = c;
-                if (c.name === 'THE VOODOO DOLL') p.voodooSuits = ['♣', '♦']; /* two lowest suits (suit tier) */
-                modal.style.display = 'none';
-                pickClasses(idx + 1);
-            };
-            opts.appendChild(b);
+        showClassChoiceModal(p, drawClassChoices(pool), function () {
+            pickClasses(idx + 1);
         });
     }
 

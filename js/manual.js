@@ -380,6 +380,9 @@
     };
 
     window.resetPoolManual = function () {
+        closePickedFullscreen();
+        closeClassViewer();
+        returnToPickedFullscreen = false;
         manualClassPool = (manualPoolSize === 38 ? CLASSES : manualPoolSize === 2 ? POOL_2 : POOL_20).slice();
         pickedClasses = [];
         selectedPinIdx = null;
@@ -387,6 +390,28 @@
         updatePoolStatus();
         document.getElementById('selection-area').style.display = 'none';
         renderPickedClasses();
+    };
+
+    function focusClassSelectionTool() {
+        var target = document.getElementById('class-selection');
+        if (!target) return;
+        var section = target.closest('section');
+        if (section) {
+            section.classList.remove('is-collapsed');
+            section.classList.add('is-expanded');
+            var btn = section.querySelector('.manual-section-toggle-btn');
+            if (btn) btn.setAttribute('aria-expanded', 'true');
+        }
+        requestAnimationFrame(function () {
+            var tool = document.getElementById('class-tool') || target;
+            tool.scrollIntoView({ block: 'start' });
+        });
+    }
+
+    window.resetAndPickAgainManual = function () {
+        resetPoolManual();
+        focusClassSelectionTool();
+        drawClassesManual();
     };
 
     window.showDiagram = function (c) {
@@ -470,6 +495,8 @@
         var hideBtn = document.getElementById('manual-picked-pin-hide');
         var showBtn = document.getElementById('manual-picked-pin-show');
         var fullscreenBtn = document.getElementById('manual-picked-pin-fullscreen');
+        var clearBtn = document.getElementById('manual-picked-pin-clear');
+        var pickAgainBtn = document.getElementById('manual-picked-pin-pick-again');
         if (hideBtn) {
             hideBtn.addEventListener('click', function () {
                 pinVisible = false;
@@ -487,6 +514,12 @@
         if (fullscreenBtn) {
             fullscreenBtn.addEventListener('click', openPickedFullscreen);
         }
+        if (clearBtn) {
+            clearBtn.addEventListener('click', resetPoolManual);
+        }
+        if (pickAgainBtn) {
+            pickAgainBtn.addEventListener('click', resetAndPickAgainManual);
+        }
         renderPinnedBar();
     })();
 
@@ -495,8 +528,12 @@
         if (!overlay) return;
         var closeBtn = overlay.querySelector('.manual-picked-fullscreen-close');
         var exitBtn = document.getElementById('manual-picked-fullscreen-exit');
+        var clearBtn = document.getElementById('manual-picked-fullscreen-clear');
+        var pickAgainBtn = document.getElementById('manual-picked-fullscreen-pick-again');
         if (closeBtn) closeBtn.addEventListener('click', closePickedFullscreen);
         if (exitBtn) exitBtn.addEventListener('click', closePickedFullscreen);
+        if (clearBtn) clearBtn.addEventListener('click', resetPoolManual);
+        if (pickAgainBtn) pickAgainBtn.addEventListener('click', resetAndPickAgainManual);
     })();
 
     (function initClassViewer() {
