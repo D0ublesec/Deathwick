@@ -28,18 +28,22 @@
         </header>
 
         <div class="manual-section-controls">
-            <button type="button" class="tool-btn" id="manual-expand-all">Expand all</button>
-            <button type="button" class="tool-btn secondary" id="manual-collapse-all">Collapse all</button>
+            <a href="#class-selection" class="tool-btn manual-jump-btn">Class selection</a>
+            <div class="manual-section-controls-actions">
+                <button type="button" class="tool-btn" id="manual-expand-all">Expand all</button>
+                <button type="button" class="tool-btn secondary" id="manual-collapse-all">Collapse all</button>
+            </div>
         </div>
 
         <nav class="manual-toc" aria-label="Manual contents">
             <h2 class="manual-toc-title">Contents</h2>
             <ol class="manual-toc-list">
                 <li><a href="#setup">1. The Setup</a></li>
+                <li><a href="#class-selection">Class selection</a></li>
                 <li><a href="#board">2. The Ritual Circle</a></li>
                 <li><a href="#turn">3. The Passage of Time</a></li>
                 <li><a href="#grimoire">4. The Grimoire</a></li>
-                <li><a href="#curses">5. The Curses</a></li>
+                <li><a href="#classes">5. The Classes</a></li>
                 <li><a href="#faq">6. FAQ &amp; Edge Cases</a></li>
                 <li><a href="#concurrent-flames-table">Concurrent Flames table</a></li>
                 <li><a href="#full-deck">Full deck</a></li>
@@ -87,7 +91,7 @@
                 </figure>
                 <figure style="margin:0; text-align:center;">
                     <img class="reference-card-img" src="images/cards/backs/deathwick_class_back.png" alt="Class card back" style="max-height:140px; width:auto;">
-                    <figcaption style="font-size:0.9em; color:var(--text-muted, #888); margin-top:0.5rem;">Curse cards</figcaption>
+                    <figcaption style="font-size:0.9em; color:var(--text-muted, #888); margin-top:0.5rem;">Class cards</figcaption>
                 </figure>
             </div>
 
@@ -97,7 +101,7 @@
                 <li>Deal exactly <strong>27 cards</strong> (half a deck) to each player. This is your <strong>Candle</strong>.</li>
                 <li>Place any remaining undealt cards <strong>Face Up</strong> into <strong>THE DARK</strong> (Discard Pile) to start the game.</li>
                 <li>Each player draws <strong>3 cards</strong> from their Candle into their hand; this is their <strong>starting hand</strong>.</li>
-                <li><strong>Turn order:</strong> Decide who goes first (curse selection will follow this order; see <a href="#calling">The Calling</a> below).
+                <li><strong>Turn order:</strong> Decide who goes first (class selection will follow this order; see <a href="#class-selection">Class selection</a> below).
                     <ul>
                         <li><strong>Physical (choose one):</strong> Last person to <strong>light a candle</strong> goes first; or last person to <strong>tell a ghost story</strong> goes first; or last person to <strong>watch a horror movie</strong> goes first. Alternatively, <strong>The Chilling Touch:</strong> all players touch the hand of the person to their left; the player with the <strong>Coldest Hands</strong> goes first.</li>
                         <li><strong>Digital / online:</strong> Host chooses who starts, or Random.</li>
@@ -112,41 +116,6 @@
                     </ul>
                 </li>
             </ol>
-
-            <h3 id="calling">The Calling (Curse Selection)</h3>
-            <p>Once turn order is set, each player must accept a curse. <strong>Curse selection follows turn order</strong>: the player who goes first picks first, then the next in order, and so on. Each is offered <strong>3 random curses</strong> and chooses one (the last to pick sees all previous choices, a minor advantage).</p>
-            <p style="border: 1px solid var(--accent-color); padding: 10px; border-radius: 4px; background: #1a1a22;"><strong>2-player games:</strong> These curses are excluded from the 2-player pool because they play poorly or feel unsatisfying with only 2 players: <strong>The Mime</strong>, <strong>The Watcher</strong>, <strong>The Occultist</strong>, <strong>The Lich</strong>, <strong>The Plague</strong>, <strong>The Vulture</strong>, <strong>The Witness</strong>. The digital game and the Random Selector below remove them automatically when you choose 2 players.</p>
-            <h4 style="margin-top:1em;">Curses available by group size</h4>
-            <table class="manual-ref-table" style="max-width:32em;">
-                <thead><tr><th>Players</th><th>Pool size</th><th>Excluded curses</th></tr></thead>
-                <tbody>
-                    <tr><td>2</td><td>29 curses</td><td>Same as 3–6, minus: The Mime, The Watcher, The Occultist, The Plague, The Vulture, The Witness (The Lich is already excluded in 3–6)</td></tr>
-                    <tr><td>3–6</td><td>35 curses</td><td>The Funeral Bell, The Lich, The Gravedigger</td></tr>
-                    <tr><td>7+</td><td>38 curses</td><td>None (all curses)</td></tr>
-                </tbody>
-            </table>
-            <ul class="setup-list">
-                <li><strong>Choose player count for the pool:</strong> Use the table above. For <strong>2 players</strong> use the restricted pool (29 curses). For <strong>3–6 players</strong> draw from 35 curses; for <strong>7+ players</strong>, all 38 curses.</li>
-                <li><strong>Digital:</strong> The game uses the correct pool (2 players = restricted; 3–6 = 35; 7+ = 38). Turn order is decided first, then curse selection follows that order.</li>
-            </ul>
-            <div id="class-tool">
-                <h3 style="border:none; margin:0;">The Random Selector</h3>
-                <p style="font-size:0.9em; margin-bottom:8px;">First choose how many players (this sets the curse pool):</p>
-                <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px; justify-content:center;">
-                    <button type="button" class="tool-btn" id="manual-pool-2" onclick="setManualClassPool(2)">2 players (restricted pool)</button>
-                    <button type="button" class="tool-btn" id="manual-pool-20" onclick="setManualClassPool(20)">3–6 players (35 curses)</button>
-                    <button type="button" class="tool-btn" id="manual-pool-38" onclick="setManualClassPool(38)">7+ players (38 curses)</button>
-                </div>
-                <p id="pool-status" style="color:#888; font-size:0.9em; margin-bottom:15px;">Choose a pool above, then draw.</p>
-                <button type="button" class="tool-btn" onclick="drawClassesManual()">Draw 3 Curses</button>
-                <button type="button" class="tool-btn secondary" onclick="resetPoolManual()">Reset Ritual</button>
-                <div id="selection-area">
-                    <div class="choice-card" onclick="pickClassManual(0)"><span class="choice-name" id="name-0">Curse A</span><div id="desc-0">...</div></div>
-                    <div class="choice-card" onclick="pickClassManual(1)"><span class="choice-name" id="name-1">Curse B</span><div id="desc-1">...</div></div>
-                    <div class="choice-card" onclick="pickClassManual(2)"><span class="choice-name" id="name-2">Curse C</span><div id="desc-2">...</div></div>
-                </div>
-                <div id="result-area"></div>
-            </div>
 
             <h3 id="ritual-type">The Empty Candle Rule</h3>
             <p>If your Candle has <strong>no cards</strong> when the rules require you to take one from it, you are <strong>Consumed by the Darkness immediately</strong>, even mid-turn. There is no “last full turn” if you burn or spend your last card at the wrong time.</p>
@@ -163,10 +132,64 @@
             </ul>
         </section>
 
+        <section id="class-selection">
+            <h2>Class Selection</h2>
+            <h3 id="calling">The Calling</h3>
+            <p>Once turn order is set, each player chooses a class. <strong>Class selection follows turn order</strong>: the player who goes first picks first, then the next in order, and so on. Each is offered <strong>3 random classes</strong> and chooses one (the last to pick sees all previous choices, a minor advantage).</p>
+            <p style="border: 1px solid var(--accent-color); padding: 10px; border-radius: 4px; background: #1a1a22;"><strong>2-player games:</strong> These classes are excluded from the 2-player pool because they play poorly or feel unsatisfying with only 2 players: <strong>The Mime</strong>, <strong>The Watcher</strong>, <strong>The Occultist</strong>, <strong>The Lich</strong>, <strong>The Plague</strong>, <strong>The Vulture</strong>, <strong>The Witness</strong>. The digital game and the Random Selector below remove them automatically when you choose 2 players.</p>
+            <h4 style="margin-top:1em;">Classes available by group size</h4>
+            <table class="manual-ref-table" style="max-width:32em;">
+                <thead><tr><th>Players</th><th>Pool size</th><th>Excluded classes</th></tr></thead>
+                <tbody>
+                    <tr><td>2</td><td>29 classes</td><td>Same as 3–6, minus: The Mime, The Watcher, The Occultist, The Plague, The Vulture, The Witness (The Lich is already excluded in 3–6)</td></tr>
+                    <tr><td>3–6</td><td>35 classes</td><td>The Funeral Bell, The Lich, The Gravedigger</td></tr>
+                    <tr><td>7+</td><td>38 classes</td><td>None (all classes)</td></tr>
+                </tbody>
+            </table>
+            <ul class="setup-list">
+                <li><strong>Choose player count for the pool:</strong> Use the table above. For <strong>2 players</strong> use the restricted pool (29 classes). For <strong>3–6 players</strong> draw from 35 classes; for <strong>7+ players</strong>, all 38 classes.</li>
+                <li><strong>Digital:</strong> The game uses the correct pool (2 players = restricted; 3–6 = 35; 7+ = 38). Turn order is decided first, then class selection follows that order.</li>
+            </ul>
+            <div id="class-tool">
+                <h3 style="border:none; margin:0;">The Random Selector</h3>
+                <p style="font-size:0.9em; margin-bottom:8px;">First choose how many players (this sets the class pool):</p>
+                <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px; justify-content:center;">
+                    <button type="button" class="tool-btn" id="manual-pool-2" onclick="setManualClassPool(2)">2 players (restricted pool)</button>
+                    <button type="button" class="tool-btn" id="manual-pool-20" onclick="setManualClassPool(20)">3–6 players (35 classes)</button>
+                    <button type="button" class="tool-btn" id="manual-pool-38" onclick="setManualClassPool(38)">7+ players (38 classes)</button>
+                </div>
+                <p id="pool-status" style="color:#888; font-size:0.9em; margin-bottom:15px;">Choose a pool above, then draw.</p>
+                <button type="button" class="tool-btn" onclick="drawClassesManual()">Draw 3 Classes</button>
+                <button type="button" class="tool-btn secondary" onclick="resetPoolManual()">Reset Ritual</button>
+                <p class="choice-card-hint">Each draw shows three classes with card art and rules text. Click a card image to zoom; use <strong>Choose this class</strong> when you are ready.</p>
+                <div id="selection-area">
+                    <div class="choice-card">
+                        <button type="button" class="choice-card-img-btn" aria-label="Zoom class card"><img class="choice-card-img" id="img-0" src="" alt="" loading="lazy"></button>
+                        <span class="choice-name" id="name-0">Class A</span>
+                        <p class="choice-desc" id="desc-0">...</p>
+                        <button type="button" class="tool-btn choice-pick-btn" onclick="pickClassManual(0)">Choose this class</button>
+                    </div>
+                    <div class="choice-card">
+                        <button type="button" class="choice-card-img-btn" aria-label="Zoom class card"><img class="choice-card-img" id="img-1" src="" alt="" loading="lazy"></button>
+                        <span class="choice-name" id="name-1">Class B</span>
+                        <p class="choice-desc" id="desc-1">...</p>
+                        <button type="button" class="tool-btn choice-pick-btn" onclick="pickClassManual(1)">Choose this class</button>
+                    </div>
+                    <div class="choice-card">
+                        <button type="button" class="choice-card-img-btn" aria-label="Zoom class card"><img class="choice-card-img" id="img-2" src="" alt="" loading="lazy"></button>
+                        <span class="choice-name" id="name-2">Class C</span>
+                        <p class="choice-desc" id="desc-2">...</p>
+                        <button type="button" class="tool-btn choice-pick-btn" onclick="pickClassManual(2)">Choose this class</button>
+                    </div>
+                </div>
+                <div id="result-area"></div>
+            </div>
+        </section>
+
         <section id="board">
             <h2>2. The Ritual Circle</h2>
             <p><strong>Who plays when:</strong> In a 2–5 player game, one person takes a turn at a time (clockwise). In a 6–8 player game, two people play at once; in a 9+ player game, three or more play at once. Each concurrent group does Burn, Draw, One Action, and Discard in parallel; then the round advances clockwise. For which player numbers act together (6–20 players), see the <a href="#concurrent-flames-table">Concurrent Flames table</a> at the end of the manual. The diagrams below show where each player sits and which seats start the round (❄️ starter, 🔥 concurrent starters).</p>
-            <p><strong>Shadow layout (3+ players):</strong> In games with three or more players, each player’s <strong>Shadow</strong> is shown split: <strong>ghosts on the left</strong> are from your <strong>left neighbour</strong> (who Haunted you from that side), and <strong>ghosts on the right</strong> are from your <strong>right neighbour</strong>. This lets you see at a glance who Haunted which ghost; especially useful for curses like <strong>The Sealbinder</strong> (whose Haunted ghosts cannot be moved with Possess or Mirror, or Recalled) or <strong>The Clown</strong> (whose Haunted ghosts can only be Banished by Face or Cleanse). In a 2‑player game there is only one opponent, so the Shadow is a single zone.</p>
+            <p><strong>Shadow layout (3+ players):</strong> In games with three or more players, each player’s <strong>Shadow</strong> is shown split: <strong>ghosts on the left</strong> are from your <strong>left neighbour</strong> (who Haunted you from that side), and <strong>ghosts on the right</strong> are from your <strong>right neighbour</strong>. This lets you see at a glance who Haunted which ghost; especially useful for classes like <strong>The Sealbinder</strong> (whose Haunted ghosts cannot be moved with Possess or Mirror, or Recalled) or <strong>The Clown</strong> (whose Haunted ghosts can only be Banished by Face or Cleanse). In a 2‑player game there is only one opponent, so the Shadow is a single zone.</p>
             <div id="layout-tool">
                 <button type="button" class="tool-btn" onclick="showDiagram(2)">2 Players</button>
                 <button type="button" class="tool-btn" onclick="showDiagram(3)">3 Players</button>
@@ -332,7 +355,7 @@
             <div class="ritual-actions">
                 <div class="ritual-action">
                     <h4 class="ritual-action-name">HAUNT <span class="ritual-action-tag">Attack</span></h4>
-                    <p class="ritual-action-summary"><strong>Only number cards (A or 1 through 10) can be used to Haunt.</strong> Face cards (J, Q, K) and Jokers cannot be used to Haunt; use them to <strong>Summon</strong> instead. (Rare <strong>curse abilities</strong> can change this; see each curse card and <a href="#faq-haunt-classes">FAQ: Haunting and curse exceptions</a>.)</p>
+                    <p class="ritual-action-summary"><strong>Only number cards (A or 1 through 10) can be used to Haunt.</strong> Face cards (J, Q, K) and Jokers cannot be used to Haunt; use them to <strong>Summon</strong> instead. (Rare <strong>class abilities</strong> can change this; see each class card and <a href="#faq-haunt-classes">FAQ: Haunting and class exceptions</a>.)</p>
                     <p class="ritual-action-summary">Choose a neighbour. Play a number card (A–10) from your hand into their Shadow. That card becomes a ghost there; they will Burn one card from their Candle for each ghost in their Shadow (to The Dark) at the start of their next turn. <em>Example:</em> if they have 3 ghosts, they Burn 3 cards.</p>
                 </div>
                 <div class="ritual-action">
@@ -432,8 +455,8 @@
             </div>
         </section>
 
-        <section id="curses">
-            <h2>5. The Curses</h2>
+        <section id="classes">
+            <h2>5. The Classes</h2>
             <div class="classes-grid" id="manual-class-grid"></div>
         </section>
 
@@ -442,9 +465,9 @@
             <p style="border: 1px solid var(--accent-color); padding: 10px; border-radius: 4px; background: #1a1a22;">
                 <strong>When in doubt:</strong> If a rule could be read more than one way, choose the reading that <strong>denies an advantage</strong>: rule against whoever would benefit from the ambiguity, or in favour of whoever is defending or being targeted.
             </p>
-            <h3 id="faq-haunt-classes">Haunting and curse exceptions</h3>
+            <h3 id="faq-haunt-classes">Haunting and class exceptions</h3>
             <ul class="faq-list">
-                <li><strong>Can any curse Haunt with a face card or Joker?</strong> By default, <strong>no</strong>; only number cards (A–10) are valid for Haunt. <strong>Face cards</strong> mean <strong>J, Q, and K</strong> only. <strong>Jokers</strong> are separate (Summoned for BOO!, not treated as face cards). <strong>The Warlock</strong> may Haunt with a <strong>face card or Joker</strong> instead of Summoning it; each counts as <strong>strength 10</strong>.</li>
+                <li><strong>Can any class Haunt with a face card or Joker?</strong> By default, <strong>no</strong>; only number cards (A–10) are valid for Haunt. <strong>Face cards</strong> mean <strong>J, Q, and K</strong> only. <strong>Jokers</strong> are separate (Summoned for BOO!, not treated as face cards). <strong>The Warlock</strong> may Haunt with a <strong>face card or Joker</strong> instead of Summoning it; each counts as <strong>strength 10</strong>.</li>
                 <li><strong>Face cards vs Jokers (quick reference):</strong> J, Q, and K are face cards (Banish as 10, or Summon for Mirror/Medium/Purge). Jokers are not face cards; they are Summoned for BOO! only, unless you are <strong>The Warlock</strong>.</li>
             </ul>
             <h3 id="faq-haunting-walls">The Haunting (Walls)</h3>
@@ -608,6 +631,50 @@
             <p>Sound effects: <a href="attribution.html">Sound effects attribution</a>.</p>
             <p><strong>DEATHWICK</strong> &copy; 2026. All Rights Reserved.</p>
         </footer>
+    </div>
+
+    <div id="manual-class-viewer" class="manual-class-viewer" role="dialog" aria-modal="true" aria-labelledby="manual-class-viewer-title" aria-hidden="true" hidden>
+        <div class="manual-class-viewer-backdrop"></div>
+        <div class="manual-class-viewer-panel">
+            <button type="button" class="manual-class-viewer-close" aria-label="Close">&times;</button>
+            <div class="manual-class-viewer-content">
+                <img class="manual-class-viewer-img" src="" alt="">
+                <div class="manual-class-viewer-text">
+                    <h2 id="manual-class-viewer-title" class="manual-class-viewer-title"></h2>
+                    <div id="manual-class-viewer-player-wrap" class="manual-class-viewer-player-wrap" hidden>
+                        <label for="manual-class-viewer-player-input" class="picked-class-player-label">Player:</label>
+                        <input type="text" id="manual-class-viewer-player-input" class="picked-class-player-input" placeholder="Player name">
+                    </div>
+                    <p id="manual-class-viewer-desc" class="manual-class-viewer-desc"></p>
+                </div>
+            </div>
+            <div id="manual-class-viewer-nav" class="manual-class-viewer-nav" hidden>
+                <button type="button" id="manual-class-viewer-prev" class="tool-btn secondary">Previous class</button>
+                <button type="button" id="manual-class-viewer-next" class="tool-btn secondary">Next class</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="manual-picked-pin" class="manual-picked-pin" hidden aria-hidden="true">
+        <div class="manual-picked-pin-bar">
+            <div class="manual-picked-pin-header">
+                <span class="manual-picked-pin-title">Selected classes</span>
+                <div class="manual-picked-pin-actions">
+                    <button type="button" id="manual-picked-pin-hide" class="tool-btn secondary manual-picked-pin-hide-btn">Hide pin</button>
+                    <button type="button" id="manual-picked-pin-fullscreen" class="tool-btn manual-picked-pin-fullscreen-btn">Full screen</button>
+                </div>
+            </div>
+            <div id="manual-picked-pin-list" class="manual-picked-pin-list" role="tablist" aria-label="Selected classes"></div>
+        </div>
+    </div>
+    <button type="button" id="manual-picked-pin-show" class="manual-picked-pin-show tool-btn" hidden>Show selected classes</button>
+
+    <div id="manual-picked-fullscreen" class="manual-picked-fullscreen" role="dialog" aria-modal="true" aria-label="Selected classes full screen" aria-hidden="true" hidden>
+        <button type="button" class="manual-picked-fullscreen-close" aria-label="Close">&times;</button>
+        <div id="manual-picked-fullscreen-grid" class="manual-picked-fullscreen-grid"></div>
+        <div class="manual-picked-fullscreen-footer">
+            <button type="button" id="manual-picked-fullscreen-exit" class="tool-btn secondary manual-picked-fullscreen-exit-btn">Exit full screen</button>
+        </div>
     </div>
 
     <script src="js/data.js"></script>

@@ -38,7 +38,7 @@
             <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:14px; text-align:center;">An <strong>empty Candle</strong> eliminates you <strong>immediately</strong>, even mid-turn. <a href="manual.html#ritual-type" target="_blank" rel="noopener" style="color:var(--accent-color);">Manual → Empty Candle rule</a></p>
             <div id="local-setup">
                 <p style="margin-bottom:6px; font-size:0.9rem;"><strong>Number of players:</strong> <span id="player-count-buttons"></span></p>
-                <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:10px;">Determines which curses appear in the random 3-card draw (2–6 players: 35 curses; 7+: 38 curses).</p>
+                <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:10px;">Determines which classes appear in the random 3-card draw (2–6 players: 35 classes; 7+: 38 classes).</p>
                 <div id="player-setup-list" style="margin-bottom:10px;"></div>
                 <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;">
                     <button type="button" class="game-btn" onclick="addPlayerSlot()">+ ADD PLAYER</button>
@@ -55,7 +55,7 @@
 
     <div id="class-modal" class="modal">
         <div class="modal-content">
-            <h2 id="class-select-title">CHOOSE CURSE</h2>
+            <h2 id="class-select-title">CHOOSE CLASS</h2>
             <div id="class-options" style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;"></div>
             <button type="button" class="game-btn" onclick="goBackToSetup()" style="margin-top:20px;">⬅ BACK</button>
         </div>
@@ -64,7 +64,7 @@
     <div id="first-player-modal" class="modal" style="display:none; z-index:2600;">
         <div class="modal-content" style="border-color:var(--accent-color);">
             <h2 style="color:var(--accent-color)">DECIDE TURN ORDER</h2>
-            <p style="margin-bottom:8px;">Choose who goes first. This sets the full turn order. Curse selection will then follow that order (first in turn order picks first; last to pick sees everyone else's choices, a minor advantage).</p>
+            <p style="margin-bottom:8px;">Choose who goes first. This sets the full turn order. Class selection will then follow that order (first in turn order picks first; last to pick sees everyone else's choices, a minor advantage).</p>
             <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:14px;">In online play, agree at the table (e.g. last nightmare, ghost story, horror film) then select that player, or use Random. Only the host sees this in an online game.</p>
             <div id="first-player-options" style="display:flex; flex-direction:column; gap:10px; align-items:center;"></div>
             <button type="button" class="game-btn" style="margin-top:12px;" onclick="chooseFirstPlayerRandom()">RANDOM</button>
@@ -200,7 +200,7 @@
 
     <div id="class-desc-modal" class="modal">
         <div class="modal-content class-desc-modal-content" style="border-color:var(--magic-color);">
-            <h2 id="class-desc-title" style="color:var(--magic-color)">CURSE</h2>
+            <h2 id="class-desc-title" style="color:var(--magic-color)">CLASS</h2>
             <img id="class-desc-card" class="class-desc-card-img" src="" alt="" style="display:none;">
             <p id="class-desc-text"></p>
             <button type="button" class="game-btn" onclick="closeClassDesc()">CLOSE</button>
