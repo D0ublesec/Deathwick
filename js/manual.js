@@ -24,6 +24,8 @@
     var viewerPlayerIdx = null;
     var viewerShowNav = false;
     var returnToPickedFullscreen = false;
+    var manualPickMode = 'random';
+    var manualTrackSearchQuery = '';
 
     function updatePoolStatus() {
         var el = document.getElementById('pool-status');
@@ -31,6 +33,10 @@
         var label = '2–6 player';
         if (manualPoolSize === 2) label = '2-player (restricted)';
         else if (manualPoolSize === 38) label = '7+ player';
+        if (manualPickMode === 'track') {
+            el.textContent = pickedClasses.length + ' tracked, ' + manualClassPool.length + ' still available (' + label + ' pool).';
+            return;
+        }
         el.textContent = 'Drawing from ' + manualClassPool.length + ' classes (' + label + ' pool).';
     }
 
@@ -50,6 +56,7 @@
         manualClassPool = (manualPoolSize === 38 ? CLASSES : manualPoolSize === 2 ? POOL_2 : POOL_20).slice();
         updatePoolStatus();
         updatePoolButtons();
+        renderManualTrackGrid();
     };
 
     function saveToStorage() {
@@ -74,6 +81,7 @@
                 });
                 updatePoolStatus();
                 renderPickedClasses();
+                renderManualTrackGrid();
             }
         } catch (e) {}
     }
@@ -332,7 +340,7 @@
                 res.style.display = 'block';
                 res.innerHTML = '<p class="picked-classes-heading">' + pickedClasses.length + ' class' +
                     (pickedClasses.length === 1 ? '' : 'es') +
-                    ' selected. Tap a class in the pin bar or class list for a full-screen view.</p>';
+                    ' tracked. Tap a class in the pin bar for a full-screen view.</p>';
             }
         }
         renderPinnedBar();
@@ -374,19 +382,113 @@
     };
 
     window.pickClassManual = function (i) {
-        var sel = currentManualPair[i];
-        manualClassPool = manualClassPool.filter(function (c) { return c.name !== sel.name; });
+        addPickedClass(currentManualPair[i]);
+    };
+
+    function addPickedClass(cls) {
+        if (!cls) return;
+        manualClassPool = manualClassPool.filter(function (c) { return c.name !== cls.name; });
         pickedClasses.push({
-            name: sel.name,
-            desc: sel.desc,
+            name: cls.name,
+            desc: cls.desc,
             playerLabel: 'Player ' + (pickedClasses.length + 1)
         });
         if (selectedPinIdx === null) selectedPinIdx = pickedClasses.length - 1;
-        document.getElementById('selection-area').style.display = 'none';
+        var selectionArea = document.getElementById('selection-area');
+        if (selectionArea) selectionArea.style.display = 'none';
         saveToStorage();
         renderPickedClasses();
         updatePoolStatus();
+        renderManualTrackGrid();
+    }
+
+    window.addTrackedClassManual = function (className) {
+        var cls = null;
+        for (var i = 0; i < manualClassPool.length; i++) {
+            if (manualClassPool[i].name === className) {
+                cls = manualClassPool[i];
+                break;
+            }
+        }
+        if (cls) addPickedClass(cls);
     };
+
+    function setManualPickMode(mode) {
+        manualPickMode = mode === 'track' ? 'track' : 'random';
+        updateManualPickModeUI();
+        updatePoolStatus();
+        if (manualPickMode === 'track') {
+            var selectionArea = document.getElementById('selection-area');
+            if (selectionArea) selectionArea.style.display = 'none';
+            renderManualTrackGrid();
+        }
+    }
+
+    function updateManualPickModeUI() {
+        var randomPanel = document.getElementById('manual-random-panel');
+        var trackPanel = document.getElementById('manual-track-panel');
+        var btnRandom = document.getElementById('manual-mode-random');
+        var btnTrack = document.getElementById('manual-mode-track');
+        if (randomPanel) randomPanel.hidden = manualPickMode !== 'random';
+        if (trackPanel) trackPanel.hidden = manualPickMode !== 'track';
+        if (btnRandom) {
+            btnRandom.classList.toggle('selected', manualPickMode === 'random');
+            btnRandom.classList.toggle('secondary', manualPickMode !== 'random');
+            btnRandom.setAttribute('aria-selected', manualPickMode === 'random' ? 'true' : 'false');
+        }
+        if (btnTrack) {
+            btnTrack.classList.toggle('selected', manualPickMode === 'track');
+            btnTrack.classList.toggle('secondary', manualPickMode !== 'track');
+            btnTrack.setAttribute('aria-selected', manualPickMode === 'track' ? 'true' : 'false');
+        }
+    }
+
+    function renderManualTrackGrid() {
+        var grid = document.getElementById('manual-track-grid');
+        var empty = document.getElementById('manual-track-empty');
+        if (!grid) return;
+
+        if (manualClassPool.length === 0) {
+            grid.innerHTML = '';
+            if (empty) empty.hidden = false;
+            return;
+        }
+        if (empty) empty.hidden = true;
+
+        var q = (manualTrackSearchQuery || '').trim().toLowerCase();
+        var visible = manualClassPool.filter(function (cls) {
+            if (!q) return true;
+            return (cls.name && cls.name.toLowerCase().indexOf(q) !== -1) ||
+                (cls.desc && cls.desc.toLowerCase().indexOf(q) !== -1);
+        });
+
+        grid.innerHTML = '';
+        if (visible.length === 0) {
+            grid.innerHTML = '<p class="manual-track-empty">No available classes match your search.</p>';
+            return;
+        }
+
+        visible.forEach(function (cls) {
+            var nameEsc = escapeHtml(cls.name);
+            var descEsc = escapeHtml(cls.desc);
+            var imgPath = getClassImagePath(cls.name);
+            var card = document.createElement('div');
+            card.className = 'manual-track-card';
+            card.innerHTML =
+                (imgPath
+                    ? '<button type="button" class="manual-track-card-img-btn choice-card-img-btn" aria-label="Zoom ' + nameEsc + ' card">' +
+                        '<img class="manual-track-card-img choice-card-img" src="' + escapeHtml(imgPath) + '" alt="' + nameEsc + '" loading="lazy">' +
+                      '</button>'
+                    : '') +
+                '<span class="manual-track-card-name">' + nameEsc + '</span>' +
+                '<p class="manual-track-card-desc">' + descEsc + '</p>' +
+                '<button type="button" class="tool-btn manual-track-card-btn">Track this class</button>';
+            card.querySelector('.manual-track-card-btn').addEventListener('click', function () {
+                addPickedClass(cls);
+            });
+            grid.appendChild(card);
+        });
+    }
 
     window.resetPoolManual = function () {
         closePickedFullscreen();
@@ -396,9 +498,13 @@
         pickedClasses = [];
         selectedPinIdx = null;
         try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+        manualTrackSearchQuery = '';
+        var trackSearch = document.getElementById('manual-track-search');
+        if (trackSearch) trackSearch.value = '';
         updatePoolStatus();
         document.getElementById('selection-area').style.display = 'none';
         renderPickedClasses();
+        renderManualTrackGrid();
     };
 
     function focusClassSelectionTool() {
@@ -499,6 +605,22 @@
     loadFromStorage();
     updatePoolStatus();
     updatePoolButtons();
+    updateManualPickModeUI();
+    renderManualTrackGrid();
+
+    (function initManualPickMode() {
+        var btnRandom = document.getElementById('manual-mode-random');
+        var btnTrack = document.getElementById('manual-mode-track');
+        var search = document.getElementById('manual-track-search');
+        if (btnRandom) btnRandom.addEventListener('click', function () { setManualPickMode('random'); });
+        if (btnTrack) btnTrack.addEventListener('click', function () { setManualPickMode('track'); });
+        if (search) {
+            search.addEventListener('input', function () {
+                manualTrackSearchQuery = search.value || '';
+                renderManualTrackGrid();
+            });
+        }
+    })();
 
     (function initPinnedBar() {
         var hideBtn = document.getElementById('manual-picked-pin-hide');

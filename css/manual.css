@@ -854,6 +854,110 @@ th {
     width: 100%;
 }
 
+.manual-pick-mode {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    margin: 16px 0 12px;
+}
+
+.manual-pick-mode .tool-btn {
+    margin: 0;
+}
+
+.manual-pick-panel {
+    margin-top: 8px;
+}
+
+.manual-track-hint {
+    margin: 0 0 12px;
+    font-size: 0.9em;
+    color: var(--text-muted, #888);
+    text-align: center;
+}
+
+.manual-track-empty {
+    margin: 12px 0 0;
+    padding: 12px;
+    text-align: center;
+    font-size: 0.9em;
+    color: var(--text-muted, #888);
+    border: 1px dashed var(--border-color);
+    border-radius: var(--radius-sm);
+}
+
+.manual-track-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+    margin-top: 12px;
+}
+
+.manual-track-card {
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    padding: 12px;
+}
+
+.manual-track-card-img-wrap {
+    margin: 0 auto 10px;
+    max-width: 120px;
+}
+
+.manual-track-card-img-btn {
+    display: block;
+    width: 100%;
+    margin: 0 auto 10px;
+    max-width: 120px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    cursor: zoom-in;
+}
+
+.manual-track-card-img-btn:focus {
+    outline: none;
+}
+
+.manual-track-card-img-btn:focus-visible .manual-track-card-img {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 2px;
+}
+
+.manual-track-card-img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-color);
+    cursor: zoom-in;
+}
+
+.manual-track-card-name {
+    display: block;
+    color: var(--accent-color);
+    font-weight: 700;
+    font-size: 0.9em;
+    margin-bottom: 6px;
+    text-align: center;
+}
+
+.manual-track-card-desc {
+    flex: 1;
+    margin: 0 0 10px;
+    font-size: 0.85rem;
+    line-height: 1.45;
+}
+
+.manual-track-card-btn {
+    margin: 0;
+    width: 100%;
+}
+
 #result-area {
     display: none;
     margin-top: 20px;

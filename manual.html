@@ -151,36 +151,48 @@
                 <li><strong>Digital:</strong> The game uses the correct pool (2 players = restricted; 3–6 = 35; 7+ = 38). Turn order is decided first, then class selection follows that order.</li>
             </ul>
             <div id="class-tool">
-                <h3 style="border:none; margin:0;">The Random Selector</h3>
+                <h3 style="border:none; margin:0;">Class selection tool</h3>
                 <p style="font-size:0.9em; margin-bottom:8px;">First choose how many players (this sets the class pool):</p>
                 <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px; justify-content:center;">
                     <button type="button" class="tool-btn" id="manual-pool-2" onclick="setManualClassPool(2)">2 players (restricted pool)</button>
                     <button type="button" class="tool-btn" id="manual-pool-20" onclick="setManualClassPool(20)">3–6 players (35 classes)</button>
                     <button type="button" class="tool-btn" id="manual-pool-38" onclick="setManualClassPool(38)">7+ players (38 classes)</button>
                 </div>
-                <p id="pool-status" style="color:#888; font-size:0.9em; margin-bottom:15px;">Choose a pool above, then draw.</p>
-                <button type="button" class="tool-btn" onclick="drawClassesManual()">Draw 3 Classes</button>
+                <p id="pool-status" style="color:#888; font-size:0.9em; margin-bottom:12px;">Choose a pool above, then draw or track.</p>
                 <button type="button" class="tool-btn secondary" onclick="resetPoolManual()">Reset Ritual</button>
-                <p class="choice-card-hint">Each draw shows three classes with card art and rules text. Click a card image to zoom; use <strong>Choose this class</strong> when you are ready.</p>
-                <div id="selection-area">
-                    <div class="choice-card">
-                        <button type="button" class="choice-card-img-btn" aria-label="Zoom class card"><img class="choice-card-img" id="img-0" src="" alt="" loading="lazy"></button>
-                        <span class="choice-name" id="name-0">Class A</span>
-                        <p class="choice-desc" id="desc-0">...</p>
-                        <button type="button" class="tool-btn choice-pick-btn" onclick="pickClassManual(0)">Choose this class</button>
+                <div class="manual-pick-mode" role="tablist" aria-label="Class selection mode">
+                    <button type="button" class="tool-btn selected" id="manual-mode-random" role="tab" aria-selected="true" aria-controls="manual-random-panel">Random selector</button>
+                    <button type="button" class="tool-btn secondary" id="manual-mode-track" role="tab" aria-selected="false" aria-controls="manual-track-panel">Track manually</button>
+                </div>
+                <div id="manual-random-panel" class="manual-pick-panel" role="tabpanel" aria-labelledby="manual-mode-random">
+                    <button type="button" class="tool-btn" onclick="drawClassesManual()">Draw 3 Classes</button>
+                    <p class="choice-card-hint">Each draw shows three classes with card art and rules text. Click a card image to zoom; use <strong>Choose this class</strong> when you are ready.</p>
+                    <div id="selection-area">
+                        <div class="choice-card">
+                            <button type="button" class="choice-card-img-btn" aria-label="Zoom class card"><img class="choice-card-img" id="img-0" src="" alt="" loading="lazy"></button>
+                            <span class="choice-name" id="name-0">Class A</span>
+                            <p class="choice-desc" id="desc-0">...</p>
+                            <button type="button" class="tool-btn choice-pick-btn" onclick="pickClassManual(0)">Choose this class</button>
+                        </div>
+                        <div class="choice-card">
+                            <button type="button" class="choice-card-img-btn" aria-label="Zoom class card"><img class="choice-card-img" id="img-1" src="" alt="" loading="lazy"></button>
+                            <span class="choice-name" id="name-1">Class B</span>
+                            <p class="choice-desc" id="desc-1">...</p>
+                            <button type="button" class="tool-btn choice-pick-btn" onclick="pickClassManual(1)">Choose this class</button>
+                        </div>
+                        <div class="choice-card">
+                            <button type="button" class="choice-card-img-btn" aria-label="Zoom class card"><img class="choice-card-img" id="img-2" src="" alt="" loading="lazy"></button>
+                            <span class="choice-name" id="name-2">Class C</span>
+                            <p class="choice-desc" id="desc-2">...</p>
+                            <button type="button" class="tool-btn choice-pick-btn" onclick="pickClassManual(2)">Choose this class</button>
+                        </div>
                     </div>
-                    <div class="choice-card">
-                        <button type="button" class="choice-card-img-btn" aria-label="Zoom class card"><img class="choice-card-img" id="img-1" src="" alt="" loading="lazy"></button>
-                        <span class="choice-name" id="name-1">Class B</span>
-                        <p class="choice-desc" id="desc-1">...</p>
-                        <button type="button" class="tool-btn choice-pick-btn" onclick="pickClassManual(1)">Choose this class</button>
-                    </div>
-                    <div class="choice-card">
-                        <button type="button" class="choice-card-img-btn" aria-label="Zoom class card"><img class="choice-card-img" id="img-2" src="" alt="" loading="lazy"></button>
-                        <span class="choice-name" id="name-2">Class C</span>
-                        <p class="choice-desc" id="desc-2">...</p>
-                        <button type="button" class="tool-btn choice-pick-btn" onclick="pickClassManual(2)">Choose this class</button>
-                    </div>
+                </div>
+                <div id="manual-track-panel" class="manual-pick-panel" role="tabpanel" aria-labelledby="manual-mode-track" hidden>
+                    <p class="manual-track-hint">Playing with physical cards? Tap <strong>Track this class</strong> as each player chooses at the table. Picks appear in the pin bar at the bottom so you can follow along on your device.</p>
+                    <input type="search" id="manual-track-search" class="manual-class-search-input" placeholder="Search available classes…" aria-label="Search available classes">
+                    <p id="manual-track-empty" class="manual-track-empty" hidden>Every class in this pool is tracked. Use <strong>Clear classes</strong> in the pin bar to start over.</p>
+                    <div id="manual-track-grid" class="manual-track-grid"></div>
                 </div>
                 <div id="result-area"></div>
             </div>
