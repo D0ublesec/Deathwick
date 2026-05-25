@@ -1,5 +1,6 @@
 /* Game view — board, cards, controls, modals */
 @import 'variables.css';
+@import 'site.css';
 
 body.game-page {
     margin: 0;

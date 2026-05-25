@@ -1,5 +1,6 @@
 /* Manual view — layout and typography only; content unchanged */
 @import 'variables.css';
+@import 'site.css';
 
 /* Suit colours (standard playing card scheme) for tier listings */
 .suit-spades, .suit-clubs { color: #d8d4cc; }   /* black suits (light on dark bg) */

@@ -1,5 +1,6 @@
 /* Home page - cover art, story, description, link cards */
 @import 'variables.css';
+@import 'site.css';
 
 body.home-page {
     font-family: var(--font-body);
@@ -76,15 +77,6 @@ body.home-page {
     width: 100%;
     height: auto;
     vertical-align: middle;
-}
-
-.home-hero h1 {
-    font-family: var(--font-heading);
-    font-size: clamp(2.2rem, 6vw, 3.5rem);
-    font-weight: 700;
-    color: var(--accent-color);
-    margin: 0 0 0.5rem;
-    text-shadow: 0 0 24px var(--accent-glow);
 }
 
 .home-hero .tagline {

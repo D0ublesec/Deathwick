@@ -1,0 +1,87 @@
+/* Shared site branding — logo and nav layout */
+.site-logo-link {
+    display: inline-flex;
+    flex-shrink: 0;
+    line-height: 0;
+    text-decoration: none;
+}
+
+.site-logo-link:hover {
+    filter: brightness(1.08);
+}
+
+.site-logo {
+    display: block;
+    width: auto;
+    height: auto;
+    max-width: 100%;
+}
+
+.site-logo-nav {
+    width: min(148px, 38vw);
+}
+
+.site-logo-game-nav {
+    width: min(96px, 24vw);
+}
+
+.site-logo-hero {
+    width: min(340px, 88vw);
+    margin: 0 auto;
+    filter: drop-shadow(0 0 24px var(--accent-glow, rgba(201, 77, 40, 0.35)));
+}
+
+.site-logo-header {
+    width: min(280px, 75vw);
+    margin: 0 auto;
+    filter: drop-shadow(0 0 18px var(--accent-glow, rgba(201, 77, 40, 0.3)));
+}
+
+.site-nav {
+    flex-wrap: wrap;
+    gap: 12px 20px;
+}
+
+.site-nav-links {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+}
+
+.site-page-header-logo {
+    margin: 0 0 0.35rem;
+    padding: 0;
+    border: none;
+    text-align: center;
+}
+
+.site-page-header-logo .site-logo-link {
+    margin: 0 auto;
+}
+
+.home-hero-logo {
+    margin: 0 0 0.75rem;
+    padding: 0;
+    border: none;
+    text-align: center;
+}
+
+.game-nav .site-logo-link-game {
+    margin-right: 4px;
+}
+
+@media (max-width: 640px) {
+    .site-nav {
+        justify-content: center;
+    }
+
+    .site-nav-links {
+        gap: 14px 18px;
+    }
+
+    .site-logo-nav {
+        width: min(128px, 52vw);
+    }
+}
