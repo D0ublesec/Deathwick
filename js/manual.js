@@ -235,14 +235,23 @@
         if (!grid || pickedClasses.length === 0) return;
 
         var layout = computeFullscreenLayout(pickedClasses.length);
+        var narrow = window.innerWidth <= 640;
+        var useScrollLayout = narrow || pickedClasses.length > 4;
         var captionHeight = 44;
-        var chrome = 120;
-        var imgMaxH = 'calc((100vh - ' + (chrome + layout.rows * captionHeight) + 'px) / ' + layout.rows + ')';
+        var chrome = narrow ? 200 : 120;
+        var imgMaxH;
+
+        if (useScrollLayout) {
+            imgMaxH = narrow ? 'min(30dvh, 160px)' : 'min(34dvh, 200px)';
+        } else {
+            imgMaxH = 'calc((100dvh - ' + (chrome + layout.rows * captionHeight) + 'px) / ' + layout.rows + ')';
+        }
 
         grid.style.setProperty('--picked-cols', layout.cols);
         grid.style.setProperty('--picked-rows', layout.rows);
         grid.style.setProperty('--picked-img-max-h', imgMaxH);
         grid.setAttribute('data-count', String(pickedClasses.length));
+        grid.classList.toggle('is-scroll-layout', useScrollLayout);
 
         grid.innerHTML = '';
         pickedClasses.forEach(function (cls, idx) {

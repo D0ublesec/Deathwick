@@ -1096,6 +1096,8 @@ body.manual-picked-fullscreen-open {
 .manual-picked-fullscreen {
     position: fixed;
     inset: 0;
+    height: 100dvh;
+    max-height: 100dvh;
     z-index: 1150;
     background: #050508;
     display: flex;
@@ -1136,7 +1138,7 @@ body.manual-picked-fullscreen-open {
 }
 
 .manual-picked-fullscreen-grid {
-    flex: 1;
+    flex: 1 1 auto;
     display: grid;
     grid-template-columns: repeat(var(--picked-cols, 1), minmax(0, 1fr));
     grid-template-rows: repeat(var(--picked-rows, 1), minmax(0, 1fr));
@@ -1144,9 +1146,28 @@ body.manual-picked-fullscreen-open {
     padding: max(56px, calc(52px + var(--safe-top, 0px))) max(12px, var(--safe-right, 0px)) 12px max(12px, var(--safe-left, 0px));
     box-sizing: border-box;
     min-height: 0;
-    overflow: auto;
+    overflow: hidden;
     align-content: center;
     justify-content: center;
+}
+
+.manual-picked-fullscreen-grid.is-scroll-layout {
+    grid-template-rows: none;
+    grid-auto-rows: auto;
+    align-content: start;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+}
+
+.manual-picked-fullscreen-grid.is-scroll-layout .manual-picked-fullscreen-item {
+    height: auto;
+}
+
+.manual-picked-fullscreen-grid.is-scroll-layout .manual-picked-fullscreen-img {
+    flex: 0 0 auto;
+    max-height: min(var(--picked-img-max-h, 34dvh), 200px);
 }
 
 .manual-picked-fullscreen-footer {
@@ -1255,8 +1276,34 @@ body.manual-picked-fullscreen-open {
 }
 
 @media (max-width: 640px) {
+    .manual-picked-fullscreen-grid {
+        grid-template-rows: none;
+        grid-auto-rows: auto;
+        align-content: start;
+        overflow-x: hidden;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .manual-picked-fullscreen-item {
+        height: auto;
+    }
+
     .manual-picked-fullscreen-img {
-        max-height: min(var(--picked-img-max-h, 40vh), 42vh);
+        flex: 0 0 auto;
+        max-height: min(var(--picked-img-max-h, 30dvh), 160px);
+    }
+
+    .manual-picked-fullscreen-footer {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .manual-picked-fullscreen-clear-btn,
+    .manual-picked-fullscreen-pick-again-btn,
+    .manual-picked-fullscreen-exit-btn {
+        width: 100%;
+        min-width: 0;
     }
 }
 
