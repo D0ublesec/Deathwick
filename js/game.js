@@ -2,16 +2,24 @@
 (function () {
     var CLASSES = window.CLASSES;
     var SUITS = window.SUITS;
-    var EXTENDED_CLASS_NAMES = ['THE FUNERAL BELL', 'THE LICH', 'THE GRAVEDIGGER'];
-    var TWO_PLAYER_EXCLUDED_CLASS_NAMES = ['THE MIME', 'THE WATCHER', 'THE OCCULTIST', 'THE LICH', 'THE PLAGUE', 'THE VULTURE', 'THE WITNESS'];
+    var TWO_PLAYER_EXCLUDED_CLASS_NAMES = window.TWO_PLAYER_EXCLUDED_CLASS_NAMES || [
+        'THE MIME', 'THE WATCHER', 'THE OCCULTIST', 'THE LICH', 'THE PLAGUE', 'THE VULTURE', 'THE WITNESS',
+        'THE FUNERAL BELL', 'THE GRAVEDIGGER'
+    ];
+    var FOUR_PLAYER_ONLY_CLASS_NAMES = window.FOUR_PLAYER_ONLY_CLASS_NAMES || ['THE OCCULTIST', 'THE WITNESS', 'THE FUNERAL BELL'];
     function getClassPool() {
-        var basePool = gameState.players.length > 6
-            ? CLASSES
-            : CLASSES.filter(function (c) { return EXTENDED_CLASS_NAMES.indexOf(c.name) < 0; });
-        if (gameState.players.length === 2) {
-            basePool = basePool.filter(function (c) {
+        var n = gameState.players.length;
+        var basePool;
+        if (n === 2) {
+            basePool = CLASSES.filter(function (c) {
                 return TWO_PLAYER_EXCLUDED_CLASS_NAMES.indexOf(c.name) < 0;
             });
+        } else if (n === 3) {
+            basePool = CLASSES.filter(function (c) {
+                return FOUR_PLAYER_ONLY_CLASS_NAMES.indexOf(c.name) < 0;
+            });
+        } else {
+            basePool = CLASSES.slice();
         }
         var taken = {};
         for (var i = 0; i < gameState.players.length; i++) {
@@ -384,6 +392,7 @@
         if (modal) modal.style.display = 'none';
     }
 
+    var MAX_RITUAL_CIRCLE_PLAYERS = 9;
     var CHEATSHEET_TURN_DARK = '<li>Empty Candle at <strong>The Draw</strong> or <strong>Am I Alive?</strong> → Consumed (lose).</li>';
     var CHEATSHEET_POSSESSION_DARK = '<li>3 Ghosts same suit → Possessed (lose) at <strong>end of your turn</strong> only. THE SUFFERER needs 4. Ghosts added on others’ turns wait until your turn ends.</li>';
     var CHEATSHEET_REST = '<section class="cs-section"><h3>Ritual actions</h3><ul class="cs-list"><li><strong>Haunt:</strong> number card to a neighbour\'s Shadow.</li><li><strong>Banish:</strong> match/beat a Ghost in your Shadow.</li><li><strong>Séance:</strong> pair → heal 4 from The Dark.</li><li><strong>Cast</strong> (number cards) / <strong>Summon</strong> (face cards &amp; Jokers): use card effect (see Grimoire).</li><li><strong>Flicker:</strong> shuffle hand, draw 3.</li><li><strong>Ability:</strong> class power.</li><li><strong>Abstain:</strong> skip your Ritual action (uses your action this turn).</li></ul></section>' +
@@ -481,6 +490,7 @@
     function addPlayerSlot() {
         var list = document.getElementById('player-setup-list');
         if (!list) return;
+        if (list.children.length >= MAX_RITUAL_CIRCLE_PLAYERS) return;
         var n = list.children.length + 1;
         var defaultType = n === 1 ? 'human' : 'ai';
         var div = document.createElement('div');
@@ -510,7 +520,7 @@
     function setPlayerCount(n) {
         var list = document.getElementById('player-setup-list');
         if (!list) return;
-        n = Math.max(2, Math.min(n, 12));
+        n = Math.max(2, Math.min(n, MAX_RITUAL_CIRCLE_PLAYERS));
         while (list.children.length < n) addPlayerSlot();
         while (list.children.length > n) {
             var lastRow = list.children[list.children.length - 1];
@@ -531,8 +541,8 @@
         if (!container || !list) return;
         var n = list.children.length;
         container.querySelectorAll('.player-count-btn').forEach(function (b) {
-            var val = b.dataset.count === '7plus' ? 7 : parseInt(b.dataset.count, 10);
-            b.classList.toggle('selected', (val === 7 && n >= 7) || (val < 7 && n === val));
+            var val = parseInt(b.dataset.count, 10);
+            b.classList.toggle('selected', n === val);
         });
     }
 
@@ -540,7 +550,7 @@
         var container = document.getElementById('player-count-buttons');
         if (!container) return;
         container.innerHTML = '';
-        [2, 3, 4, 5, 6].forEach(function (n) {
+        [2, 3, 4, 5, 6, 7, 8, 9].forEach(function (n) {
             var b = document.createElement('button');
             b.type = 'button';
             b.className = 'game-btn player-count-btn';
@@ -549,14 +559,6 @@
             b.onclick = function () { setPlayerCount(n); };
             container.appendChild(b);
         });
-        var b7 = document.createElement('button');
-        b7.type = 'button';
-        b7.className = 'game-btn player-count-btn';
-        b7.dataset.count = '7plus';
-        b7.textContent = '7+';
-        b7.title = '7 or more players: all classes in the draw';
-        b7.onclick = function () { setPlayerCount(7); };
-        container.appendChild(b7);
         updatePlayerCountButtonsState();
     }
 
@@ -635,7 +637,7 @@
             }
         }
         var nPlayers = gameState.players.length;
-        var totalJokers = nPlayers <= 8 ? 2 * Math.ceil(nPlayers / 2) : 9 + Math.floor((nPlayers - 9) / 2);
+        var totalJokers = 2 * Math.ceil(nPlayers / 2);
         for (var j = 0; j < totalJokers; j++) {
             var jokerVariant = (j % 4) + 1;
             deck.push({ s: '★', r: 'JOKER', val: 99, isFace: false, jokerVariant: jokerVariant });
@@ -1595,31 +1597,16 @@
         return out;
     }
 
-    /** Index into turnOrder for the player who should act right now (respects concurrentSlot for 6+). */
+    /** Index into turnOrder for the player who should act right now. */
     function getCurrentTurnOrderIndex() {
-        var n = gameState.turnOrder.length;
-        if (n < 6) return gameState.turnIdx;
-        var slot = gameState.concurrentSlot || 0;
-        if (n <= 8) return (gameState.turnIdx + slot * Math.floor(n / 2)) % n;
-        return (gameState.turnIdx + slot * Math.floor(n / 3)) % n;
+        return gameState.turnIdx;
     }
 
-    /** For 6–8 players: 2 act per round (turnIdx and turnIdx+floor(n/2)). For 9–12: 3 act. Returns player ids. */
+    /** Player id(s) with the active turn (always one at a time). */
     function getConcurrentTurnPlayerIds() {
         var n = gameState.turnOrder.length;
-        if (n < 6) return [gameState.players[gameState.turnOrder[gameState.turnIdx]].id];
-        var idx = gameState.turnIdx;
-        var ids = [];
-        if (n <= 8) {
-            var half = Math.floor(n / 2);
-            ids.push(gameState.players[gameState.turnOrder[idx]].id);
-            ids.push(gameState.players[gameState.turnOrder[(idx + half) % n]].id);
-        } else {
-            ids.push(gameState.players[gameState.turnOrder[idx]].id);
-            ids.push(gameState.players[gameState.turnOrder[(idx + Math.floor(n / 3)) % n]].id);
-            ids.push(gameState.players[gameState.turnOrder[(idx + Math.floor(2 * n / 3)) % n]].id);
-        }
-        return ids;
+        if (n < 1) return [];
+        return [gameState.players[gameState.turnOrder[gameState.turnIdx]].id];
     }
 
     function drawTableSurface() {
@@ -1778,7 +1765,7 @@
                 hintEl.textContent = 'THE MIME: use the popup — accept the Haunt or discard 1 to redirect to ' + gameState.pendingMimeRedirect.otherNeighbour.name + '.';
                 hintEl.style.display = 'block';
             } else if (gameState.selectionMode === 'HEX_DISCARD') {
-                hintEl.textContent = 'THE HEX: click a matching rank to reflect the Haunt into their Shadow.';
+                hintEl.textContent = 'THE HEX: click a matching suit to reflect the Haunt into their Shadow.';
                 hintEl.style.display = 'block';
             } else {
                 hintEl.textContent = '';
@@ -2085,7 +2072,6 @@
                 if (displayCount >= 4) seat.classList.add('seat-compact');
                 if (isNarrow && displayCount >= 4) seat.classList.add('seat-mobile-many');
                 seat.classList.toggle('active-turn', concurrentIds.indexOf(other.id) >= 0);
-                seat.classList.toggle('concurrent-flame', concurrentIds.indexOf(other.id) >= 0 && gameState.turnOrder.length >= 6);
                 seat.dataset.playerId = String(other.id);
                 var validTargets = gameState.selectionMode === 'SELECT_TARGET' ? getValidTargets() : [];
                 var isTargetable = validTargets.some(function (pl) { return pl.id === other.id; });
@@ -2094,8 +2080,7 @@
                     seat.onclick = (function (tgt) { return function () { targetPlayerSelected(tgt); }; })(other);
                 }
                 var clsName = other.class ? other.class.name : '';
-                var concurrentBadge = (concurrentIds.indexOf(other.id) >= 0 && gameState.turnOrder.length >= 6) ? ' <span class="concurrent-badge" title="Concurrent flame">🔥</span>' : '';
-                seat.innerHTML = '<div class="seat-header"><span class="seat-name">' + other.name + '</span><span class="seat-class clickable-class' + (other.class ? '' : ' empty') + '" data-class-name="' + clsName + '">' + clsName + '</span>' + concurrentBadge + '</div>';
+                seat.innerHTML = '<div class="seat-header"><span class="seat-name">' + other.name + '</span><span class="seat-class clickable-class' + (other.class ? '' : ' empty') + '" data-class-name="' + clsName + '">' + clsName + '</span></div>';
                 var seatClassEl = seat.querySelector('.seat-class');
                 if (other.class && seatClassEl) seatClassEl.onclick = (function (cls) { return function (e) { e.stopPropagation(); showClassDesc(cls); }; })(other.class);
                 zone.querySelector('.ritual-zone-header-center').appendChild(seat);
@@ -2362,14 +2347,14 @@
         } else {
             var act = gameState.players[gameState.activeIdx];
             if (pm.target.type === 'human' && act && pm.target.id !== act.id && countHumanPlayers() > 1) {
-                showReadyPrompt(pm.target, 'Pass the device to ' + pm.target.name + ' to reveal a matching card (THE HEX).', function () {
+                showReadyPrompt(pm.target, 'Pass the device to ' + pm.target.name + ' to reveal a matching suit (THE HEX).', function () {
                     gameState.selectionMode = 'HEX_DISCARD';
-                    log('Click the matching rank to reflect the Haunt (THE HEX).');
+                    log('Click a matching suit to reflect the Haunt (THE HEX).');
                     updateUI();
                 });
             } else {
                 gameState.selectionMode = 'HEX_DISCARD';
-                log('Click the matching rank to reflect the Haunt (THE HEX).');
+                log('Click a matching suit to reflect the Haunt (THE HEX).');
                 updateUI();
             }
         }
@@ -2377,7 +2362,7 @@
 
     function applyHexReflect(attacker, hexTarget, hauntCard, hauntHandIdx, hexHandIdx) {
         if (!attacker || !hexTarget || hexHandIdx < 0 || hexHandIdx >= hexTarget.hand.length) return false;
-        if (hexTarget.hand[hexHandIdx].r !== hauntCard.r) return false;
+        if (hexTarget.hand[hexHandIdx].s !== hauntCard.s) return false;
         var hexCard = hexTarget.hand.splice(hexHandIdx, 1)[0];
         gameState.lastDiscardByPlayerId = hexTarget.id;
         gameState.discard.push(hexCard);
@@ -2393,7 +2378,7 @@
         if (!gameState.lastDamageTo) gameState.lastDamageTo = {};
         gameState.lastDamageTo[attacker.id] = hexTarget.id;
         attacker.shadow.push(cardCopy);
-        log(hexTarget.name + ' (THE HEX) reflected the Haunt! ' + played.r + played.s + ' → ' + attacker.name + "'s Shadow.");
+        log(hexTarget.name + ' (THE HEX) reflected the Haunt! ' + played.r + played.s + ' → ' + attacker.name + "'s Shadow. (Cannot be Salted.)");
         if (typeof window.playSFX === 'function') window.playSFX('haunt');
         if (checkPossessionInstantIfDark(attacker)) return true;
         return true;
@@ -2403,8 +2388,8 @@
         var pm = gameState.pendingHexCancel;
         if (!pm || !pm.target || discardIdx < 0 || discardIdx >= pm.target.hand.length) return;
         var revealed = pm.target.hand[discardIdx];
-        if (!revealed || revealed.r !== pm.card.r) {
-            showAlertModal('That card does not match the Haunting card\'s rank.', 'THE HEX');
+        if (!revealed || revealed.s !== pm.card.s) {
+            showAlertModal('That card does not match the Haunting card\'s suit.', 'THE HEX');
             return;
         }
         if (!applyHexReflect(pm.attacker, pm.target, pm.card, pm.handIdx, discardIdx)) return;
@@ -2806,7 +2791,7 @@
         };
         if (t.class && t.class.name === 'THE HEX' && t.hand.length >= 1 && !c.isFace && c.r !== 'JOKER' && c.r !== '★') {
             var hexMatchIdx = -1;
-            for (var hx = 0; hx < t.hand.length; hx++) { if (t.hand[hx].r === c.r) { hexMatchIdx = hx; break; } }
+            for (var hx = 0; hx < t.hand.length; hx++) { if (t.hand[hx].s === c.s) { hexMatchIdx = hx; break; } }
             if (hexMatchIdx >= 0) {
                 if (t.type === 'ai') {
                     if (Math.random() < 0.5) {
@@ -2819,7 +2804,7 @@
                     gameState.pendingHexCancel = { attacker: p, target: t, card: c, handIdx: idx, hauntContinuation: hauntContinuation };
                     var hexModal = document.getElementById('hex-modal');
                     var hexMsg = document.getElementById('hex-msg');
-                    if (hexMsg) hexMsg.textContent = p.name + ' Haunts with ' + c.r + c.s + '. Reveal a matching rank to reflect it back? Your card → The Dark; theirs → their Shadow.';
+                    if (hexMsg) hexMsg.textContent = p.name + ' Haunts with ' + c.r + c.s + '. Reveal a matching suit (' + c.s + ') to reflect it back? Your card → The Dark; theirs → their Shadow. A completed reflect cannot be Salted.';
                     if (hexModal) hexModal.style.display = 'flex';
                     return;
                 }
@@ -4213,23 +4198,7 @@
             if (handleDeath(p)) return;
         }
         var n = gameState.turnOrder.length;
-        if (n < 6) {
-            gameState.turnIdx = (gameState.turnIdx + 1) % n;
-        } else if (n <= 8) {
-            if (gameState.concurrentSlot === 0) {
-                gameState.concurrentSlot = 1;
-            } else {
-                gameState.concurrentSlot = 0;
-                gameState.turnIdx = (gameState.turnIdx + 1) % n;
-            }
-        } else {
-            if (gameState.concurrentSlot < 2) {
-                gameState.concurrentSlot++;
-            } else {
-                gameState.concurrentSlot = 0;
-                gameState.turnIdx = (gameState.turnIdx + 1) % n;
-            }
-        }
+        gameState.turnIdx = (gameState.turnIdx + 1) % n;
         if (gameState.isOnline && gameState.isHost && typeof gameState.broadcastState === 'function') gameState.broadcastState();
         startTurn();
     }

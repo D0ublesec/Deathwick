@@ -4,19 +4,58 @@
     var getClassImageFilename = window.getClassImageFilename;
     if (!CLASSES) return;
 
-    var EXTENDED_CLASS_NAMES = ['THE FUNERAL BELL', 'THE LICH', 'THE GRAVEDIGGER'];
-    var TWO_PLAYER_EXCLUDED_CLASS_NAMES = ['THE MIME', 'THE WATCHER', 'THE OCCULTIST', 'THE LICH', 'THE PLAGUE', 'THE VULTURE', 'THE WITNESS'];
-    var POOL_20 = CLASSES.filter(function (c) { return EXTENDED_CLASS_NAMES.indexOf(c.name) < 0; });
-    var POOL_2 = POOL_20.filter(function (c) { return TWO_PLAYER_EXCLUDED_CLASS_NAMES.indexOf(c.name) < 0; });
+    var TWO_PLAYER_EXCLUDED_CLASS_NAMES = window.TWO_PLAYER_EXCLUDED_CLASS_NAMES || [
+        'THE MIME', 'THE WATCHER', 'THE OCCULTIST', 'THE LICH', 'THE PLAGUE', 'THE VULTURE', 'THE WITNESS',
+        'THE FUNERAL BELL', 'THE GRAVEDIGGER'
+    ];
+    var FOUR_PLAYER_ONLY_CLASS_NAMES = window.FOUR_PLAYER_ONLY_CLASS_NAMES || ['THE OCCULTIST', 'THE WITNESS', 'THE FUNERAL BELL'];
+    var getClassPoolBySize = window.getClassPoolBySize || function (poolSize) {
+        if (poolSize === 2) {
+            return CLASSES.filter(function (c) { return TWO_PLAYER_EXCLUDED_CLASS_NAMES.indexOf(c.name) < 0; });
+        }
+        if (poolSize === 3) {
+            return CLASSES.filter(function (c) { return FOUR_PLAYER_ONLY_CLASS_NAMES.indexOf(c.name) < 0; });
+        }
+        return CLASSES.slice();
+    };
+    var POOL_2 = getClassPoolBySize(2);
+    var twoPoolSet = {};
+    POOL_2.forEach(function (c) { twoPoolSet[c.name] = true; });
+    var fourPlusOnlySet = {};
+    FOUR_PLAYER_ONLY_CLASS_NAMES.forEach(function (n) { fourPlusOnlySet[n] = true; });
+    var threePlusOnlySet = {};
+    TWO_PLAYER_EXCLUDED_CLASS_NAMES.forEach(function (n) {
+        if (!fourPlusOnlySet[n]) threePlusOnlySet[n] = true;
+    });
+    var CLASS_POOL_GROUPS = [
+        {
+            id: 'four-plus-only',
+            title: '4+ players only',
+            subtitle: '3 classes — need at least 4 players',
+            match: function (c) { return !!fourPlusOnlySet[c.name]; }
+        },
+        {
+            id: 'three-plus-only',
+            title: '3+ players only',
+            subtitle: '6 classes — not in the 2-player pool',
+            match: function (c) { return !!threePlusOnlySet[c.name]; }
+        },
+        {
+            id: 'two',
+            title: '2-player pool',
+            subtitle: '29 classes — available at every group size',
+            match: function (c) { return !!twoPoolSet[c.name]; }
+        }
+    ];
 
     var CLASS_IMAGES_BASE = 'images/cards/classes/';
     var CARD_IMAGE_EXT = '.png';
 
     var STORAGE_KEY = 'finalflicker_manual_picked';
     var PIN_VISIBLE_KEY = 'finalflicker_manual_pin_visible';
-    var manualPoolSize = 20;
+    var manualPoolSize = 'plus';
 
-    var manualClassPool = POOL_20.slice();
+    var manualClassPool = getClassPoolBySize('plus').slice();
     var currentManualPair = [];
     var pickedClasses = [];
     var pinVisible = true;
@@ -30,9 +69,9 @@
     function updatePoolStatus() {
         var el = document.getElementById('pool-status');
         if (!el) return;
-        var label = '2–6 player';
+        var label = '4+ player';
         if (manualPoolSize === 2) label = '2-player (restricted)';
-        else if (manualPoolSize === 38) label = '7+ player';
+        else if (manualPoolSize === 3) label = '3-player';
         if (manualPickMode === 'track') {
             el.textContent = pickedClasses.length + ' tracked, ' + manualClassPool.length + ' still available (' + label + ' pool).';
             return;
@@ -42,18 +81,18 @@
 
     function updatePoolButtons() {
         var btn2 = document.getElementById('manual-pool-2');
-        var btn20 = document.getElementById('manual-pool-20');
-        var btn38 = document.getElementById('manual-pool-38');
+        var btn3 = document.getElementById('manual-pool-3');
+        var btnPlus = document.getElementById('manual-pool-plus');
         if (btn2) btn2.classList.toggle('selected', manualPoolSize === 2);
-        if (btn20) btn20.classList.toggle('selected', manualPoolSize === 20);
-        if (btn38) btn38.classList.toggle('selected', manualPoolSize === 38);
+        if (btn3) btn3.classList.toggle('selected', manualPoolSize === 3);
+        if (btnPlus) btnPlus.classList.toggle('selected', manualPoolSize === 'plus');
     }
 
     window.setManualClassPool = function (size) {
-        if (size === 38) manualPoolSize = 38;
-        else if (size === 2) manualPoolSize = 2;
-        else manualPoolSize = 20;
-        manualClassPool = (manualPoolSize === 38 ? CLASSES : manualPoolSize === 2 ? POOL_2 : POOL_20).slice();
+        if (size === 2) manualPoolSize = 2;
+        else if (size === 3) manualPoolSize = 3;
+        else manualPoolSize = 'plus';
+        manualClassPool = getClassPoolBySize(manualPoolSize).slice();
         updatePoolStatus();
         updatePoolButtons();
         renderManualTrackGrid();
@@ -494,7 +533,7 @@
         closePickedFullscreen();
         closeClassViewer();
         returnToPickedFullscreen = false;
-        manualClassPool = (manualPoolSize === 38 ? CLASSES : manualPoolSize === 2 ? POOL_2 : POOL_20).slice();
+        manualClassPool = getClassPoolBySize(manualPoolSize).slice();
         pickedClasses = [];
         selectedPinIdx = null;
         try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
@@ -544,25 +583,104 @@
             .replace(/"/g, '&quot;');
     }
 
-    function renderClassGrid(classesToShow) {
+    var manualClassListPoolFilter = 'all';
+    var manualClassSearchQuery = '';
+
+    function classMatchesSearch(cls, q) {
+        if (!q) return true;
+        return (cls.name && cls.name.toLowerCase().indexOf(q) !== -1) ||
+            (cls.desc && cls.desc.toLowerCase().indexOf(q) !== -1);
+    }
+
+    function getManualClassListPool() {
+        if (manualClassListPoolFilter === 'all') return CLASSES.slice();
+        if (manualClassListPoolFilter === '2') return getClassPoolBySize(2);
+        if (manualClassListPoolFilter === '3') return getClassPoolBySize(3);
+        return getClassPoolBySize('plus');
+    }
+
+    function getClassesForGroup(group, poolClasses) {
+        var poolSet = {};
+        poolClasses.forEach(function (c) { poolSet[c.name] = c; });
+        var out = [];
+        if (group.names) {
+            group.names.forEach(function (name) {
+                if (poolSet[name]) out.push(poolSet[name]);
+            });
+            return out;
+        }
+        if (group.match) {
+            poolClasses.forEach(function (c) {
+                if (group.match(c)) out.push(c);
+            });
+        }
+        return out;
+    }
+
+    function buildClassCardHtml(cls) {
+        var nameEsc = escapeHtml(cls.name);
+        var descEsc = escapeHtml(cls.desc);
+        var imgName = getClassImageFilename ? getClassImageFilename(cls.name) : null;
+        var classFolder = imgName && window.getClassSubfolder ? window.getClassSubfolder(imgName) : '';
+        var imgPath = imgName ? CLASS_IMAGES_BASE + (classFolder ? classFolder + '/' : '') + imgName + CARD_IMAGE_EXT : '';
+        var imgHtml = imgPath
+            ? '<img class="manual-class-card-img" src="' + escapeHtml(imgPath) + '" alt="' + nameEsc + '">'
+            : '';
+        return '<div class="class-card class-card-interactive" data-class-name="' + nameEsc + '" data-class-desc="' + descEsc + '" tabindex="0" role="button" aria-label="View ' + nameEsc + '">' +
+            '<span class="class-name">' + nameEsc + '</span>' +
+            '<p class="class-desc">' + descEsc + '</p>' +
+            (imgHtml ? '<div class="manual-class-card-img-wrap">' + imgHtml + '</div>' : '') +
+            '</div>';
+    }
+
+    function renderClassGrid() {
         var grid = document.getElementById('manual-class-grid');
         if (!grid) return;
-        grid.innerHTML = '';
-        (classesToShow || CLASSES).forEach(function (cls) {
-            var nameEsc = escapeHtml(cls.name);
-            var descEsc = escapeHtml(cls.desc);
-            var imgName = getClassImageFilename ? getClassImageFilename(cls.name) : null;
-            var classFolder = imgName && window.getClassSubfolder ? window.getClassSubfolder(imgName) : '';
-            var imgPath = imgName ? CLASS_IMAGES_BASE + (classFolder ? classFolder + '/' : '') + imgName + CARD_IMAGE_EXT : '';
-            var imgHtml = imgPath
-                ? '<img class="manual-class-card-img" src="' + escapeHtml(imgPath) + '" alt="' + nameEsc + '">'
-                : '';
-            grid.innerHTML += '<div class="class-card class-card-interactive" data-class-name="' + nameEsc + '" data-class-desc="' + descEsc + '" tabindex="0" role="button" aria-label="View ' + nameEsc + '">' +
-                '<span class="class-name">' + nameEsc + '</span>' +
-                '<p class="class-desc">' + descEsc + '</p>' +
-                (imgHtml ? '<div class="manual-class-card-img-wrap">' + imgHtml + '</div>' : '') +
-                '</div>';
+
+        var q = (manualClassSearchQuery || '').trim().toLowerCase();
+        var poolClasses = getManualClassListPool();
+        var html = '';
+        var totalShown = 0;
+
+        CLASS_POOL_GROUPS.forEach(function (group) {
+            var groupClasses = getClassesForGroup(group, poolClasses).filter(function (cls) {
+                return classMatchesSearch(cls, q);
+            });
+            if (!groupClasses.length) return;
+            totalShown += groupClasses.length;
+            html += '<div class="manual-class-pool-group" data-pool-group="' + group.id + '">';
+            html += '<div class="manual-class-pool-group-head">';
+            html += '<h3 class="manual-class-pool-group-title">' + escapeHtml(group.title) + '</h3>';
+            html += '<p class="manual-class-pool-group-subtitle">' + escapeHtml(group.subtitle) + '</p>';
+            html += '</div>';
+            html += '<div class="classes-grid manual-class-pool-group-grid">';
+            groupClasses.forEach(function (cls) {
+                html += buildClassCardHtml(cls);
+            });
+            html += '</div></div>';
         });
+
+        if (!totalShown) {
+            html = '<p class="manual-class-pool-empty">No classes match this pool or search.</p>';
+        }
+        grid.innerHTML = html;
+    }
+
+    function updateClassPoolFilterButtons() {
+        var wrap = document.getElementById('manual-class-pool-filters');
+        if (!wrap) return;
+        wrap.querySelectorAll('[data-pool-filter]').forEach(function (btn) {
+            var val = btn.getAttribute('data-pool-filter');
+            var selected = val === manualClassListPoolFilter;
+            btn.classList.toggle('selected', selected);
+            btn.classList.toggle('secondary', !selected);
+        });
+    }
+
+    function setManualClassListPoolFilter(filter) {
+        manualClassListPoolFilter = filter || 'all';
+        updateClassPoolFilterButtons();
+        renderClassGrid();
     }
 
     function populateManual() {
@@ -584,19 +702,21 @@
             wrap.appendChild(input);
             section.insertBefore(wrap, grid);
             input.addEventListener('input', function () {
-                var q = (input.value || '').trim().toLowerCase();
-                if (!q) {
-                    renderClassGrid(CLASSES);
-                    return;
-                }
-                var filtered = CLASSES.filter(function (cls) {
-                    return (cls.name && cls.name.toLowerCase().indexOf(q) !== -1) ||
-                        (cls.desc && cls.desc.toLowerCase().indexOf(q) !== -1);
-                });
-                renderClassGrid(filtered);
+                manualClassSearchQuery = input.value || '';
+                renderClassGrid();
             });
         }
-        renderClassGrid(CLASSES);
+
+        var poolFilters = document.getElementById('manual-class-pool-filters');
+        if (poolFilters) {
+            poolFilters.querySelectorAll('[data-pool-filter]').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    setManualClassListPoolFilter(btn.getAttribute('data-pool-filter'));
+                });
+            });
+        }
+        updateClassPoolFilterButtons();
+        renderClassGrid();
     }
 
     populateManual();

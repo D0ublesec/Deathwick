@@ -10,7 +10,7 @@ window.CLASSES = [
     { name: "THE GATEKEEPER", desc: "You are immune to Ghosts being moved into your Shadow (Mirror/Possess)." },
     { name: "THE GRAVEDIGGER", desc: "When a neighbour dies, add their remaining Candle to the bottom of yours." },
     { name: "THE GRIMOIRE OF REJECTION", desc: "Ability (not your Ritual action): Secretly write a card name. Reveal to cancel a neighbour's play of that card only; cannot be Salted. Locked until it triggers, then write anew. Same name cannot follow itself (Ace, 5, Ace is fine)." },
-    { name: "THE HEX", desc: "When a neighbour Haunts you with a number card, you may reveal a matching rank from hand. Your card goes to The Dark; their Haunt becomes a ghost in their Shadow instead of yours." },
+    { name: "THE HEX", desc: "When a neighbour Haunts you with a number card, you may reveal a matching suit from hand. Your card goes to The Dark; their Haunt becomes a ghost in their Shadow instead of yours. A completed reflect cannot be Salted." },
     { name: "THE HOARDER", desc: "Hand Limit is 8 (instead of 5)." },
     { name: "THE INQUISITOR", desc: "As your action, you may discard 1 card to the top of The Dark to choose a neighbour; they reveal their hand. If they reveal a Face Card, they must Burn 3 (to the top of The Dark)." },
     { name: "THE LEECH", desc: "When you Banish a Ghost, you always Siphon it. (Spades are still banished to The Dark)." },
@@ -39,6 +39,35 @@ window.CLASSES = [
     { name: "THE WATCHER", desc: "When you cast a 6 (Sight), you see both neighbours' hands and may take up to 2 cards from each (4 total)." },
     { name: "THE WITNESS", desc: "You may not win the game. If you are alive when only one player remains, they also lose." }
 ];
+
+window.TWO_PLAYER_EXCLUDED_CLASS_NAMES = [
+    'THE MIME', 'THE WATCHER', 'THE OCCULTIST', 'THE LICH', 'THE PLAGUE', 'THE VULTURE', 'THE WITNESS',
+    'THE FUNERAL BELL', 'THE GRAVEDIGGER'
+];
+
+window.FOUR_PLAYER_ONLY_CLASS_NAMES = ['THE OCCULTIST', 'THE WITNESS', 'THE FUNERAL BELL'];
+
+/** poolSize: 2 (29) | 3 (35) | 4 | 'plus' (all 38) */
+window.getClassPoolBySize = function (poolSize) {
+    var list = window.CLASSES;
+    if (poolSize === 2) {
+        return list.filter(function (c) { return window.TWO_PLAYER_EXCLUDED_CLASS_NAMES.indexOf(c.name) < 0; });
+    }
+    if (poolSize === 3) {
+        return list.filter(function (c) { return window.FOUR_PLAYER_ONLY_CLASS_NAMES.indexOf(c.name) < 0; });
+    }
+    return list.slice();
+};
+
+window.getPlusOnlyClassNames = function () {
+    var twoPool = {};
+    window.getClassPoolBySize(2).forEach(function (c) { twoPool[c.name] = true; });
+    return window.CLASSES.filter(function (c) { return !twoPool[c.name]; }).map(function (c) { return c.name; });
+};
+
+window.getFourPlusOnlyClassNames = function () {
+    return window.FOUR_PLAYER_ONLY_CLASS_NAMES.slice();
+};
 
 window.SUITS = ['♠', '♥', '♣', '♦'];
 window.RANKS = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];

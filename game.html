@@ -40,8 +40,8 @@
             <h2 style="color:var(--accent-color)">SETUP RITUAL</h2>
             <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:14px; text-align:center;">Empty Candle eliminates you only at <strong>The Draw</strong> or <strong>Am I Alive?</strong> <a href="manual.html#ritual-type" target="_blank" rel="noopener" style="color:var(--accent-color);">Manual → Consumed by the Darkness</a></p>
             <div id="local-setup">
-                <p style="margin-bottom:6px; font-size:0.9rem;"><strong>Number of players:</strong> <span id="player-count-buttons"></span></p>
-                <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:10px;">Determines which classes appear in the random 3-card draw (2–6 players: 35 classes; 7+: 38 classes).</p>
+                <p style="margin-bottom:6px; font-size:0.9rem;"><strong>Number of players:</strong> <span id="player-count-buttons"></span> <span style="font-size:0.8rem; color:var(--text-muted);">(max 9 per circle)</span></p>
+                <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:6px;">Classes in the random draw: <strong>2 players</strong> = 29; <strong>3 players</strong> = 35; <strong>4+</strong> = all 38. For <strong>10+</strong> at the table, split into separate circles—see <a href="manual.html#large-groups" target="_blank" rel="noopener" style="color:var(--accent-color);">Large groups &amp; Final Ritual</a>.</p>
                 <div id="player-setup-list" style="margin-bottom:10px;"></div>
                 <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;">
                     <button type="button" class="game-btn" onclick="addPlayerSlot()">+ ADD PLAYER</button>
@@ -177,7 +177,7 @@
     <div id="hex-modal" class="modal" style="z-index:3000;">
         <div class="modal-content" style="border-color:var(--magic-color);">
             <h2 style="color:var(--magic-color)">THE HEX</h2>
-            <p id="hex-msg">Reveal a matching rank to reflect this Haunt back? Your card goes to The Dark; theirs becomes a ghost in their Shadow.</p>
+            <p id="hex-msg">Reveal a matching suit to reflect this Haunt back? Your card goes to The Dark; theirs becomes a ghost in their Shadow. A completed reflect cannot be Salted.</p>
             <div style="display:flex; gap:20px; justify-content:center; flex-wrap:wrap;">
                 <button type="button" class="game-btn" style="background:#444;" onclick="resolveHexCancel(true)">ALLOW HAUNT</button>
                 <button type="button" class="game-btn" style="background:var(--magic-color); color:black;" onclick="resolveHexCancel(false)">REFLECT THE HAUNT</button>
