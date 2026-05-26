@@ -84,6 +84,7 @@
                 </li>
                 <li><strong>The Shuffle:</strong> Shuffle that circle’s decks and Jokers together into one pool. Deal from it as in <strong>The Circle &amp; The Start</strong> below.</li>
                 <li><strong>Large gatherings:</strong> Repeat the same supplies math for <strong>each</strong> circle (e.g. 10 players → two circles of 5: each uses 3 decks and 6 Jokers). Do not combine every table into one pool unless you are deliberately running a single circle—and circles above 9 tend to feel slow compared with splitting.</li>
+                <li><strong>Optional — haunter markers:</strong> A <strong>pile of small matching pieces per player</strong> (same colour beads, same coin type, etc.—one style per person, <strong>many pieces each</strong>). Needed only when <strong>The Voodoo Doll</strong>, <strong>The Clown</strong>, <strong>The Sealbinder</strong>, or <strong>The Plague</strong> is in the circle—or whenever you want left/right Shadow to stay clear after Mirror/Possess. See <a href="#track-haunter">Tracking who Haunted whom</a>.</li>
             </ul>
             <h4>Card backs</h4>
             <p>The game uses three card-back designs so you can tell decks apart:</p>
@@ -211,6 +212,23 @@
             <h2>2. The Ritual Circle</h2>
             <p><strong>Who plays when:</strong> One player takes a full turn at a time (Haunting, Draw, one Ritual action, Discard), then play passes <strong>clockwise</strong> to the next player still Lit. Up to <strong>9 players</strong> per ritual circle; larger gatherings split into separate circles (see <a href="#large-groups">Large groups &amp; Final Ritual</a>). The diagrams below show seating; ❄️ marks a typical starter.</p>
             <p><strong>Shadow layout (3+ players):</strong> In games with three or more players, each player’s <strong>Shadow</strong> is shown split: <strong>ghosts on the left</strong> are from your <strong>left neighbour</strong> (who Haunted you from that side), and <strong>ghosts on the right</strong> are from your <strong>right neighbour</strong>. This lets you see at a glance who Haunted which ghost; especially useful for classes like <strong>The Sealbinder</strong> (whose Haunted ghosts cannot be moved with Possess or Mirror, or Recalled) or <strong>The Clown</strong> (whose Haunted ghosts can only be Banished by Face or Cleanse). In a 2‑player game there is only one opponent, so the Shadow is a single zone.</p>
+            <div id="track-haunter" class="manual-tip-box">
+                <h3 class="manual-tip-title">Optional: tracking who Haunted whom (physical play)</h3>
+                <p>Some rules care about the <strong>player who Haunted</strong> a ghost, not just which side of your Shadow it sits on. Split left/right helps for ordinary Haunts in 3+ player games, but <strong>Mirror (J)</strong>, <strong>Possess (9)</strong>, and ghosts passed when someone dies can move cards—so a marker on each ghost stays accurate when it matters.</p>
+                <p><strong>Which classes need it?</strong> Only <strong>four</strong> class abilities check <em>who</em> Haunted a ghost (see table). No other class reads the haunter. You do <strong>not</strong> need markers for Panic failures, BOO!, or other ghosts that were never Haunted onto someone (e.g. Voodoo Doll does not reflect those).</p>
+                <p><strong>Suggestion:</strong> Assign each player a <strong>style</strong> of marker (e.g. red beads for P1, blue for P2, green for P3)—and bring <strong>several of each</strong>, not just one. Every time someone Haunts a ghost onto you, place <strong>one of that player’s pieces</strong> on that ghost (under the card, on the corner, or beside it in your Shadow). Each ghost needs its own marker: if three different players Haunt you, you have three marked ghosts; if one player Haunts you twice, you need <strong>two</strong> of their pieces. When a ghost leaves your Shadow, return that piece to a discard pile (or move it with the ghost if Mirror/Possess moved it). The digital game tracks this automatically.</p>
+                <table class="manual-ref-table manual-tip-table">
+                    <thead><tr><th>Class / effect</th><th>Why the haunter matters</th></tr></thead>
+                    <tbody>
+                        <tr><td><strong>The Voodoo Doll</strong></td><td>When you Burn at the Haunting, ♠/♣/♦ ghosts put there by a <strong>Haunt</strong> reflect: that <strong>haunter</strong> Burns 1 too. Mirror and Possess do not change who Haunted the ghost.</td></tr>
+                        <tr><td><strong>The Clown</strong></td><td>Ghosts <strong>they</strong> Haunted onto you reject Banish with number cards (except Cleanse&nbsp;7); only Face or Cleanse works.</td></tr>
+                        <tr><td><strong>The Sealbinder</strong></td><td>Ghosts <strong>they</strong> Haunted cannot be moved (Possess, Mirror) or returned (Recall). Mirror swaps involving such a ghost are blocked.</td></tr>
+                        <tr><td><strong>The Plague</strong></td><td>Spreading only applies to ghosts <strong>they</strong> Haunted. Also track which players that ghost has <strong>already visited</strong> (it cannot return to the same player)—e.g. small checklist on paper or a second set of tokens, not just the haunter marker.</td></tr>
+                    </tbody>
+                </table>
+                <p style="font-size:0.92em; color:var(--text-muted, #888);"><strong>Not on this list:</strong> The Mime, Hex, Warlock, and other Haunt-adjacent classes either redirect/cancel the Haunt or use a normal Haunt tag—you still mark the <strong>original attacker</strong> as haunter when a ghost lands, but no extra class rule reads beyond the four above. In 3+ players without these four classes, left/right Shadow is often enough until someone Mirror-swaps or Possesses.</p>
+                <p style="margin-bottom:0; font-size:0.92em; color:var(--text-muted, #888);">Use whatever is at hand—coloured beads, dice, bottle caps, paper clips. A practical starting point is <strong>about 5–8 pieces per player</strong> (more in long games with heavy Haunting). Markers can be reused once a ghost is banished or leaves play.</p>
+            </div>
             <div id="layout-tool">
                 <button type="button" class="tool-btn" onclick="showDiagram(2)">2 Players</button>
                 <button type="button" class="tool-btn" onclick="showDiagram(3)">3 Players</button>
@@ -344,7 +362,7 @@
                 <dt class="game-term">Neighbours</dt>
                 <dd>The two players immediately to your left and right in the circle. Most effects target one neighbour unless a card says otherwise (e.g. <strong>Drain (4)</strong> hits <strong>all</strong> neighbours).</dd>
                 <dt class="game-term">Shadow</dt>
-                <dd>The player area in front of you where ghost cards reside. Place <strong>ghosts vertically</strong> (portrait) in the Shadow and <strong>Walls horizontally</strong> (landscape) so ghosts and Walls are easy to tell apart. For each ghost there, you <strong>Burn</strong> one card from your Candle at the start of your turn.</dd>
+                <dd>The player area in front of you where ghost cards reside. Place <strong>ghosts vertically</strong> (portrait) in the Shadow and <strong>Walls horizontally</strong> (landscape) so ghosts and Walls are easy to tell apart. For each ghost there, you <strong>Burn</strong> one card from your Candle at the start of your turn. At a physical table, consider <a href="#track-haunter">a pile of markers per player (one on each Haunted ghost)</a> when <strong>The Voodoo Doll</strong>, <strong>The Clown</strong>, <strong>The Sealbinder</strong>, or <strong>The Plague</strong> are in play.</dd>
                 <dt class="game-term">Burn</dt>
                 <dd>Take the top card of your Candle and put it face up on top of The Dark.</dd>
                 <dt class="game-term">Suit tier</dt>

@@ -1845,3 +1845,25 @@ h2.manual-section-toggle {
 .full-deck-jokers .full-deck-card {
     width: 56px;
 }
+
+.manual-tip-box {
+    margin: 1.25rem 0 1.5rem;
+    padding: 14px 16px;
+    border: 1px solid var(--accent-color);
+    border-radius: var(--radius-sm);
+    background: #1a1a22;
+}
+
+.manual-tip-title {
+    margin: 0 0 10px 0;
+    padding: 0;
+    border: none;
+    font-family: var(--font-heading);
+    font-size: 1.05rem;
+    color: var(--accent-color);
+}
+
+.manual-tip-table {
+    margin: 12px 0;
+    max-width: 100%;
+}
