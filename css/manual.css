@@ -1752,21 +1752,21 @@ h2.manual-section-toggle {
     .diagram-display { height: clamp(300px, 38vh, 360px); min-height: 300px; }
 }
 
-/* 9-player layout: circle with 3 flames (P1, P4, P7) */
-.diagram-9.diagram-display {
+/* 8-player layout: circle with 3 flames (P1, P4, P7) */
+.diagram-8.diagram-display {
     min-height: clamp(280px, 40vh, 380px);
     height: clamp(280px, 40vh, 380px);
 }
 
-.diagram-9 .d-node {
+.diagram-8 .d-node {
     width: clamp(48px, 10vw, 60px);
     min-width: 48px;
     font-size: clamp(0.55rem, 1.6vw, 0.7rem);
 }
 
-.diagram-9 .d-node-name { font-size: inherit; }
-.diagram-9 .candle-mini { width: 8px; height: 12px; }
-.diagram-9 .d-shadow-box .ghost-mini { width: 14px; height: 20px; font-size: 0.55rem; }
+.diagram-8 .d-node-name { font-size: inherit; }
+.diagram-8 .candle-mini { width: 8px; height: 12px; }
+.diagram-8 .d-shadow-box .ghost-mini { width: 14px; height: 20px; font-size: 0.55rem; }
 
 /* 12-player layout: smaller nodes so all fit in the circle */
 .diagram-12.diagram-display {

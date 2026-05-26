@@ -395,7 +395,7 @@
         if (modal) modal.style.display = 'none';
     }
 
-    var MAX_RITUAL_CIRCLE_PLAYERS = 9;
+    var MAX_RITUAL_CIRCLE_PLAYERS = 8;
     var CHEATSHEET_TURN_DARK = '<li>Empty Candle at <strong>The Draw</strong> or <strong>Am I Alive?</strong> → Consumed (lose).</li>';
     var CHEATSHEET_POSSESSION_DARK = '<li>3 Ghosts same suit → Possessed (lose) at <strong>end of your turn</strong> only. THE SUFFERER needs 4. Ghosts added on others’ turns wait until your turn ends.</li>';
     var CHEATSHEET_REST = '<section class="cs-section"><h3>Ritual actions</h3><ul class="cs-list"><li><strong>Haunt:</strong> number card to a neighbour\'s Shadow.</li><li><strong>Banish:</strong> match/beat a Ghost in your Shadow.</li><li><strong>Séance:</strong> pair → heal 4 from The Dark.</li><li><strong>Cast</strong> (number cards) / <strong>Summon</strong> (face cards &amp; Jokers): use card effect (see Grimoire).</li><li><strong>Flicker:</strong> shuffle hand, draw 3.</li><li><strong>Ability:</strong> class power.</li><li><strong>Abstain:</strong> skip your Ritual action (uses your action this turn).</li></ul></section>' +
@@ -553,7 +553,7 @@
         var container = document.getElementById('player-count-buttons');
         if (!container) return;
         container.innerHTML = '';
-        [2, 3, 4, 5, 6, 7, 8, 9].forEach(function (n) {
+        [2, 3, 4, 5, 6, 7, 8].forEach(function (n) {
             var b = document.createElement('button');
             b.type = 'button';
             b.className = 'game-btn player-count-btn';
