@@ -257,9 +257,9 @@
     <div id="grimoire-rejection-modal" class="modal" style="display:none;">
         <div class="modal-content">
             <h2 style="color:var(--magic-color)">THE GRIMOIRE OF REJECTION</h2>
-            <p>Write down a card to reject (next time a <strong>neighbour</strong> plays it, cancel it). Does not use your Ritual action. Same name cannot follow itself (e.g. Ace, then 5, then Ace is fine).</p>
-            <div id="grimoire-rank-buttons" class="card-grid" style="margin-top:12px;"></div>
-            <button type="button" class="game-btn" style="margin-top:12px; background:#444;" onclick="closeGrimoireRejectionModal()">Skip</button>
+            <p id="grimoire-rejection-msg">A neighbour played a card. Reveal a matching page (same rank) to cancel it?</p>
+            <div id="grimoire-rejection-pages" class="card-grid" style="margin-top:12px;"></div>
+            <button type="button" class="game-btn" style="margin-top:12px; background:#444;" onclick="resolveGrimoireRejection(null)">Pass</button>
         </div>
     </div>
 
@@ -335,6 +335,7 @@
                             </div>
                             <div class="ritual-zone-class-card">
                                 <img id="player-class-card-on-table" class="class-card-on-table" alt="" src="">
+                                <div id="player-grimoire-pages" class="grimoire-pages-slot" hidden aria-label="Grimoire pages"></div>
                             </div>
                         </div>
                         <div class="ritual-zone-shadow">

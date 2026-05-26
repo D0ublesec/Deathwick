@@ -237,6 +237,7 @@
                 if (p.usedMimic) out.usedMimic = true;
                 if (p.usedLichRevive) out.usedLichRevive = true;
                 if (p.voodooSuits) out.voodooSuits = p.voodooSuits.slice();
+                if (p.grimoirePages && p.grimoirePages.length) out.grimoirePages = p.grimoirePages.slice();
                 return out;
             }),
             discard: gameState.discard.slice(),
@@ -286,6 +287,7 @@
             if (p.usedMimic) pl.usedMimic = true;
             if (p.usedLichRevive) pl.usedLichRevive = true;
             if (p.voodooSuits) pl.voodooSuits = p.voodooSuits.slice();
+            if (p.grimoirePages) pl.grimoirePages = p.grimoirePages.slice();
             if (p.isRemote) pl.isRemote = true;
             return pl;
         });
@@ -334,6 +336,7 @@
                 if (p.usedMimic) pl.usedMimic = true;
                 if (p.usedLichRevive) pl.usedLichRevive = true;
                 if (p.voodooSuits) pl.voodooSuits = p.voodooSuits.slice();
+                if (p.grimoirePages) pl.grimoirePages = p.grimoirePages.slice();
                 return pl;
             });
             gameState.discard = snap.discard || [];
@@ -887,6 +890,7 @@
         if (!p) return;
         p.occultistPossessBonusUsedThisTurn = false;
         p.doomreaderUsedThisTurn = false;
+        p.grimoirePageAddedThisTurn = false;
         gameState.funeralBellTriggeredThisTurn = false;
         if (p.type === 'human') {
             var aceIdx = -1;
@@ -1801,6 +1805,7 @@
         }
         var playerDeckBack = document.getElementById('player-deck-card-back');
         if (playerDeckBack) playerDeckBack.src = CARD_BACKS_BASE + getCardBackFilename() + CARD_IMAGE_EXT;
+        renderGrimoirePages(humanPlayer);
         if (playerStatus) playerStatus.innerHTML = humanPlayer.isSalted ? ' <span class="status-badge status-salt">SALTED</span>' : '';
 
         var seatYou = document.getElementById('seat-you');
@@ -2112,9 +2117,8 @@
         var btnFlicker = document.getElementById('btn-flicker');
         var btnPass = document.getElementById('btn-pass');
         var btnCancelTarget = document.getElementById('btn-cancel-target');
-        /* Ability without selecting a hand card: Grimoire (write name); Mimic (swap Candle); Usurer (debt collect). */
+        /* Ability without selecting a hand card: Mimic (swap Candle); Usurer (debt collect). Grimoire requires a selected card. */
         var canUseClassAbilityWithoutCard = !!(humanPlayer.class && (
-            (humanPlayer.class.name === 'THE GRIMOIRE OF REJECTION' && gameState.grimoireRejectionRank == null) ||
             (humanPlayer.class.name === 'THE MIMIC' && !humanPlayer.usedMimic) ||
             humanPlayer.class.name === 'THE USURER'));
         var doomreaderAbilityUsed = !!(humanPlayer.class && humanPlayer.class.name === 'THE DOOMREADER' && humanPlayer.doomreaderUsedThisTurn);
@@ -2680,16 +2684,194 @@
         }
     }
 
-    function isGrimoireRejected(c, caster) {
-        if (!c || !gameState.grimoireRejectionRank || !caster) return false;
-        var owner = gameState.grimoireRejectionOwnerId != null ? gameState.players[gameState.grimoireRejectionOwnerId] : null;
-        if (!owner || owner.isDead || !owner.class || owner.class.name !== 'THE GRIMOIRE OF REJECTION') return false;
-        var nb = getNeighbours(owner);
-        if (caster !== nb.left && caster !== nb.right) return false;
-        var r = c.r === '★' ? 'JOKER' : c.r;
-        if (r === gameState.grimoireRejectionRank) return true;
-        if (gameState.grimoireRejectionRank === 'JOKER' && (c.isFace || c.r === 'JOKER' || c.r === '★')) return true;
-        return false;
+    function normalizeCardRank(c) {
+        if (!c) return null;
+        if (c.r === '★' || c.r === 'JOKER') return 'JOKER';
+        return c.r;
+    }
+
+    function cardRanksMatch(a, b) {
+        return normalizeCardRank(a) === normalizeCardRank(b);
+    }
+
+    function ensureGrimoirePages(player) {
+        if (!player.grimoirePages) player.grimoirePages = [];
+        return player.grimoirePages;
+    }
+
+    function renderGrimoirePages(player) {
+        var slot = document.getElementById('player-grimoire-pages');
+        if (!slot) return;
+        slot.innerHTML = '';
+        if (!player || !player.class || player.class.name !== 'THE GRIMOIRE OF REJECTION') {
+            slot.hidden = true;
+            return;
+        }
+        var pages = ensureGrimoirePages(player);
+        if (!pages.length) {
+            slot.hidden = true;
+            return;
+        }
+        slot.hidden = false;
+        var backSrc = CARD_BACKS_BASE + getCardBackFilename() + CARD_IMAGE_EXT;
+        for (var i = 0; i < pages.length; i++) {
+            var img = document.createElement('img');
+            img.className = 'grimoire-page-back';
+            img.src = backSrc;
+            img.alt = 'Grimoire page ' + (i + 1);
+            img.title = 'Grimoire page (' + pages.length + '/3)';
+            slot.appendChild(img);
+        }
+    }
+
+    function buildGrimoireRejectionCandidates(caster, card) {
+        if (!caster || !card || caster.isDead) return [];
+        var nb = getNeighbours(caster);
+        var owners = [nb.left, nb.right];
+        var out = [];
+        for (var oi = 0; oi < owners.length; oi++) {
+            var owner = owners[oi];
+            if (!owner || owner.isDead || !owner.class || owner.class.name !== 'THE GRIMOIRE OF REJECTION') continue;
+            var pages = ensureGrimoirePages(owner);
+            if (!pages.length) continue;
+            var pageIdxs = [];
+            for (var pi = 0; pi < pages.length; pi++) {
+                if (cardRanksMatch(pages[pi], card)) pageIdxs.push(pi);
+            }
+            if (pageIdxs.length) out.push({ owner: owner, pageIdxs: pageIdxs });
+        }
+        return out;
+    }
+
+    function formatPlayedCardLabel(c) {
+        if (!c) return 'card';
+        if (c.r === '★' || c.r === 'JOKER') return 'JOKER';
+        return c.r + (c.s || '');
+    }
+
+    function applyGrimoireRejection(owner, pageIdx, caster, card, handIdx) {
+        var pages = ensureGrimoirePages(owner);
+        if (pageIdx < 0 || pageIdx >= pages.length) return false;
+        var page = pages.splice(pageIdx, 1)[0];
+        gameState.lastDiscardByPlayerId = owner.id;
+        gameState.discard.push(page);
+        var played = null;
+        if (handIdx != null && handIdx >= 0 && caster.hand[handIdx]) {
+            played = caster.hand.splice(handIdx, 1)[0];
+        } else if (card) {
+            var findIdx = caster.hand.indexOf(card);
+            if (findIdx >= 0) played = caster.hand.splice(findIdx, 1)[0];
+        }
+        if (played) {
+            gameState.lastDiscardByPlayerId = caster.id;
+            gameState.discard.push(played);
+        }
+        log(owner.name + ' (THE GRIMOIRE OF REJECTION) rejected ' + caster.name + "'s " + formatPlayedCardLabel(card) + '. Both → The Dark.');
+        return true;
+    }
+
+    function aiShouldRevealGrimoirePage(card) {
+        var rank = normalizeCardRank(card);
+        if (rank === '5' || rank === 'A' || rank === '2' || rank === '10' || rank === 'JOKER' || rank === 'K') return true;
+        return Math.random() < 0.45;
+    }
+
+    function promptNextGrimoireRejectionCandidate() {
+        var pending = gameState.pendingGrimoireRejection;
+        if (!pending) return;
+        if (pending.candidateIdx >= pending.candidates.length) {
+            var onContinue = pending.onContinue;
+            gameState.pendingGrimoireRejection = null;
+            onContinue();
+            return;
+        }
+        var cand = pending.candidates[pending.candidateIdx];
+        var owner = cand.owner;
+        if (owner.type === 'ai') {
+            if (aiShouldRevealGrimoirePage(pending.card)) {
+                applyGrimoireRejection(owner, cand.pageIdxs[0], pending.caster, pending.card, pending.handIdx);
+                var onRejected = pending.onRejected;
+                gameState.pendingGrimoireRejection = null;
+                onRejected();
+            } else {
+                pending.candidateIdx++;
+                promptNextGrimoireRejectionCandidate();
+            }
+            return;
+        }
+        function openRevealModal() {
+            openGrimoireRejectionRevealModal(owner, pending.caster, pending.card, cand.pageIdxs);
+        }
+        if (owner.id !== gameState.activeIdx && countHumanPlayers() > 1) {
+            showReadyPrompt(owner, 'Pass the device to ' + owner.name + ' (THE GRIMOIRE OF REJECTION). A neighbour played ' + formatPlayedCardLabel(pending.card) + '.', openRevealModal);
+        } else {
+            openRevealModal();
+        }
+    }
+
+    function checkGrimoireRejectionBeforePlay(caster, card, handIdx, onContinue, onRejected) {
+        var candidates = buildGrimoireRejectionCandidates(caster, card);
+        if (!candidates.length) {
+            onContinue();
+            return;
+        }
+        gameState.pendingGrimoireRejection = {
+            caster: caster,
+            card: card,
+            handIdx: handIdx,
+            candidates: candidates,
+            candidateIdx: 0,
+            onContinue: onContinue,
+            onRejected: onRejected
+        };
+        promptNextGrimoireRejectionCandidate();
+    }
+
+    function openGrimoireRejectionRevealModal(owner, caster, playedCard, pageIdxs) {
+        var modal = document.getElementById('grimoire-rejection-modal');
+        var msg = document.getElementById('grimoire-rejection-msg');
+        var container = document.getElementById('grimoire-rejection-pages');
+        if (!modal || !container) return;
+        if (msg) {
+            msg.textContent = caster.name + ' played ' + formatPlayedCardLabel(playedCard) + '. Reveal a matching page (same rank) to cancel? Both cards → The Dark.';
+        }
+        container.innerHTML = '';
+        var pages = ensureGrimoirePages(owner);
+        for (var i = 0; i < pageIdxs.length; i++) {
+            (function (pageIdx) {
+                var page = pages[pageIdx];
+                var btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'game-btn';
+                btn.style.padding = '4px';
+                btn.appendChild(mkCard(page));
+                btn.onclick = function () { resolveGrimoireRejection(pageIdx); };
+                container.appendChild(btn);
+            })(pageIdxs[i]);
+        }
+        modal.style.display = 'flex';
+    }
+
+    function closeGrimoireRejectionModal() {
+        var modal = document.getElementById('grimoire-rejection-modal');
+        if (modal) modal.style.display = 'none';
+    }
+
+    function resolveGrimoireRejection(pageIdx) {
+        var pending = gameState.pendingGrimoireRejection;
+        closeGrimoireRejectionModal();
+        if (!pending) return;
+        if (pageIdx == null) {
+            pending.candidateIdx++;
+            promptNextGrimoireRejectionCandidate();
+            return;
+        }
+        var cand = pending.candidates[pending.candidateIdx];
+        applyGrimoireRejection(cand.owner, pageIdx, pending.caster, pending.card, pending.handIdx);
+        var onRejected = pending.onRejected;
+        gameState.pendingGrimoireRejection = null;
+        onRejected();
+        updateUI();
     }
 
     function doHauntWithTarget(t) {
@@ -2697,16 +2879,15 @@
         var idx = gameState.pendingCardIdx;
         if (idx == null || !p.hand[idx]) return;
         var c = p.hand[idx];
-        if (isGrimoireRejected(c, p)) {
-            p.hand.splice(idx, 1);
-            gameState.lastDiscardByPlayerId = p.id;
-            gameState.discard.push(c);
-            log('THE GRIMOIRE OF REJECTION cancelled ' + (c.r === '★' ? 'JOKER' : c.r + c.s) + '!');
-            consumeGrimoireRejectionWritten();
+        checkGrimoireRejectionBeforePlay(p, c, idx, function () {
+            doHauntWithTargetAfterGrimoire(t, p, c, idx);
+        }, function () {
             clearTargetMode();
             finishAction();
-            return;
-        }
+        });
+    }
+
+    function doHauntWithTargetAfterGrimoire(t, p, c, idx) {
         var nb = getNeighbours(p);
         if (t !== nb.left && t !== nb.right) return;
         if (t.class && t.class.name === 'THE MIME' && t.hand.length >= 1 && t.type === 'ai' && Math.random() < 0.5) {
@@ -3232,17 +3413,16 @@
     })();
 
     function executeCast(p, c, target, ghostIdx) {
-        if (isGrimoireRejected(c, p)) {
-            var handIdx = p.hand.indexOf(c);
-            if (handIdx > -1) p.hand.splice(handIdx, 1);
-            gameState.lastDiscardByPlayerId = p.id;
-            gameState.discard.push(c);
-            log('THE GRIMOIRE OF REJECTION cancelled ' + (c.r === '★' ? 'JOKER' : c.r + (c.s || '')) + '!');
-            consumeGrimoireRejectionWritten();
+        var handIdx = p.hand.indexOf(c);
+        checkGrimoireRejectionBeforePlay(p, c, handIdx >= 0 ? handIdx : null, function () {
+            executeCastCore(p, c, target, ghostIdx);
+        }, function () {
             gameState.selectionMode = null;
             finishAction();
-            return;
-        }
+        });
+    }
+
+    function executeCastCore(p, c, target, ghostIdx) {
         var handIdx = p.hand.indexOf(c);
         if (c.r === 'J' && target && mirrorBlockedBySealbinder(p, target)) {
             showAlertModal('A Shadow contains a Ghost Haunted by THE SEALBINDER; Mirror cannot move it.', 'Blocked');
@@ -3723,61 +3903,6 @@
         if (onComplete) onComplete();
     }
 
-    function consumeGrimoireRejectionWritten() {
-        if (gameState.grimoireRejectionRank != null) {
-            gameState.grimoireRejectionLastRank = gameState.grimoireRejectionRank;
-            gameState.grimoireRejectionRank = null;
-        }
-    }
-
-    function openGrimoireRejectionModal() {
-        var p = gameState.players[gameState.activeIdx];
-        if (!p || !p.class || p.class.name !== 'THE GRIMOIRE OF REJECTION') return;
-        if (gameState.grimoireRejectionRank != null) return;
-        var container = document.getElementById('grimoire-rank-buttons');
-        if (!container) return;
-        container.innerHTML = '';
-        var ranks = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'JOKER'];
-        var lastRank = gameState.grimoireRejectionLastRank;
-        for (var ri = 0; ri < ranks.length; ri++) {
-            var r = ranks[ri];
-            (function (rank) {
-                var btn = document.createElement('button');
-                btn.type = 'button';
-                btn.className = 'game-btn';
-                btn.textContent = rank;
-                if (lastRank != null && rank === lastRank) {
-                    btn.disabled = true;
-                    btn.style.opacity = '0.45';
-                    btn.title = 'Cannot write the same name twice in a row';
-                } else {
-                    btn.onclick = function () { setGrimoireRejection(rank); };
-                }
-                container.appendChild(btn);
-            })(r);
-        }
-        var modal = document.getElementById('grimoire-rejection-modal');
-        if (modal) modal.style.display = 'flex';
-    }
-
-    function setGrimoireRejection(rank) {
-        if (gameState.grimoireRejectionLastRank != null && rank === gameState.grimoireRejectionLastRank) {
-            showAlertModal('Same name cannot follow itself (e.g. Ace, then 5, then Ace is fine).', 'THE GRIMOIRE OF REJECTION');
-            return;
-        }
-        gameState.grimoireRejectionRank = rank;
-        gameState.grimoireRejectionOwnerId = p.id;
-        closeGrimoireRejectionModal();
-        var p = gameState.players[gameState.activeIdx];
-        if (p) log(p.name + ' (THE GRIMOIRE OF REJECTION) wrote down ' + rank + '.');
-        finishClassAbility();
-    }
-
-    function closeGrimoireRejectionModal() {
-        var modal = document.getElementById('grimoire-rejection-modal');
-        if (modal) modal.style.display = 'none';
-    }
-
     function drawCards(p, n) {
         for (var i = 0; i < n && p.candle.length; i++) p.hand.push(p.candle.shift());
         if (n > 0 && typeof window.playSFX === 'function') window.playSFX('draw');
@@ -3931,8 +4056,26 @@
         var p = gameState.players[gameState.activeIdx];
         if (!p || !p.class) return;
         if (p.class.name === 'THE GRIMOIRE OF REJECTION') {
-            if (gameState.grimoireRejectionRank == null) { openGrimoireRejectionModal(); return; }
-            showAlertModal('THE GRIMOIRE OF REJECTION: Cannot change the written name until it has been consumed.', 'Ability');
+            if (p.grimoirePageAddedThisTurn) {
+                showAlertModal('THE GRIMOIRE OF REJECTION: You may place only 1 page per turn.', 'Ability');
+                return;
+            }
+            if (gameState.selectedIdxs.length !== 1) {
+                showAlertModal('Select 1 card from your hand to place face-down in your Grimoire (max 3 pages).', 'THE GRIMOIRE OF REJECTION');
+                return;
+            }
+            var grIdx = gameState.selectedIdxs[0];
+            var grCard = p.hand[grIdx];
+            if (!grCard) return;
+            var grPages = ensureGrimoirePages(p);
+            if (grPages.length >= 3) {
+                showAlertModal('THE GRIMOIRE OF REJECTION: Your Grimoire is full (3 pages). Reveal a page when a neighbour\'s play matches, or wait for pages to trigger.', 'Ability');
+                return;
+            }
+            grPages.push(p.hand.splice(grIdx, 1)[0]);
+            p.grimoirePageAddedThisTurn = true;
+            log(p.name + ' placed a page in THE GRIMOIRE OF REJECTION (' + grPages.length + '/3).');
+            finishClassAbility();
             return;
         }
         if (p.class.name === 'THE MIMIC') {
@@ -4324,13 +4467,14 @@
             updateUI();
             aiTimer = setTimeout(function () {
                 if (gameState.isGameOver) return;
-                if (ai.class && ai.class.name === 'THE GRIMOIRE OF REJECTION' && gameState.grimoireRejectionRank == null && Math.random() < 0.25) {
-                    var grRanks = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'JOKER'];
-                    var grPick = grRanks.filter(function (r) { return r !== gameState.grimoireRejectionLastRank; });
-                    if (!grPick.length) grPick = grRanks;
-                    gameState.grimoireRejectionRank = grPick[Math.floor(Math.random() * grPick.length)];
-                    gameState.grimoireRejectionOwnerId = ai.id;
-                    log(ai.name + ' (THE GRIMOIRE OF REJECTION) wrote down ' + gameState.grimoireRejectionRank + '.');
+                if (ai.class && ai.class.name === 'THE GRIMOIRE OF REJECTION' && !ai.grimoirePageAddedThisTurn) {
+                    var aiGrPages = ensureGrimoirePages(ai);
+                    if (aiGrPages.length < 3 && ai.hand.length > 2 && Math.random() < 0.35) {
+                        var tuckIdx = Math.floor(Math.random() * ai.hand.length);
+                        aiGrPages.push(ai.hand.splice(tuckIdx, 1)[0]);
+                        ai.grimoirePageAddedThisTurn = true;
+                        log(ai.name + ' placed a page in THE GRIMOIRE OF REJECTION (' + aiGrPages.length + '/3).');
+                    }
                 }
                 var targets = getNeighbours(ai);
                 var t = Math.random() > 0.5 ? targets.left : targets.right;
@@ -4418,8 +4562,7 @@
     window.queenExhume = queenExhume;
     window.queenRekindle = queenRekindle;
     window.closeHandView = closeHandView;
-    window.closeGrimoireRejectionModal = closeGrimoireRejectionModal;
-    window.setGrimoireRejection = setGrimoireRejection;
+    window.resolveGrimoireRejection = resolveGrimoireRejection;
     window.goBackToSetup = goBackToSetup;
     window.showManual = showManual;
     window.gameState = gameState;

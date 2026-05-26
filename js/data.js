@@ -9,7 +9,7 @@ window.CLASSES = [
     { name: "THE FUNERAL BELL", desc: "When a player dies, each other remaining player Burns 2 cards. You are not affected." },
     { name: "THE GATEKEEPER", desc: "You are immune to Ghosts being moved into your Shadow (Mirror/Possess)." },
     { name: "THE GRAVEDIGGER", desc: "When a neighbour dies, add their remaining Candle to the bottom of yours." },
-    { name: "THE GRIMOIRE OF REJECTION", desc: "Ability (not your Ritual action): Secretly write a card name. Reveal to cancel a neighbour's play of that card only; cannot be Salted. Locked until it triggers, then write anew. Same name cannot follow itself (Ace, 5, Ace is fine)." },
+    { name: "THE GRIMOIRE OF REJECTION", desc: "Ability (not your Ritual action): Place 1 card from your hand face-down in your Grimoire (max 3 pages; 1 per turn). When a neighbour plays a card, you may reveal a matching page (same rank) to cancel it; both cards go to The Dark. Cannot be Salted." },
     { name: "THE HEX", desc: "When a neighbour Haunts you with a number card, you may reveal a matching suit from hand. Your card goes to The Dark; their Haunt becomes a ghost in their Shadow instead of yours. A completed reflect cannot be Salted." },
     { name: "THE HOARDER", desc: "Hand Limit is 8 (instead of 5)." },
     { name: "THE INQUISITOR", desc: "As your action, you may discard 1 card to the top of The Dark to choose a neighbour; they reveal their hand. If they reveal a Face Card, they must Burn 3 (to the top of The Dark)." },
