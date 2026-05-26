@@ -174,18 +174,21 @@ body.game-page {
     position: relative;
     align-items: center;
     justify-content: flex-start;
+    --ritual-user-scale: 1;
 }
 
-/* 2–12 players: generous padding so seats never touch edges or overlap */
+/* Room around the oval; tighter for crowded tables so all seats stay visible */
 #game-board:has(.ritual-table[data-player-count="2"]) {
-    padding: clamp(48px, 14%, 80px);
-    padding-top: clamp(56px, 16%, 88px);
+    padding: clamp(32px, 8vw, 56px);
     box-sizing: border-box;
 }
-#game-board:has(.ritual-table[data-player-count="3"]),
+#game-board:has(.ritual-table[data-player-count="3"]) {
+    padding: clamp(28px, 7vw, 48px);
+    box-sizing: border-box;
+}
 #game-board:has(.ritual-table[data-player-count="4"]),
 #game-board:has(.ritual-table[data-player-count="5"]) {
-    padding: clamp(48px, 14%, 80px);
+    padding: clamp(20px, 5vw, 40px);
     box-sizing: border-box;
 }
 #game-board:has(.ritual-table[data-player-count="6"]),
@@ -195,20 +198,34 @@ body.game-page {
 #game-board:has(.ritual-table[data-player-count="10"]),
 #game-board:has(.ritual-table[data-player-count="11"]),
 #game-board:has(.ritual-table[data-player-count="12"]) {
-    padding: clamp(56px, 16%, 88px);
+    padding: clamp(16px, 4vw, 32px);
     box-sizing: border-box;
 }
 
-/* Poker-table: smaller oval; positioned high so P1 shadow is above their hand */
+/* Poker-table oval */
 #game-board #ritual-table {
     flex: 0 1 auto;
     min-height: 0;
     position: relative;
     aspect-ratio: 1.4;
-    width: 72%;
-    max-width: 72%;
+    width: min(78vw, 820px);
+    max-width: 92%;
     align-self: center;
     margin-bottom: auto;
+}
+#game-board:has(.ritual-table[data-player-count="4"]) #ritual-table {
+    width: min(86vw, 880px);
+    max-width: 94%;
+}
+#game-board:has(.ritual-table[data-player-count="5"]) #ritual-table {
+    width: min(90vw, 940px);
+    max-width: 96%;
+}
+#game-board:has(.ritual-table[data-player-count="6"]) #ritual-table,
+#game-board:has(.ritual-table[data-player-count="7"]) #ritual-table,
+#game-board:has(.ritual-table[data-player-count="8"]) #ritual-table {
+    width: min(94vw, 980px);
+    max-width: 98%;
 }
 #game-board #controls-bar { flex-shrink: 0; align-self: stretch; }
 #game-board #selection-hint { align-self: stretch; }
@@ -249,6 +266,35 @@ body.game-page {
     --ritual-hand-margin-top: -33px;
     /* The Dark: lower % = higher on table (e.g. 46% = up). */
     --ritual-dark-top: 46%;
+    --ritual-zone-scale: 1;
+}
+
+/* Scale other-player zones down as the table fills up */
+.ritual-table[data-player-count="3"] { --ritual-zone-scale: 0.94; }
+.ritual-table[data-player-count="4"] { --ritual-zone-scale: 0.86; --ritual-name-margin-top: 28px; --ritual-hand-margin-top: -26px; }
+.ritual-table[data-player-count="5"] { --ritual-zone-scale: 0.74; --ritual-name-margin-top: 24px; --ritual-hand-margin-top: -22px; }
+.ritual-table[data-player-count="6"] { --ritual-zone-scale: 0.7; --ritual-name-margin-top: 20px; --ritual-hand-margin-top: -18px; }
+.ritual-table[data-player-count="7"],
+.ritual-table[data-player-count="8"] { --ritual-zone-scale: 0.64; --ritual-name-margin-top: 18px; --ritual-hand-margin-top: -16px; }
+.ritual-table[data-player-count="9"],
+.ritual-table[data-player-count="10"],
+.ritual-table[data-player-count="11"],
+.ritual-table[data-player-count="12"] { --ritual-zone-scale: 0.52; --ritual-name-margin-top: 14px; --ritual-hand-margin-top: -12px; }
+
+.ritual-table[data-player-count="4"] .ritual-zone-other .table-shadow-box,
+.ritual-table[data-player-count="5"] .ritual-zone-other .table-shadow-box,
+.ritual-table[data-player-count="6"] .ritual-zone-other .table-shadow-box {
+    min-width: 110px;
+    min-height: 60px;
+}
+.ritual-table[data-player-count="7"] .ritual-zone-other .table-shadow-box,
+.ritual-table[data-player-count="8"] .ritual-zone-other .table-shadow-box,
+.ritual-table[data-player-count="9"] .ritual-zone-other .table-shadow-box,
+.ritual-table[data-player-count="10"] .ritual-zone-other .table-shadow-box,
+.ritual-table[data-player-count="11"] .ritual-zone-other .table-shadow-box,
+.ritual-table[data-player-count="12"] .ritual-zone-other .table-shadow-box {
+    min-width: 104px;
+    min-height: 58px;
 }
 
 /* Canvas-drawn oval table surface (matches oval shape; drawn in game.js) */
@@ -289,6 +335,8 @@ body.game-page {
     gap: 10px 10px;
     align-items: start;
     justify-items: center;
+    transform: translate(-50%, -50%) scale(calc(var(--ritual-zone-scale, 1) * var(--ritual-user-scale, 1)));
+    transform-origin: center center;
 }
 .ritual-zone-other > .ritual-zone-header-row {
     display: grid;
@@ -466,6 +514,14 @@ body.game-page {
     z-index: 1;
     position: relative;
 }
+
+/* Player opposite P1 (top-centre only): sit higher so hand stays above The Dark */
+.ritual-zone-other.zone-apex {
+    --ritual-hand-margin-top: -54px;
+    --ritual-name-margin-top: 18px;
+    transform: translate(-50%, calc(-50% - 18px)) scale(calc(var(--ritual-zone-scale, 1) * var(--ritual-user-scale, 1)));
+}
+
 .ritual-zone-hand .hand-label-zone {
     font-size: 0.5rem;
     text-transform: uppercase;
@@ -575,7 +631,8 @@ body.game-page {
 .ritual-zone-you {
     left: 50%;
     bottom: 2%;
-    transform: translate(-50%, 0);
+    transform: translate(-50%, 0) scale(var(--ritual-user-scale, 1));
+    transform-origin: 50% 100%;
 }
 
 /* Shadow reveal: hover (desktop) tooltip */
@@ -938,6 +995,44 @@ body.game-page {
     max-width: min(220px, 35vw);
 }
 
+.player-size-wrap {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    background: rgba(14, 12, 10, 0.92);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
+    max-width: min(240px, 52vw);
+}
+.player-size-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    flex-shrink: 0;
+}
+.player-size-slider {
+    flex: 1;
+    min-width: 72px;
+    accent-color: var(--accent-color);
+    cursor: pointer;
+}
+.player-size-value {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--text-color);
+    min-width: 2.8em;
+    text-align: right;
+    flex-shrink: 0;
+}
+
 .log-toggle {
     background: var(--bg-card);
     border: 1px solid var(--border-color);
@@ -1073,6 +1168,17 @@ body.game-page {
     border-color: var(--target-color);
     box-shadow: 0 0 16px var(--target-glow), 0 0 0 2px var(--target-color);
 }
+#table-zone-you.ritual-zone-you.targetable .table-shadow-box {
+    border-color: var(--target-color);
+    box-shadow: 0 0 16px var(--target-glow), 0 0 0 2px var(--target-color);
+    cursor: pointer;
+}
+.ritual-seat-you.targetable {
+    cursor: pointer;
+    outline: 2px solid var(--target-color);
+    outline-offset: 4px;
+    box-shadow: 0 0 16px var(--target-glow);
+}
 
 /* 3+ players: smaller seats to prevent overlap */
 .ritual-seat-other.seat-many {
@@ -1180,7 +1286,8 @@ body.game-page {
     position: relative;
     bottom: auto;
     left: auto;
-    transform: none;
+    transform: scale(var(--ritual-user-scale, 1));
+    transform-origin: 50% 100%;
     width: 100%;
     max-width: min(92%, calc(100% - 20px));
     margin: 0 auto;
@@ -2390,13 +2497,79 @@ body.game-page.ritual-theme-blood #theme-btn-blood {
     .nav-player-banner { font-size: 0.75rem; gap: 4px; }
     .game-nav { padding: 8px 10px; gap: 8px; }
     .top-right-btn { padding: 6px 10px; font-size: 0.7rem; }
-    #game-board { padding: 4px; gap: 4px; padding-top: 36vh; }
-    /* Ritual table: push way down on mobile so table sits lower and hand/actions have room */
-    #game-board #ritual-table { margin-top: 14vh; }
-    /* P1 (you) table zone: push shadow row considerably lower; deck + class card at bottom of zone */
+    body.game-page {
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+    #game-board {
+        padding: 4px 6px;
+        gap: 4px;
+        overflow-y: auto;
+        overflow-x: hidden;
+        -webkit-overflow-scrolling: touch;
+    }
+    #game-board:has(.ritual-table[data-player-count="2"]),
+    #game-board:has(.ritual-table[data-player-count="3"]),
+    #game-board:has(.ritual-table[data-player-count="4"]),
+    #game-board:has(.ritual-table[data-player-count="5"]),
+    #game-board:has(.ritual-table[data-player-count="6"]),
+    #game-board:has(.ritual-table[data-player-count="7"]),
+    #game-board:has(.ritual-table[data-player-count="8"]),
+    #game-board:has(.ritual-table[data-player-count="9"]),
+    #game-board:has(.ritual-table[data-player-count="10"]),
+    #game-board:has(.ritual-table[data-player-count="11"]),
+    #game-board:has(.ritual-table[data-player-count="12"]) {
+        padding: 4px 6px;
+    }
+    /* Table fills width; zone scale vars shrink other players per count */
+    #game-board #ritual-table {
+        width: 98%;
+        max-width: 100%;
+        margin-top: 0;
+        flex-shrink: 0;
+    }
+    .ritual-table[data-player-count="2"] { --ritual-zone-scale: 0.58; }
+    .ritual-table[data-player-count="3"] { --ritual-zone-scale: 0.5; }
+    .ritual-table[data-player-count="4"] { --ritual-zone-scale: 0.44; }
+    .ritual-table[data-player-count="5"] { --ritual-zone-scale: 0.38; }
+    .ritual-table[data-player-count="6"] { --ritual-zone-scale: 0.34; }
+    .ritual-table[data-player-count="7"],
+    .ritual-table[data-player-count="8"] { --ritual-zone-scale: 0.3; }
+    .ritual-table[data-player-count="9"],
+    .ritual-table[data-player-count="10"],
+    .ritual-table[data-player-count="11"],
+    .ritual-table[data-player-count="12"] { --ritual-zone-scale: 0.26; }
+    .ritual-table[data-player-count="4"] .ritual-zone-other .table-shadow-box,
+    .ritual-table[data-player-count="5"] .ritual-zone-other .table-shadow-box,
+    .ritual-table[data-player-count="6"] .ritual-zone-other .table-shadow-box,
+    .ritual-table[data-player-count="7"] .ritual-zone-other .table-shadow-box,
+    .ritual-table[data-player-count="8"] .ritual-zone-other .table-shadow-box,
+    .ritual-table[data-player-count="9"] .ritual-zone-other .table-shadow-box,
+    .ritual-table[data-player-count="10"] .ritual-zone-other .table-shadow-box,
+    .ritual-table[data-player-count="11"] .ritual-zone-other .table-shadow-box,
+    .ritual-table[data-player-count="12"] .ritual-zone-other .table-shadow-box {
+        min-width: 96px;
+        min-height: 52px;
+    }
+    .ritual-zone-other {
+        gap: 6px 6px;
+    }
+    .ritual-zone-other .ritual-zone-deck {
+        width: 36px;
+        height: 48px;
+    }
+    .ritual-zone-other .ritual-zone-class-card .class-card-on-table {
+        width: 36px;
+    }
+    .ritual-zone-other .ritual-zone-hand .nb-hand-fan .g-card {
+        width: 18px;
+        height: 24px;
+    }
+    /* P1 table zone: keep shadow on table edge without pushing the whole board down */
     #table-zone-you.ritual-zone-you {
-        bottom: -2%;
-        transform: translate(-50%, 18%);
+        bottom: 0;
+        transform: translate(-50%, 8%) scale(var(--ritual-user-scale, 1));
+        transform-origin: 50% 100%;
     }
     #table-zone-you.ritual-zone-you .ritual-zone-row {
         flex-direction: column;
@@ -2405,16 +2578,19 @@ body.game-page.ritual-theme-blood #theme-btn-blood {
     #table-zone-you.ritual-zone-you .ritual-zone-shadow { order: 1; }
     #table-zone-you.ritual-zone-you .ritual-zone-candle { order: 2; }
     #table-zone-you.ritual-zone-you .ritual-zone-left { order: 3; flex-direction: row; justify-content: center; gap: 10px; }
-    /* 3–4 player mobile: keep same padding all sides so no card leaves screen; table still lower */
-    #game-board:has(.ritual-table[data-player-count="3"]),
-    #game-board:has(.ritual-table[data-player-count="4"]) {
-        padding: clamp(36px, 12%, 56px);
-        padding-top: 36vh;
-        box-sizing: border-box;
-    }
     .selection-hint { font-size: 0.7rem; padding: 2px 6px; }
     #game-board .game-log { max-height: 90px; font-size: 0.65rem; }
     .log-panel { max-width: min(200px, 45vw); }
+    .player-size-wrap {
+        top: 4px;
+        left: 4px;
+        padding: 4px 8px;
+        gap: 6px;
+        max-width: min(200px, 48vw);
+    }
+    .player-size-label { font-size: 0.62rem; }
+    .player-size-slider { min-width: 56px; }
+    .player-size-value { font-size: 0.62rem; }
 }
 
 @media (min-width: 641px) and (max-width: 900px) {

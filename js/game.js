@@ -130,9 +130,31 @@
         displayName: null,
         showAllPlayers: false,
         viewPreferenceSet: false,
-        saltOnlyWhenTargeted: false
+        saltOnlyWhenTargeted: false,
+        playerZoneScale: 1
     };
     var GAME_SETTINGS_KEY = 'finalFlickerGameSettings';
+    var PLAYER_ZONE_SCALE_MIN = 0.75;
+    var PLAYER_ZONE_SCALE_MAX = 1.5;
+    var DEFAULT_PLAYER_ZONE_SCALE = 1;
+
+    function clampPlayerZoneScale(scale) {
+        var n = Number(scale);
+        if (!isFinite(n)) return DEFAULT_PLAYER_ZONE_SCALE;
+        return Math.max(PLAYER_ZONE_SCALE_MIN, Math.min(PLAYER_ZONE_SCALE_MAX, n));
+    }
+
+    function getPlayerZoneScale() {
+        return clampPlayerZoneScale(gameState.playerZoneScale);
+    }
+
+    function applyPlayerZoneScale(scale) {
+        gameState.playerZoneScale = clampPlayerZoneScale(scale);
+        var board = document.getElementById('game-board');
+        if (board) board.style.setProperty('--ritual-user-scale', String(gameState.playerZoneScale));
+        syncPlayerSizeSliderUI();
+        saveGameSettings();
+    }
 
     function loadGameSettings() {
         try {
@@ -140,15 +162,34 @@
             if (raw) {
                 var o = JSON.parse(raw);
                 if (typeof o.saltOnlyWhenTargeted === 'boolean') gameState.saltOnlyWhenTargeted = o.saltOnlyWhenTargeted;
+                if (typeof o.playerZoneScale === 'number') gameState.playerZoneScale = clampPlayerZoneScale(o.playerZoneScale);
             }
         } catch (e) {}
     }
 
     function saveGameSettings() {
         try {
-            localStorage.setItem(GAME_SETTINGS_KEY, JSON.stringify({ saltOnlyWhenTargeted: !!gameState.saltOnlyWhenTargeted }));
+            localStorage.setItem(GAME_SETTINGS_KEY, JSON.stringify({
+                saltOnlyWhenTargeted: !!gameState.saltOnlyWhenTargeted,
+                playerZoneScale: getPlayerZoneScale()
+            }));
         } catch (e) {}
     }
+
+    function syncPlayerSizeSliderUI() {
+        var slider = document.getElementById('player-size-slider');
+        var valEl = document.getElementById('player-size-value');
+        var pct = Math.round(getPlayerZoneScale() * 100);
+        if (slider) {
+            slider.value = String(pct);
+            slider.setAttribute('aria-valuenow', String(pct));
+        }
+        if (valEl) valEl.textContent = pct + '%';
+    }
+
+    window.setPlayerZoneScaleFromSlider = function (pct) {
+        applyPlayerZoneScale(Number(pct) / 100);
+    };
 
     function syncSaltSettingUI() {
         var setupCb = document.getElementById('setup-salt-targeted-only');
@@ -1700,7 +1741,8 @@
         if (!humanPlayer) humanPlayer = p;
         if (gameState.selectionMode === 'HEX_DISCARD' && gameState.pendingHexCancel && gameState.pendingHexCancel.target && gameState.pendingHexCancel.target.type === 'human') {
             humanPlayer = gameState.pendingHexCancel.target;
-        } else if (gameState.selectionMode === 'PHANTOM_DISCARD' && gameState.pendingPhantomCancel && gameState.pendingPhantomCancel.target && gameState.pendingPhantomCancel.target.type === 'human') {
+        } else if ((gameState.selectionMode === 'PHANTOM_DISCARD' || gameState.selectionMode === 'PHANTOM_DECISION') &&
+                gameState.pendingPhantomCancel && gameState.pendingPhantomCancel.target && gameState.pendingPhantomCancel.target.type === 'human') {
             humanPlayer = gameState.pendingPhantomCancel.target;
         } else if (gameState.pendingMimeRedirect && gameState.pendingMimeRedirect.mime && gameState.pendingMimeRedirect.mime.type === 'human' &&
                 (gameState.selectionMode === 'MIME_REDIRECT_DISCARD' || gameState.selectionMode === 'MIME_DECISION')) {
@@ -1713,7 +1755,11 @@
                 hintEl.textContent = gameState.hauntingPanicMode ? 'Panic: select a ghost in your Shadow to target.' : (gameState.pendingDoomreader ? 'Select a ghost in your Shadow to exile to The Dark.' : (gameState.selectionTarget != null ? 'Select a ghost (yours)' : 'Select a ghost'));
                 hintEl.style.display = 'block';
             } else if (gameState.selectionMode === 'SELECT_TARGET') {
-                hintEl.textContent = 'Select target player';
+                var hintActive = getActivePlayer();
+                var hintCard = hintActive && gameState.pendingCardIdx != null ? hintActive.hand[gameState.pendingCardIdx] : null;
+                hintEl.textContent = hintCard && hintCard.r === '2'
+                    ? 'Select any player (including yourself)'
+                    : 'Select target player';
                 hintEl.style.display = 'block';
             } else if (gameState.selectionMode === 'DISCARD_DOWN' && gameState.pendingDiscardDown) {
                 var pd = gameState.pendingDiscardDown;
@@ -1721,6 +1767,9 @@
                 hintEl.style.display = 'block';
             } else if (gameState.selectionMode === 'PHANTOM_DISCARD') {
                 hintEl.textContent = 'Click a card in your hand to discard (cancel the Haunt).';
+                hintEl.style.display = 'block';
+            } else if (gameState.selectionMode === 'PHANTOM_DECISION' && gameState.pendingPhantomCancel) {
+                hintEl.textContent = 'THE UNSEEN: use the popup — allow the Haunt or discard 1 to cancel (both cards → The Dark).';
                 hintEl.style.display = 'block';
             } else if (gameState.selectionMode === 'MIME_REDIRECT_DISCARD' && gameState.pendingMimeRedirect) {
                 hintEl.textContent = 'Click a card to discard (redirect Haunt to ' + gameState.pendingMimeRedirect.otherNeighbour.name + ').';
@@ -1772,6 +1821,17 @@
             seatYou.classList.toggle('salted', !!humanPlayer.isSalted);
             var concurrentIds = getConcurrentTurnPlayerIds();
             seatYou.classList.toggle('active-turn', concurrentIds.indexOf(humanPlayer.id) >= 0);
+            seatYou.classList.remove('targetable');
+            seatYou.onclick = null;
+            seatYou.style.cursor = '';
+            if (gameState.selectionMode === 'SELECT_TARGET') {
+                var selfValidTargets = getValidTargets();
+                if (selfValidTargets.some(function (pl) { return pl.id === humanPlayer.id; })) {
+                    seatYou.classList.add('targetable');
+                    seatYou.style.cursor = 'pointer';
+                    seatYou.onclick = function () { targetPlayerSelected(humanPlayer); };
+                }
+            }
         }
 
         var playerCandleEl = document.getElementById('player-candle');
@@ -1855,6 +1915,20 @@
         if (zoneYou && humanPlayer) {
             attachShadowReveal(zoneYou, humanPlayer);
             zoneYou.style.setProperty('--zone-rotate', '0deg');
+            zoneYou.classList.remove('targetable');
+            zoneYou.onclick = null;
+            zoneYou.style.cursor = '';
+            if (gameState.selectionMode === 'SELECT_TARGET') {
+                var youValidTargets = getValidTargets();
+                if (youValidTargets.some(function (pl) { return pl.id === humanPlayer.id; })) {
+                    zoneYou.classList.add('targetable');
+                    zoneYou.style.cursor = 'pointer';
+                    zoneYou.onclick = function (e) {
+                        e.stopPropagation();
+                        targetPlayerSelected(humanPlayer);
+                    };
+                }
+            }
         }
 
         var otherPlayersAll = getOtherPlayersClockwise(humanPlayer);
@@ -1921,6 +1995,7 @@
                 zone.className = 'ritual-zone ritual-zone-other';
                 if (isLeftOrRight) zone.classList.add('zone-side');
                 if (layout && layout.zonePosition) zone.dataset.zonePosition = layout.zonePosition;
+                if (layout && layout.isApexPlayer) zone.classList.add('zone-apex');
                 zone.dataset.playerId = String(other.id);
                 zone.style.left = zoneLeft + '%';
                 zone.style.top = zoneTop + '%';
@@ -2008,7 +2083,7 @@
                 if (displayCount >= 3) seat.classList.add('seat-many');
                 if (displayCount >= 5) seat.classList.add('seat-crowded');
                 if (displayCount >= 4) seat.classList.add('seat-compact');
-                if (isNarrow && displayCount >= 5) seat.classList.add('seat-mobile-many');
+                if (isNarrow && displayCount >= 4) seat.classList.add('seat-mobile-many');
                 seat.classList.toggle('active-turn', concurrentIds.indexOf(other.id) >= 0);
                 seat.classList.toggle('concurrent-flame', concurrentIds.indexOf(other.id) >= 0 && gameState.turnOrder.length >= 6);
                 seat.dataset.playerId = String(other.id);
@@ -2156,6 +2231,26 @@
         updateUI();
     }
 
+    /** Opens THE UNSEEN choice modal (show on Unseen's device; use ready prompt when multiple humans hot-seat). */
+    function showPhantomHauntCancelModal(attacker, target, card, handIdx, hauntContinuation) {
+        gameState.pendingPhantomCancel = {
+            attacker: attacker,
+            target: target,
+            card: card,
+            handIdx: handIdx,
+            hauntContinuation: hauntContinuation,
+            onAllow: function () {
+                gameState.selectionMode = null;
+                checkSaltInterrupt(attacker, target, card, hauntContinuation);
+            }
+        };
+        gameState.selectionMode = 'PHANTOM_DECISION';
+        var phantomModal = document.getElementById('phantom-modal');
+        var phantomMsg = document.getElementById('phantom-msg');
+        if (phantomMsg) phantomMsg.textContent = attacker.name + ' is Haunting you. Discard 1 card to cancel? (Both cards → The Dark)';
+        if (phantomModal) phantomModal.style.display = 'flex';
+    }
+
     /** Opens THE MIME choice modal (show on Mime's device; use ready prompt when multiple humans hot-seat). */
     function showMimeHauntRedirectModal(attacker, mime, card, handIdx, otherNeighbour) {
         gameState.pendingMimeRedirect = {
@@ -2243,12 +2338,15 @@
         var discarded = pm.target.hand.splice(discardIdx, 1)[0];
         gameState.lastDiscardByPlayerId = pm.target.id;
         gameState.discard.push(discarded);
-        var attCard = pm.attacker.hand.splice(pm.attacker.hand.indexOf(pm.card), 1)[0];
+        var attIdx = pm.handIdx;
+        if (attIdx == null || attIdx < 0 || attIdx >= pm.attacker.hand.length) return;
+        var attCard = pm.attacker.hand.splice(attIdx, 1)[0];
         gameState.lastDiscardByPlayerId = pm.attacker.id;
         gameState.discard.push(attCard);
         log(pm.target.name + ' (THE UNSEEN) discarded 1 to cancel the Haunt. Both cards → The Dark.');
         gameState.pendingPhantomCancel = null;
         gameState.selectionMode = null;
+        clearTargetMode();
         finishAction();
         updateUI();
     }
@@ -2560,7 +2658,6 @@
                 }
                 executeCast(p, c, t, gIdx);
                 clearTargetMode();
-                finishAction();
                 return;
             }
             if (idx == null || !p.hand[idx]) { clearTargetMode(); updateUI(); return; }
@@ -2590,7 +2687,6 @@
             }
             executeCast(p, c, t, null);
             clearTargetMode();
-            finishAction();
             return;
         }
         if (gameState.pendingAction === 'class') {
@@ -2745,17 +2841,15 @@
                     return;
                 }
             } else {
-                gameState.pendingPhantomCancel = { attacker: p, target: t, card: c, handIdx: idx, onAllow: function () {
-                    var pm = gameState.pendingPhantomCancel;
-                    gameState.pendingPhantomCancel = null;
-                    var phantomModal = document.getElementById('phantom-modal');
-                    if (phantomModal) phantomModal.style.display = 'none';
-                    if (pm) checkSaltInterrupt(pm.attacker, pm.target, pm.card, hauntContinuation);
-                } };
-                var phantomModal = document.getElementById('phantom-modal');
-                var phantomMsg = document.getElementById('phantom-msg');
-                if (phantomMsg) phantomMsg.textContent = p.name + ' is Haunting you. Discard 1 card to cancel? (Both cards → The Dark)';
-                if (phantomModal) phantomModal.style.display = 'flex';
+                function openPhantomDecision() {
+                    showPhantomHauntCancelModal(p, t, c, idx, hauntContinuation);
+                    updateUI();
+                }
+                if (countHumanPlayers() > 1) {
+                    showReadyPrompt(t, 'Pass the device to ' + t.name + ' (THE UNSEEN). They may discard 1 to cancel this Haunt.', openPhantomDecision);
+                } else {
+                    openPhantomDecision();
+                }
                 return;
             }
         }
@@ -4279,34 +4373,11 @@
                     }
                 }
                 if (numCard && t) {
-                    checkSaltInterrupt(ai, t, numCard, function () {
-                        var cardCopy = { r: numCard.r, s: numCard.s, val: numCard.val, isFace: numCard.isFace };
-                        if (ai.class && ai.class.name === 'THE WARLOCK' && (numCard.isFace || numCard.r === 'JOKER' || numCard.r === '★')) cardCopy.val = 10;
-                        tagHauntedGhost(cardCopy, ai, t);
-                        var architectHasWall = t.shadow.some(function (g) { return g.isWall; });
-                        if (t.class && t.class.name === 'THE CRYPTKEEPER' && architectHasWall) {
-                            var wallIdx = -1;
-                            for (var w = 0; w < t.shadow.length; w++) { if (t.shadow[w].isWall) { wallIdx = w; break; } }
-                            var wall = t.shadow.splice(wallIdx, 1)[0];
-                            gameState.lastDiscardByPlayerId = t.id;
-                            gameState.discard.push(cardCopy);
-                            gameState.discard.push(wall);
-                            ai.hand.splice(ai.hand.indexOf(numCard), 1);
-                            log(t.name + ' (THE CRYPTKEEPER) Wall blocked AI Haunt! Ghost and Wall → The Dark.');
-                            finishAction();
-                            return;
-                        }
-                        t.shadow.push(cardCopy);
-                        ai.hand.splice(ai.hand.indexOf(numCard), 1);
-                        if (ai.class && ai.class.name === 'THE MEDDLER' && t.candle.length > 0) {
-                            var top = t.candle.shift();
-                            t.candle.push(top);
-                            log(ai.name + ' (THE MEDDLER) put ' + t.name + "'s top Candle on bottom.");
-                        }
-                        log('AI Haunted ' + t.name);
-                        if (checkPossessionInstantIfDark(t)) return;
-                        finishAction();
-                    });
+                    var numCardIdx = ai.hand.indexOf(numCard);
+                    gameState.pendingAction = 'haunt';
+                    gameState.pendingCardIdx = numCardIdx;
+                    doHauntWithTarget(t);
+                    updateUI();
                 } else {
                     log('AI Passed');
                     finishAction();
@@ -4409,12 +4480,17 @@
     }
     window.toggleLog = toggleLog;
 
+    var layoutResizeTimer = null;
     window.addEventListener('resize', function () {
         drawTableSurface();
         var zones = ['player-shadow-left', 'player-shadow-right'];
         for (var z = 0; z < zones.length; z++) {
             var sDiv = document.getElementById(zones[z]);
             if (sDiv) updateShadowColumns(sDiv);
+        }
+        if (gameState && gameState.players && gameState.players.length) {
+            clearTimeout(layoutResizeTimer);
+            layoutResizeTimer = setTimeout(function () { updateUI(); }, 120);
         }
     });
     document.addEventListener('click', function (e) {
@@ -4425,6 +4501,7 @@
     });
     document.addEventListener('DOMContentLoaded', function () {
         loadGameSettings();
+        applyPlayerZoneScale(getPlayerZoneScale());
         syncSaltSettingUI();
         drawTableSurface();
         var muteBtn = document.getElementById('btn-mute');

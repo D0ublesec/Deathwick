@@ -311,6 +311,12 @@
     <div id="game-board">
         <div id="selection-hint" class="selection-hint" aria-live="polite"></div>
 
+        <div id="player-size-wrap" class="player-size-wrap" aria-label="Player zone size">
+            <label for="player-size-slider" class="player-size-label">Size</label>
+            <input type="range" id="player-size-slider" class="player-size-slider" min="75" max="150" value="100" step="1" aria-valuemin="75" aria-valuemax="150" aria-valuenow="100" oninput="setPlayerZoneScaleFromSlider(this.value)">
+            <span id="player-size-value" class="player-size-value">100%</span>
+        </div>
+
         <div id="log-panel" class="log-panel">
             <button type="button" id="log-toggle" class="log-toggle" onclick="toggleLog()" aria-label="Toggle log">Log</button>
             <div id="game-log" class="game-log">Log...</div>
