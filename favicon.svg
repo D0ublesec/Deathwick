@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="Candle">
+  <rect fill="#666" width="8" height="20" x="12" y="10" rx="2"/>
+  <ellipse fill="#f90" cx="16" cy="8" rx="4" ry="6"/>
+  <ellipse fill="#fc0" cx="16" cy="8" rx="2" ry="4"/>
+</svg>
