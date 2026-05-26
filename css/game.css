@@ -2064,6 +2064,10 @@ body.game-page {
 
 
 /* Modals */
+.modal.modal-exit-prompt {
+    z-index: 3200;
+}
+
 .modal {
     position: fixed;
     top: 0;
@@ -2165,8 +2169,18 @@ body.game-page {
     margin: 0.4em 0;
 }
 .alert-modal-content p {
-    margin: 1em 0;
+    margin: 1em 0 1rem;
     line-height: 1.5;
+}
+.alert-modal-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+}
+.alert-modal-secondary-btn {
+    background: var(--bg-elevated);
+    color: var(--text-muted);
 }
 
 body.game-page.ritual-theme-fire #theme-btn-fire,

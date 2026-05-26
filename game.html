@@ -31,7 +31,7 @@
         </div>
         <div class="nav-right-buttons">
             <button type="button" class="top-right-btn" id="btn-cheatsheet" onclick="openCheatsheet()">RULES</button>
-            <button type="button" class="top-right-btn" onclick="resetGameSetup()">QUIT / RESET</button>
+            <button type="button" class="top-right-btn" onclick="confirmQuitReset()">QUIT / RESET</button>
         </div>
     </nav>
 
@@ -237,7 +237,12 @@
         <div class="modal-content alert-modal-content">
             <h2 id="alert-modal-title" style="color:var(--accent-color)">···</h2>
             <p id="alert-modal-msg"></p>
-            <button type="button" class="game-btn" id="alert-modal-btn" onclick="closeAlertModal()">OK</button>
+            <div class="alert-modal-actions">
+                <button type="button" class="game-btn alert-modal-secondary-btn" id="alert-modal-cancel-btn" style="display:none;" onclick="closeAlertModalCancel()">Cancel</button>
+                <button type="button" class="game-btn" id="alert-modal-btn" onclick="closeAlertModal()">OK</button>
+                <button type="button" class="game-btn alert-modal-secondary-btn" id="alert-modal-manual-btn" style="display:none;" onclick="navigateToManualFromExit()">Manual</button>
+                <button type="button" class="game-btn alert-modal-secondary-btn" id="alert-modal-home-btn" style="display:none;" onclick="navigateToHomeFromExit()">Home</button>
+            </div>
         </div>
     </div>
 

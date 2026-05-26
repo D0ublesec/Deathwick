@@ -19,6 +19,8 @@
         return audioCtx;
     }
 
+    var simMuted = false;
+
     function loadSettings() {
         try {
             var raw = localStorage.getItem(STORAGE_KEY);
@@ -103,7 +105,7 @@
 
     window.playSFX = function (type) {
         loadSettings();
-        if (muted || sfxVolume <= 0) return;
+        if (muted || simMuted || sfxVolume <= 0) return;
         var baseName = (type === 'cleanse' ? 'cleanse' : type === 'banish' ? 'banish' : type);
         var fallbackDone = false;
         var fallbackOnce = function () {
@@ -119,7 +121,7 @@
 
     window.startBackgroundMusic = function () {
         loadSettings();
-        if (muted) {
+        if (muted || simMuted) {
             if (musicEl) { musicEl.pause(); musicEl.currentTime = 0; }
             return;
         }
@@ -160,6 +162,13 @@
         if (musicEl) musicEl.volume = Math.max(0, Math.min(1, musicVolume / 100));
     };
     window.setSFXVolume = function (v) { sfxVolume = Math.max(0, Math.min(100, v)); saveSettings(); };
+
+    window.setSimAudioMuted = function (value) {
+        simMuted = !!value;
+        if (simMuted) {
+            if (typeof window.stopBackgroundMusic === 'function') window.stopBackgroundMusic();
+        }
+    };
 
     window.getMuted = function () { loadSettings(); return muted; };
     window.toggleMute = function () {

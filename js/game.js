@@ -44,6 +44,7 @@
     function applyClassToPlayer(p, cls) {
         p.class = cls;
         if (cls.name === 'THE VOODOO DOLL') p.voodooSuits = ['♠', '♣', '♦']; /* all suits except Hearts */
+        recordSimClassSelection(p, cls);
     }
 
     function resolveClassPickFromOffer(p, className, choices, pool) {
@@ -128,6 +129,7 @@
         pendingCardIdx: null,
         pendingGhostIdx: null,
         isGameOver: false,
+        isPaused: false,
         darkMode: true,
         isOnline: false,
         isHost: false,
@@ -139,9 +141,256 @@
         showAllPlayers: false,
         viewPreferenceSet: false,
         saltOnlyWhenTargeted: false,
-        playerZoneScale: 1
+        playerZoneScale: 1,
+        simMode: false,
+        simStats: null,
+        simTurnCount: 0
     };
     var GAME_SETTINGS_KEY = 'finalFlickerGameSettings';
+    var SIM_MAX_TURNS = 10000;
+
+    function isSimMode() {
+        return !!gameState.simMode;
+    }
+
+    function simSchedule(fn, delay) {
+        if (isSimMode()) {
+            if (!gameState.isPaused) fn();
+            return null;
+        }
+        return setTimeout(function () {
+            if (gameState.isPaused || gameState.isGameOver) return;
+            fn();
+        }, delay || 0);
+    }
+
+    var GAMEPLAY_INTERRUPT_MODAL_IDS = [
+        'salt-modal', 'ready-modal', 'reprieve-modal', 'oracle-modal', 'seer-modal',
+        'phantom-modal', 'mime-modal', 'cryptkeeper-modal', 'hex-modal',
+        'haunting-panic-modal', 'plague-spread-modal', 'grimoire-rejection-modal',
+        'usurer-swap-modal', 'queen-modal', 'first-player-modal'
+    ];
+
+    function hideGameplayInterruptModals() {
+        for (var i = 0; i < GAMEPLAY_INTERRUPT_MODAL_IDS.length; i++) {
+            var el = document.getElementById(GAMEPLAY_INTERRUPT_MODAL_IDS[i]);
+            if (el) el.style.display = 'none';
+        }
+    }
+
+    function pauseGameForExitPrompt() {
+        gameState.isPaused = true;
+        if (aiTimer) { clearTimeout(aiTimer); aiTimer = null; }
+        hideGameplayInterruptModals();
+        var alertModal = document.getElementById('alert-modal');
+        if (alertModal) alertModal.classList.add('modal-exit-prompt');
+    }
+
+    function resumeGameAfterPause() {
+        gameState.isPaused = false;
+        var alertModal = document.getElementById('alert-modal');
+        if (alertModal) alertModal.classList.remove('modal-exit-prompt');
+        if (gameState.isGameOver || gameState.turnPhase === 'SETUP') return;
+
+        if (saltCallback || saltCounterCallback) {
+            var saltModal = document.getElementById('salt-modal');
+            if (saltModal) saltModal.style.display = 'flex';
+            return;
+        }
+        if (readyCallback) {
+            var readyModal = document.getElementById('ready-modal');
+            if (readyModal) readyModal.style.display = 'flex';
+            return;
+        }
+
+        var active = gameState.players[gameState.activeIdx];
+        if (!active || active.isDead) return;
+
+        if (active.type === 'human' && gameState.turnPhase === 'HAUNTING') {
+            var aceIdx = -1;
+            for (var ai = 0; ai < active.hand.length; ai++) {
+                if (active.hand[ai].r === 'A' && !active.hand[ai].isFace) { aceIdx = ai; break; }
+            }
+            if (aceIdx >= 0) {
+                var reprieveModal = document.getElementById('reprieve-modal');
+                if (reprieveModal) reprieveModal.style.display = 'flex';
+                return;
+            }
+            if (active.class && active.class.name === 'THE ORACLE' && active.candle.length > 0) {
+                var oracleModal = document.getElementById('oracle-modal');
+                var oracleSlot = document.getElementById('oracle-card-slot');
+                if (oracleModal && oracleSlot) {
+                    oracleSlot.innerHTML = '';
+                    oracleSlot.appendChild(mkCard(active.candle[0]));
+                    oracleModal.style.display = 'flex';
+                }
+                return;
+            }
+        }
+
+        if (active.type === 'ai') resumeAITurn(active);
+    }
+
+    function resumeAITurn(ai) {
+        if (gameState.isPaused || gameState.isGameOver || !ai) return;
+        if (gameState.turnPhase === 'HAUNTING') {
+            aiTimer = simSchedule(function () { runAIHauntingAndDraw(ai); }, 500);
+        } else if (gameState.turnPhase === 'ACTION') {
+            aiTimer = simSchedule(function () { runAIActionPhase(ai); }, 1000);
+        } else if (gameState.turnPhase === 'END') {
+            aiTimer = simSchedule(endTurn, 1200);
+        }
+    }
+
+    function getSimPoolTier(playerCount) {
+        if (playerCount === 2) return '2';
+        if (playerCount === 3) return '3';
+        return '4+';
+    }
+
+    function createEmptySimGameStats(playerCount) {
+        return {
+            playerCount: playerCount,
+            poolTier: getSimPoolTier(playerCount),
+            classes: [],
+            winner: null,
+            noWinner: false,
+            noWinnerReason: null,
+            finalists: [],
+            eliminations: [],
+            actions: { haunt: {}, cast: {}, summon: {}, banish: {} },
+            turns: 0
+        };
+    }
+
+    function recordSimClassSelection(p, cls) {
+        if (!isSimMode() || !gameState.simStats || !cls) return;
+        gameState.simStats.classes.push({ playerId: p.id, className: cls.name });
+    }
+
+    function recordSimAction(actionType, rank) {
+        if (!isSimMode() || !gameState.simStats || !rank) return;
+        var bucket = gameState.simStats.actions[actionType];
+        if (!bucket) return;
+        var key = String(rank);
+        bucket[key] = (bucket[key] || 0) + 1;
+    }
+
+    function trackSimLog(msg) {
+        if (!isSimMode() || !gameState.simStats) return;
+        /* Primary action stats are recorded directly via recordSimAction; log parsing kept as fallback. */
+        var stats = gameState.simStats;
+        var plain = String(msg).replace(/<[^>]+>/g, '');
+        var hauntMatch = plain.match(/ Haunted .+ with (\d+|10|[JQKA]|JOKER)[♠♥♣♦★]/);
+        if (hauntMatch) {
+            var hr = hauntMatch[1];
+            if (!stats.actions.haunt[hr]) stats.actions.haunt[hr] = 0;
+            stats.actions.haunt[hr]++;
+        }
+    }
+
+    function finalizeSimGame(msg) {
+        var stats = gameState.simStats;
+        if (!stats) return;
+        stats.turns = logSequence;
+        if (msg.indexOf(' WINS!') >= 0) {
+            var alive = gameState.players.filter(function (pl) { return !pl.isDead; });
+            if (alive.length === 1 && alive[0].class) {
+                stats.winner = { className: alive[0].class.name, playerId: alive[0].id };
+                stats.finalists = gameState.players.filter(function (pl) { return pl.class; }).map(function (pl) {
+                    return { className: pl.class.name, survived: !pl.isDead };
+                });
+            }
+        } else {
+            stats.noWinner = true;
+            stats.noWinnerReason = msg;
+            stats.finalists = gameState.players.filter(function (pl) { return pl.class; }).map(function (pl) {
+                return { className: pl.class.name, survived: !pl.isDead };
+            });
+        }
+    }
+
+    function resetSimEngineState(playerCount) {
+        if (aiTimer) { clearTimeout(aiTimer); aiTimer = null; }
+        gameState.players = [];
+        gameState.discard = [];
+        gameState.turnOrder = [];
+        gameState.turnIdx = 0;
+        gameState.concurrentSlot = 0;
+        gameState.activeIdx = 0;
+        gameState.selectedIdxs = [];
+        gameState.selectedDarkTop = false;
+        gameState.turnPhase = 'SETUP';
+        gameState.selectionMode = null;
+        gameState.pendingAction = null;
+        gameState.pendingCardIdx = null;
+        gameState.pendingGhostIdx = null;
+        gameState.isGameOver = false;
+        gameState.lastDamageTo = {};
+        gameState.darkMode = false;
+        gameState.funeralBellTriggeredThisTurn = false;
+        gameState.pendingGrimoireRejection = null;
+        gameState.pendingPlagueSpread = null;
+        gameState.pendingCryptkeeperBlock = null;
+        gameState.pendingJokerAttacker = null;
+        gameState.pendingJokerFoes = null;
+        gameState.pendingJokerFoeIndex = 0;
+        gameState.pendingSkipBurn = false;
+        gameState.simTurnCount = 0;
+        logSequence = 0;
+        for (var i = 0; i < playerCount; i++) {
+            gameState.players.push({
+                id: i,
+                name: 'Sim' + (i + 1),
+                type: 'ai',
+                hand: [],
+                candle: [],
+                shadow: [],
+                class: null,
+                isSalted: false,
+                isDead: false
+            });
+        }
+    }
+
+    function runSingleSimGame(playerCount) {
+        resetSimEngineState(playerCount);
+        gameState.simMode = true;
+        gameState.simStats = createEmptySimGameStats(playerCount);
+        chooseFirstPlayerRandom();
+        gameState.simMode = false;
+        return gameState.simStats;
+    }
+
+    function runSimulations(opts) {
+        opts = opts || {};
+        var playerCount = opts.playerCount || 4;
+        var count = Math.max(1, Math.min(10000, opts.count || 10));
+        var onProgress = opts.onProgress || function () {};
+        var onComplete = opts.onComplete || function () {};
+        var results = [];
+        var index = 0;
+        if (typeof window.setSimAudioMuted === 'function') window.setSimAudioMuted(true);
+
+        function finishAll() {
+            if (typeof window.setSimAudioMuted === 'function') window.setSimAudioMuted(false);
+            onComplete(results);
+        }
+
+        function runNext() {
+            if (index >= count) {
+                finishAll();
+                return;
+            }
+            var result = runSingleSimGame(playerCount);
+            results.push(result);
+            index++;
+            onProgress(index, count, result);
+            simSchedule(runNext, 0);
+        }
+
+        runNext();
+    }
     var PLAYER_ZONE_SCALE_MIN = 0.75;
     var PLAYER_ZONE_SCALE_MAX = 1.5;
     var DEFAULT_PLAYER_ZONE_SCALE = 1;
@@ -367,6 +616,52 @@
         window.location.href = 'manual.html';
     }
 
+    function navigateFromGameExit(url) {
+        var modal = document.getElementById('alert-modal');
+        if (modal) modal.style.display = 'none';
+        alertModalCallback = null;
+        configureAlertModalActions({});
+        gameState.isPaused = false;
+        if (modal) modal.classList.remove('modal-exit-prompt');
+        try { localStorage.removeItem(SAVE_KEY); } catch (e) {}
+        window.location.href = url;
+    }
+
+    function navigateToManualFromExit() {
+        navigateFromGameExit('manual.html');
+    }
+
+    function navigateToHomeFromExit() {
+        navigateFromGameExit('index.html');
+    }
+
+    function configureAlertModalActions(options) {
+        options = options || {};
+        var manualBtn = document.getElementById('alert-modal-manual-btn');
+        var homeBtn = document.getElementById('alert-modal-home-btn');
+        var cancelBtn = document.getElementById('alert-modal-cancel-btn');
+        var okBtn = document.getElementById('alert-modal-btn');
+        if (manualBtn) manualBtn.style.display = options.showManualLink ? '' : 'none';
+        if (homeBtn) homeBtn.style.display = options.showHomeLink ? '' : 'none';
+        if (cancelBtn) cancelBtn.style.display = options.showCancel ? '' : 'none';
+        if (okBtn) okBtn.textContent = options.okButtonText || 'OK';
+    }
+
+    function confirmQuitReset() {
+        pauseGameForExitPrompt();
+        showAlertModal(
+            'Leave this game? Reset returns you to setup. Manual and Home exit without saving your progress.',
+            'Quit / Reset',
+            resetGameSetup,
+            {
+                showManualLink: true,
+                showHomeLink: true,
+                showCancel: true,
+                okButtonText: 'Reset to setup'
+            }
+        );
+    }
+
     function showClassDesc(cls) {
         if (!cls) return;
         var title = document.getElementById('class-desc-title');
@@ -423,19 +718,35 @@
 
     var alertModalCallback = null;
 
-    function showAlertModal(msg, title, onClose) {
+    function showAlertModal(msg, title, onClose, options) {
+        if (isSimMode()) {
+            if (typeof onClose === 'function') onClose();
+            return;
+        }
+        options = options || {};
         var titleEl = document.getElementById('alert-modal-title');
         var msgEl = document.getElementById('alert-modal-msg');
         var modal = document.getElementById('alert-modal');
         if (titleEl) titleEl.textContent = title || 'Notice';
         if (msgEl) msgEl.textContent = msg || '';
+        configureAlertModalActions(options);
         alertModalCallback = onClose || null;
         if (modal) modal.style.display = 'flex';
+    }
+
+    function closeAlertModalCancel() {
+        alertModalCallback = null;
+        var modal = document.getElementById('alert-modal');
+        if (modal) modal.style.display = 'none';
+        configureAlertModalActions({});
+        resumeGameAfterPause();
     }
 
     function closeAlertModal() {
         var modal = document.getElementById('alert-modal');
         if (modal) modal.style.display = 'none';
+        if (modal) modal.classList.remove('modal-exit-prompt');
+        configureAlertModalActions({});
         if (alertModalCallback) {
             var cb = alertModalCallback;
             alertModalCallback = null;
@@ -445,6 +756,7 @@
 
     function resetGameSetup() {
         if (aiTimer) clearTimeout(aiTimer);
+        gameState.isPaused = false;
         try { localStorage.removeItem(SAVE_KEY); } catch (e) {}
         gameState.players = [];
         gameState.discard = [];
@@ -459,6 +771,8 @@
         gameState.pendingCardIdx = null;
         gameState.pendingGhostIdx = null;
         gameState.isGameOver = false;
+        var alertModal = document.getElementById('alert-modal');
+        if (alertModal) alertModal.classList.remove('modal-exit-prompt');
         gameState.lastDamageTo = {};
         previousDiscardLength = 0;
         gameState.viewPreferenceSet = false;
@@ -826,6 +1140,11 @@
     }
 
     function showReadyPrompt(player, message, onReady) {
+        if (isSimMode()) {
+            if (typeof onReady === 'function') onReady();
+            return;
+        }
+        if (gameState.isPaused) return;
         var msgEl = document.getElementById('ready-msg');
         var modal = document.getElementById('ready-modal');
         if (msgEl) msgEl.textContent = message || ('Pass the device to ' + player.name + '. They should click when ready.');
@@ -844,7 +1163,7 @@
     }
 
     function startTurn() {
-        if (gameState.isGameOver) return;
+        if (gameState.isGameOver || gameState.isPaused) return;
         if (aiTimer) {
             clearTimeout(aiTimer);
             aiTimer = null;
@@ -1129,6 +1448,12 @@
         var killerId = gameState.lastDamageTo && gameState.lastDamageTo[p.id];
         var killer = killerId != null ? gameState.players[killerId] : null;
         var neighbours = getNeighbours(p);
+        if (isSimMode() && gameState.simStats && p.class) {
+            gameState.simStats.eliminations.push({
+                victimClass: p.class.name,
+                killerClass: killer && killer.class ? killer.class.name : null
+            });
+        }
         p.isDead = true;
         log(p.name + ' ELIMINATED!');
         if (p.class && p.class.name === 'THE LICH' && !p.usedLichRevive) {
@@ -1653,6 +1978,7 @@
     }
 
     function updateUI() {
+        if (isSimMode()) return;
         var table = document.getElementById('ritual-table');
         if (table) drawTableSurface();
         var pileEl = document.getElementById('ritual-discard-pile');
@@ -2194,6 +2520,7 @@
                     log(pm.attacker.name + ' (THE MEDDLER) put ' + pm.mime.name + "'s top Candle on bottom.");
                 }
                 log(pm.attacker.name + ' Haunted ' + pm.mime.name + ' with ' + pm.card.r + pm.card.s);
+                recordSimAction('haunt', pm.card.r);
                 if (checkPossessionInstantIfDark(pm.mime)) return;
                 clearTargetMode();
                 finishAction();
@@ -2435,6 +2762,8 @@
     var logSequence = 0;
     function log(msg) {
         logSequence++;
+        trackSimLog(msg);
+        if (isSimMode()) return;
         var l = document.getElementById('game-log');
         if (l) l.innerHTML = '&gt; <span class="log-seq" title="Order: ' + logSequence + '">[' + logSequence + ']</span> ' + msg + '<br>' + l.innerHTML;
     }
@@ -2458,6 +2787,7 @@
     }
 
     function showDefenderSaltPrompt(attacker, target, card, onContinue) {
+        if (gameState.isPaused) return;
         var saltIdx = -1;
         for (var i = 0; i < target.hand.length; i++) { if (target.hand[i].r === '5') { saltIdx = i; break; } }
         if (saltIdx === -1) { onContinue(); return; }
@@ -2546,6 +2876,7 @@
     }
 
     function checkSaltInterrupt(attacker, target, card, onContinue) {
+        if (gameState.isPaused) return;
         if (attacker.class && attacker.class.name === 'THE SILENCE') {
             onContinue();
             return;
@@ -2944,6 +3275,7 @@
                             log(p.name + ' (THE MEDDLER) put ' + t.name + "'s top Candle on bottom.");
                         }
                         log(p.name + ' Haunted ' + t.name + ' with ' + c.r + c.s);
+                        recordSimAction('haunt', c.r);
                         if (typeof window.playSFX === 'function') window.playSFX('haunt');
                         if (checkPossessionInstantIfDark(t)) return;
                         clearTargetMode();
@@ -2965,6 +3297,7 @@
                 log(p.name + ' (THE MEDDLER) put ' + t.name + "'s top Candle on bottom.");
             }
             log(p.name + ' Haunted ' + t.name + ' with ' + c.r + c.s);
+            recordSimAction('haunt', c.r);
             if (typeof window.playSFX === 'function') window.playSFX('haunt');
             if (checkPossessionInstantIfDark(t)) return;
             clearTargetMode();
@@ -3424,6 +3757,7 @@
 
     function executeCastCore(p, c, target, ghostIdx) {
         var handIdx = p.hand.indexOf(c);
+        recordSimAction((c.isFace || c.r === 'JOKER' || c.r === '★') ? 'summon' : 'cast', c.r);
         if (c.r === 'J' && target && mirrorBlockedBySealbinder(p, target)) {
             showAlertModal('A Shadow contains a Ghost Haunted by THE SEALBINDER; Mirror cannot move it.', 'Blocked');
             gameState.selectionMode = null;
@@ -3670,6 +4004,7 @@
                     return;
                 }
                 if (canBanish(c, ghost)) {
+                    recordSimAction('banish', c.r);
                     t.shadow.splice(idx, 1);
                     var isSiphonB = computeSiphon(p, c, ghost);
                     applyPriestBanishBonus(p);
@@ -3745,6 +4080,7 @@
                 return;
             }
             if (canBanish(c, ghost)) {
+                recordSimAction('banish', c.r);
                 t.shadow.splice(idx, 1);
                 var isSiphon = computeSiphon(p, c, ghost);
                 applyPriestBanishBonus(p);
@@ -3924,19 +4260,19 @@
         gameState.pendingJokerFoeIndex = idx + 1;
         if (attacker.class && attacker.class.name === 'THE SILENCE') {
             resolveJoker(foe);
-            setTimeout(runNextJokerTarget, 0);
+            simSchedule(runNextJokerTarget, 0);
             return;
         }
         if (foe.type !== 'human') {
             resolveJoker(foe);
-            setTimeout(runNextJokerTarget, 0);
+            simSchedule(runNextJokerTarget, 0);
             return;
         }
         var saltIdx = -1;
         for (var i = 0; i < foe.hand.length; i++) { if (foe.hand[i].r === '5') { saltIdx = i; break; } }
         if (saltIdx === -1) {
             resolveJoker(foe);
-            setTimeout(runNextJokerTarget, 0);
+            simSchedule(runNextJokerTarget, 0);
             return;
         }
         var saltMsg = document.getElementById('salt-msg');
@@ -3959,7 +4295,7 @@
                 resolveJoker(foe);
             }
             updateUI();
-            setTimeout(runNextJokerTarget, 0);
+            simSchedule(runNextJokerTarget, 0);
         };
     }
 
@@ -4324,11 +4660,18 @@
             aiTimer = null;
             endTurn();
         } else if (p && p.type === 'ai') {
-            aiTimer = setTimeout(endTurn, 1200);
+            aiTimer = simSchedule(endTurn, 1200);
         }
     }
 
     function endTurnContinue() {
+        if (isSimMode()) {
+            gameState.simTurnCount = (gameState.simTurnCount || 0) + 1;
+            if (gameState.simTurnCount > SIM_MAX_TURNS) {
+                gameOver('Sim aborted: turn limit exceeded.');
+                return;
+            }
+        }
         var p = gameState.players[gameState.activeIdx];
         if (!p) return;
         if (p && !p.isDead && p.candle.length === 0) {
@@ -4407,96 +4750,209 @@
     function gameOver(msg) {
         gameState.isGameOver = true;
         if (aiTimer) clearTimeout(aiTimer);
-        showAlertModal(msg, 'Game Over', resetGameSetup);
+        if (isSimMode()) {
+            finalizeSimGame(msg);
+            return;
+        }
+        showAlertModal(msg, 'Game Over', resetGameSetup, {
+            showManualLink: true,
+            showHomeLink: true,
+            okButtonText: 'Play again'
+        });
+    }
+
+    function simTryHaunt(ai) {
+        var targets = getNeighbours(ai);
+        var t = Math.random() > 0.5 ? targets.left : targets.right;
+        if (!t) t = targets.left || targets.right;
+        var numCard = null;
+        for (var h = 0; h < ai.hand.length; h++) {
+            if (!ai.hand[h].isFace && ai.hand[h].r !== 'JOKER' && ai.hand[h].r !== '★') {
+                numCard = ai.hand[h];
+                break;
+            }
+        }
+        if (!numCard || !t) return false;
+        gameState.pendingAction = 'haunt';
+        gameState.pendingCardIdx = ai.hand.indexOf(numCard);
+        doHauntWithTarget(t);
+        return true;
+    }
+
+    function simTryBanish(ai) {
+        var ghostIdxs = [];
+        for (var gi = 0; gi < ai.shadow.length; gi++) {
+            if (!ai.shadow[gi].isWall) ghostIdxs.push(gi);
+        }
+        if (!ghostIdxs.length) return false;
+        for (var hi = 0; hi < ai.hand.length; hi++) {
+            var c = ai.hand[hi];
+            if (c.r === '7') continue;
+            for (var g = 0; g < ghostIdxs.length; g++) {
+                var ghost = ai.shadow[ghostIdxs[g]];
+                var clownOwner = ghost.hauntedBy != null ? gameState.players[ghost.hauntedBy] : null;
+                var canBanishNumber = !c.isFace && c.r !== '7';
+                if (clownOwner && clownOwner.class && clownOwner.class.name === 'THE CLOWN' && canBanishNumber) continue;
+                if (!canBanish(c, ghost)) continue;
+                gameState.selectedIdxs = [hi];
+                gameState.pendingAction = 'banish';
+                gameState.selectionMode = 'SELECT_GHOST';
+                gameState.selectionTarget = ai.id;
+                ghostSelected(ai.id, ghostIdxs[g]);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function simTryCastOrSummon(ai) {
+        var options = [];
+        var nb = getNeighbours(ai);
+        var target = nb.left && nb.right ? (Math.random() > 0.5 ? nb.left : nb.right) : (nb.left || nb.right);
+        for (var hi = 0; hi < ai.hand.length; hi++) {
+            var c = ai.hand[hi];
+            if (c.r === 'A' || c.r === 'Q') continue;
+            if (c.r === '7') {
+                for (var gi = 0; gi < ai.shadow.length; gi++) {
+                    if (!ai.shadow[gi].isWall) options.push({ cardIdx: hi, target: ai, ghostIdx: gi });
+                }
+                continue;
+            }
+            if (c.r === '9') {
+                if (!target) continue;
+                for (var gi9 = 0; gi9 < ai.shadow.length; gi9++) {
+                    if (!ai.shadow[gi9].isWall) options.push({ cardIdx: hi, target: target, ghostIdx: gi9 });
+                }
+                continue;
+            }
+            if (c.r === '4' || c.r === '5' || c.r === '10' || c.r === 'K' || c.r === 'JOKER' || c.r === '★') {
+                options.push({ cardIdx: hi, target: null, ghostIdx: null });
+                continue;
+            }
+            if (target && (c.r === '2' || c.r === '3' || c.r === '6' || c.r === 'J')) {
+                options.push({ cardIdx: hi, target: target, ghostIdx: null });
+            }
+        }
+        if (!options.length) return false;
+        var pick = options[Math.floor(Math.random() * options.length)];
+        var card = ai.hand[pick.cardIdx];
+        if (!card) return false;
+        executeCast(ai, card, pick.target, pick.ghostIdx);
+        return true;
+    }
+
+    function performSimAIAction(ai) {
+        var order;
+        var roll = Math.random();
+        if (roll < 0.22) order = ['banish', 'cast', 'haunt', 'pass'];
+        else if (roll < 0.44) order = ['cast', 'banish', 'haunt', 'pass'];
+        else if (roll < 0.78) order = ['haunt', 'banish', 'cast', 'pass'];
+        else order = ['haunt', 'cast', 'banish', 'pass'];
+        for (var i = 0; i < order.length; i++) {
+            if (order[i] === 'banish' && simTryBanish(ai)) return;
+            if (order[i] === 'cast' && simTryCastOrSummon(ai)) return;
+            if (order[i] === 'haunt' && simTryHaunt(ai)) return;
+        }
+        log('AI Passed');
+        finishAction();
+    }
+
+    function runAIActionPhase(ai) {
+        if (gameState.isPaused || gameState.isGameOver) return;
+        if (ai.class && ai.class.name === 'THE GRIMOIRE OF REJECTION' && !ai.grimoirePageAddedThisTurn) {
+            var aiGrPages = ensureGrimoirePages(ai);
+            if (aiGrPages.length < 3 && ai.hand.length > 2 && Math.random() < 0.35) {
+                var tuckIdx = Math.floor(Math.random() * ai.hand.length);
+                aiGrPages.push(ai.hand.splice(tuckIdx, 1)[0]);
+                ai.grimoirePageAddedThisTurn = true;
+                log(ai.name + ' placed a page in THE GRIMOIRE OF REJECTION (' + aiGrPages.length + '/3).');
+            }
+        }
+        if (isSimMode()) {
+            performSimAIAction(ai);
+            updateUI();
+            return;
+        }
+        var targets = getNeighbours(ai);
+        var t = Math.random() > 0.5 ? targets.left : targets.right;
+        var numCard = null;
+        for (var h = 0; h < ai.hand.length; h++) {
+            if (!ai.hand[h].isFace && ai.hand[h].r !== 'JOKER') {
+                numCard = ai.hand[h];
+                break;
+            }
+        }
+        if (numCard && t) {
+            var numCardIdx = ai.hand.indexOf(numCard);
+            gameState.pendingAction = 'haunt';
+            gameState.pendingCardIdx = numCardIdx;
+            doHauntWithTarget(t);
+            updateUI();
+        } else {
+            log('AI Passed');
+            finishAction();
+        }
+    }
+
+    function runAIHauntingAndDraw(ai) {
+        if (gameState.isPaused || gameState.isGameOver) return;
+        gameState.lastDiscardByPlayerId = ai.id;
+        if (ai.class && ai.class.name === 'THE ORACLE' && ai.candle.length > 0) {
+            if (Math.random() < 0.5) {
+                var t = ai.candle.shift();
+                ai.candle.push(t);
+                log(ai.name + ' (THE ORACLE) put top card on bottom.');
+            }
+        }
+        var aiGhostCount = ai.shadow.filter(function (g) { return !g.isWall; }).length;
+        var burn = aiGhostCount;
+        var aiAceIdx = -1;
+        for (var aii = 0; aii < ai.hand.length; aii++) {
+            if (ai.hand[aii].r === 'A' && !ai.hand[aii].isFace) { aiAceIdx = aii; break; }
+        }
+        if (aiAceIdx >= 0 && burn > 0 && (ai.candle.length < burn || Math.random() < 0.35)) {
+            var aiAce = ai.hand.splice(aiAceIdx, 1)[0];
+            gameState.lastDiscardByPlayerId = ai.id;
+            gameState.discard.push(aiAce);
+            log(ai.name + ' played Reprieve (Ace): skipped the Haunting phase.');
+            burn = 0;
+        }
+        if (ai.class && ai.class.name === 'THE VESSEL' && burn > 0) burn = Math.max(0, burn - 1);
+        for (var i = 0; i < burn; i++) {
+            if (ai.candle.length) { gameState.lastDiscardByPlayerId = ai.id; gameState.discard.push(ai.candle.shift()); }
+        }
+        if (burn > 0) log('AI Burned ' + burn + ' card' + (burn === 1 ? '' : 's') + '. Candle: ' + ai.candle.length);
+        if (burn > 0 && ai.class && ai.class.name === 'THE VOODOO DOLL' && ai.voodooSuits) {
+            for (var v = 0; v < ai.shadow.length; v++) {
+                var g = ai.shadow[v];
+                if (g.isWall || !g.s || ai.voodooSuits.indexOf(g.s) < 0 || g.hauntedBy == null) continue;
+                var haunter = gameState.players[g.hauntedBy];
+                if (!haunter || haunter.isDead) continue;
+                if (burnOneFromCandle(haunter)) {
+                    log(haunter.name + ' (Voodoo reflection) Burned 1.');
+                }
+            }
+        }
+        if (ai.candle.length) {
+            ai.hand.push(ai.candle.shift());
+            gameState.turnPhase = 'ACTION';
+        } else {
+            if (gameState.darkMode) {
+                if (handleDeath(ai)) return;
+                endTurn();
+                return;
+            }
+        }
+        updateUI();
+        aiTimer = simSchedule(function () { runAIActionPhase(ai); }, 1000);
     }
 
     function startAITurn(ai) {
-        if (gameState.isGameOver) return;
+        if (gameState.isGameOver || gameState.isPaused) return;
         if (aiTimer) { clearTimeout(aiTimer); aiTimer = null; }
         updateUI();
         gameState.lastDiscardByPlayerId = ai.id;
-        aiTimer = setTimeout(function () {
-            if (gameState.isGameOver) return;
-            gameState.lastDiscardByPlayerId = ai.id;
-            if (ai.class && ai.class.name === 'THE ORACLE' && ai.candle.length > 0) {
-                if (Math.random() < 0.5) {
-                    var t = ai.candle.shift();
-                    ai.candle.push(t);
-                    log(ai.name + ' (THE ORACLE) put top card on bottom.');
-                }
-            }
-            var aiGhostCount = ai.shadow.filter(function (g) { return !g.isWall; }).length;
-            var burn = aiGhostCount;
-            var aiAceIdx = -1;
-            for (var aii = 0; aii < ai.hand.length; aii++) {
-                if (ai.hand[aii].r === 'A' && !ai.hand[aii].isFace) { aiAceIdx = aii; break; }
-            }
-            if (aiAceIdx >= 0 && burn > 0 && (ai.candle.length < burn || Math.random() < 0.35)) {
-                var aiAce = ai.hand.splice(aiAceIdx, 1)[0];
-                gameState.lastDiscardByPlayerId = ai.id;
-                gameState.discard.push(aiAce);
-                log(ai.name + ' played Reprieve (Ace): skipped the Haunting phase.');
-                burn = 0;
-            }
-            if (ai.class && ai.class.name === 'THE VESSEL' && burn > 0) burn = Math.max(0, burn - 1);
-            for (var i = 0; i < burn; i++) {
-                if (ai.candle.length) { gameState.lastDiscardByPlayerId = ai.id; gameState.discard.push(ai.candle.shift()); }
-            }
-            if (burn > 0) log('AI Burned ' + burn + ' card' + (burn === 1 ? '' : 's') + '. Candle: ' + ai.candle.length);
-            if (burn > 0 && ai.class && ai.class.name === 'THE VOODOO DOLL' && ai.voodooSuits) {
-                for (var v = 0; v < ai.shadow.length; v++) {
-                    var g = ai.shadow[v];
-                    if (g.isWall || !g.s || ai.voodooSuits.indexOf(g.s) < 0 || g.hauntedBy == null) continue;
-                    var haunter = gameState.players[g.hauntedBy];
-                    if (!haunter || haunter.isDead) continue;
-                    if (burnOneFromCandle(haunter)) {
-                        log(haunter.name + ' (Voodoo reflection) Burned 1.');
-                    }
-                }
-            }
-            if (ai.candle.length) {
-                ai.hand.push(ai.candle.shift());
-                gameState.turnPhase = 'ACTION';
-            } else {
-                if (gameState.darkMode) {
-                    if (handleDeath(ai)) return;
-                    endTurn();
-                    return;
-                }
-            }
-            updateUI();
-            aiTimer = setTimeout(function () {
-                if (gameState.isGameOver) return;
-                if (ai.class && ai.class.name === 'THE GRIMOIRE OF REJECTION' && !ai.grimoirePageAddedThisTurn) {
-                    var aiGrPages = ensureGrimoirePages(ai);
-                    if (aiGrPages.length < 3 && ai.hand.length > 2 && Math.random() < 0.35) {
-                        var tuckIdx = Math.floor(Math.random() * ai.hand.length);
-                        aiGrPages.push(ai.hand.splice(tuckIdx, 1)[0]);
-                        ai.grimoirePageAddedThisTurn = true;
-                        log(ai.name + ' placed a page in THE GRIMOIRE OF REJECTION (' + aiGrPages.length + '/3).');
-                    }
-                }
-                var targets = getNeighbours(ai);
-                var t = Math.random() > 0.5 ? targets.left : targets.right;
-                var numCard = null;
-                for (var h = 0; h < ai.hand.length; h++) {
-                    if (!ai.hand[h].isFace && ai.hand[h].r !== 'JOKER') {
-                        numCard = ai.hand[h];
-                        break;
-                    }
-                }
-                if (numCard && t) {
-                    var numCardIdx = ai.hand.indexOf(numCard);
-                    gameState.pendingAction = 'haunt';
-                    gameState.pendingCardIdx = numCardIdx;
-                    doHauntWithTarget(t);
-                    updateUI();
-                } else {
-                    log('AI Passed');
-                    finishAction();
-                }
-            }, 1000);
-        }, 500);
+        aiTimer = simSchedule(function () { runAIHauntingAndDraw(ai); }, 500);
     }
 
     function goBackToSetup() {
@@ -4521,6 +4977,7 @@
     }
 
     window.resetGameSetup = resetGameSetup;
+    window.confirmQuitReset = confirmQuitReset;
     window.setViewAllPlayers = setViewAllPlayers;
     window.setRitualTheme = setRitualTheme;
     window.addPlayerSlot = addPlayerSlot;
@@ -4556,6 +5013,7 @@
     window.closeCheatsheet = closeCheatsheet;
     window.showAlertModal = showAlertModal;
     window.closeAlertModal = closeAlertModal;
+    window.closeAlertModalCancel = closeAlertModalCancel;
     window.showClassDesc = showClassDesc;
     window.closeClassDesc = closeClassDesc;
     window.ghostSelected = ghostSelected;
@@ -4565,11 +5023,15 @@
     window.resolveGrimoireRejection = resolveGrimoireRejection;
     window.goBackToSetup = goBackToSetup;
     window.showManual = showManual;
+    window.navigateToManualFromExit = navigateToManualFromExit;
+    window.navigateToHomeFromExit = navigateToHomeFromExit;
     window.gameState = gameState;
     window.getSerializedState = getSerializedState;
     window.applyState = applyState;
     window.pickClasses = pickClasses;
     window.doDeckAndDealAndPickClasses = doDeckAndDealAndPickClasses;
+    window.runSimulations = runSimulations;
+    window.runSingleSimGame = runSingleSimGame;
     function closeActionsModal() {
         var m = document.getElementById('actions-modal');
         if (m) m.style.display = 'none';
