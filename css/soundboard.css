@@ -1,0 +1,220 @@
+/* Physical-table soundboard - large touch pads */
+
+body.soundboard-page {
+    margin: 0;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    background:
+        radial-gradient(ellipse 80% 50% at 50% -10%, rgba(201, 77, 40, 0.12), transparent 55%),
+        var(--bg-color);
+    color: var(--text-color);
+    font-family: var(--font-body);
+    box-sizing: border-box;
+}
+
+.soundboard-page .site-nav {
+    background: var(--bg-elevated);
+    padding: 12px 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 24px;
+    border-bottom: 2px solid var(--accent-color);
+    flex-shrink: 0;
+}
+
+.soundboard-page .site-nav a {
+    color: var(--text-color);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: color var(--transition-fast);
+}
+
+.soundboard-page .site-nav a:hover {
+    color: var(--accent-color);
+}
+
+.soundboard-page .play-btn-nav {
+    background: var(--accent-color);
+    color: #fff !important;
+    padding: 8px 20px;
+    border-radius: var(--radius-sm);
+}
+
+.soundboard-page .play-btn-nav:hover {
+    filter: brightness(1.1);
+}
+
+.soundboard-page .site-nav-links a[aria-current="page"] {
+    color: var(--highlight);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.soundboard-main {
+    max-width: 720px;
+    margin: 0 auto;
+    padding:
+        max(12px, var(--safe-top))
+        max(16px, var(--safe-right))
+        max(28px, calc(16px + var(--safe-bottom)))
+        max(16px, var(--safe-left));
+}
+
+.soundboard-header h1 {
+    margin: 0 0 0.35rem;
+    font-family: var(--font-heading);
+    font-size: clamp(1.75rem, 6vw, 2.4rem);
+    font-weight: 700;
+    color: var(--accent-color);
+    text-align: center;
+}
+
+.soundboard-lead {
+    margin: 0 auto 1.25rem;
+    max-width: 36em;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    line-height: 1.45;
+}
+
+.soundboard-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 10px 14px;
+    margin-bottom: 0.5rem;
+    padding: 12px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+}
+
+.soundboard-vol {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1 1 180px;
+    min-width: 0;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.soundboard-vol input[type="range"] {
+    flex: 1;
+    min-width: 80px;
+    accent-color: var(--accent-color);
+}
+
+.soundboard-vol #soundboard-volume-value {
+    min-width: 1.75em;
+    text-align: right;
+    color: var(--text-color);
+    font-variant-numeric: tabular-nums;
+}
+
+.soundboard-tool-btn {
+    min-height: var(--touch-min);
+    padding: 0.5rem 0.9rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    background: var(--bg-card);
+    color: var(--text-color);
+    font-family: var(--font-body);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.soundboard-tool-btn[aria-pressed="true"] {
+    border-color: var(--accent-color);
+    color: var(--highlight);
+    box-shadow: 0 0 0 1px var(--accent-glow);
+}
+
+.soundboard-hint {
+    margin: 0.65rem 0 1rem;
+    text-align: center;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    min-height: 1.2em;
+}
+
+.soundboard-board {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.soundboard-group h2 {
+    margin: 0 0 0.55rem;
+    font-family: var(--font-heading);
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: var(--class-color);
+    letter-spacing: 0.02em;
+}
+
+.soundboard-pads {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+@media (min-width: 520px) {
+    .soundboard-pads {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+.soundboard-pad {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 0.2rem;
+    min-height: 4.5rem;
+    padding: 0.75rem 0.85rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background: linear-gradient(165deg, var(--bg-card) 0%, #0a080c 100%);
+    color: var(--text-color);
+    font-family: var(--font-body);
+    text-align: left;
+    cursor: pointer;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast), transform 0.08s ease;
+    user-select: none;
+}
+
+.soundboard-pad:active,
+.soundboard-pad.is-active {
+    transform: scale(0.97);
+    border-color: var(--accent-color);
+    box-shadow: 0 0 18px var(--accent-glow);
+}
+
+.soundboard-pad-label {
+    font-size: 1.05rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.soundboard-pad-hint {
+    font-size: 0.72rem;
+    line-height: 1.3;
+    color: var(--text-muted);
+}
+
+.soundboard-pad[data-group="Ritual"] .soundboard-pad-label { color: var(--magic-color); }
+.soundboard-pad[data-group="Haunting"] .soundboard-pad-label { color: var(--flame-mid); }
+.soundboard-pad[data-group="Grimoire"] .soundboard-pad-label { color: var(--panic-color); }
+.soundboard-pad[data-group="Outcomes"] .soundboard-pad-label { color: var(--ice-color); }
+

@@ -64,15 +64,52 @@
             case 'draw': playTone(320, 0.08, 'sine'); break;
             case 'burn': playTone(200, 0.12, 'triangle'); break;
             case 'haunt': playTone(180, 0.1, 'sawtooth'); setTimeout(function () { playTone(140, 0.15, 'triangle'); }, 80); break;
-            case 'banish': case 'cleanse': playTone(400, 0.08, 'sine'); playTone(520, 0.12, 'sine'); break;
+            case 'banish': playTone(400, 0.08, 'sine'); playTone(520, 0.12, 'sine'); break;
+            case 'cleanse': playTone(440, 0.1, 'sine'); setTimeout(function () { playTone(660, 0.14, 'sine'); }, 70); break;
+            case 'purge': playTone(220, 0.12, 'triangle'); setTimeout(function () { playTone(160, 0.18, 'sawtooth'); }, 90); break;
             case 'salt': playTone(600, 0.06, 'sine'); playTone(800, 0.08, 'sine'); break;
+            case 'seance': playTone(360, 0.1, 'sine'); setTimeout(function () { playTone(480, 0.12, 'triangle'); }, 100); break;
+            case 'cast': playTone(500, 0.08, 'triangle'); setTimeout(function () { playTone(700, 0.1, 'sine'); }, 60); break;
+            case 'flicker': playTone(420, 0.05, 'sine'); setTimeout(function () { playTone(380, 0.05, 'sine'); }, 50); setTimeout(function () { playTone(450, 0.08, 'sine'); }, 100); break;
+            case 'panic': playTone(240, 0.08, 'sawtooth'); setTimeout(function () { playTone(190, 0.14, 'triangle'); }, 70); break;
+            case 'boo': playTone(120, 0.2, 'sawtooth'); setTimeout(function () { playTone(90, 0.25, 'sawtooth'); }, 120); break;
             case 'turn': playTone(280, 0.06, 'sine'); break;
             case 'win': playTone(523, 0.15, 'sine'); setTimeout(function () { playTone(659, 0.15, 'sine'); }, 120); setTimeout(function () { playTone(784, 0.2, 'sine'); }, 240); break;
             case 'eliminated': playTone(150, 0.25, 'sawtooth'); break;
+            case 'consumed': playTone(130, 0.2, 'triangle'); setTimeout(function () { playTone(90, 0.3, 'sawtooth'); }, 150); break;
+            case 'possession': playTone(200, 0.1, 'sawtooth'); setTimeout(function () { playTone(160, 0.12, 'sawtooth'); }, 80); setTimeout(function () { playTone(110, 0.22, 'triangle'); }, 180); break;
             case 'click': playTone(400, 0.04, 'sine'); break;
             default: playTone(300, 0.06, 'sine');
         }
     }
+
+    /** Pads for the physical-table soundboard (and filename keys under audio/). */
+    window.SOUNDBOARD_PADS = [
+        { id: 'haunt', label: 'Haunt', group: 'Ritual', hint: 'Number card into a neighbour\'s Shadow' },
+        { id: 'banish', label: 'Banish', group: 'Ritual', hint: 'Remove a ghost (no Siphon)' },
+        { id: 'cleanse', label: 'Cleanse / Siphon', group: 'Ritual', hint: 'Siphon heal to Candle' },
+        { id: 'purge', label: 'Purge', group: 'Ritual', hint: 'King - all ghosts to The Dark' },
+        { id: 'salt', label: 'Salt', group: 'Ritual', hint: 'Cancel an action' },
+        { id: 'seance', label: 'Séance', group: 'Ritual', hint: 'Pair → heal 4 from The Dark' },
+        { id: 'cast', label: 'Cast / Summon', group: 'Ritual', hint: 'Play a Grimoire effect' },
+        { id: 'flicker', label: 'Flicker', group: 'Ritual', hint: 'Shuffle hand, draw 3' },
+        { id: 'panic', label: 'Panic', group: 'Haunting', hint: 'Flip Candle vs a ghost' },
+        { id: 'burn', label: 'Burn', group: 'Haunting', hint: 'Candle card to The Dark' },
+        { id: 'draw', label: 'Draw', group: 'Haunting', hint: 'Draw from Candle' },
+        { id: 'turn', label: 'Turn start', group: 'Haunting', hint: 'Next player\'s turn' },
+        { id: 'boo', label: 'BOO!', group: 'Grimoire', hint: 'Joker attack' },
+        { id: 'win', label: 'Victory', group: 'Outcomes', hint: 'Last Lit wins' },
+        { id: 'eliminated', label: 'Eliminated', group: 'Outcomes', hint: 'Player out of the circle' },
+        { id: 'consumed', label: 'Consumed', group: 'Outcomes', hint: 'Empty Candle at Draw / Am I Alive?' },
+        { id: 'possession', label: 'Possession', group: 'Outcomes', hint: 'Too many same-suit ghosts' }
+    ];
+
+    window.unlockAudio = function () {
+        var ctx = getCtx();
+        if (ctx && ctx.state === 'suspended') {
+            ctx.resume().catch(function () {});
+        }
+    };
 
     var SFX_EXTS = ['.wav', '.mp3', '.ogg'];
     function nextSFXExt(ext) {
@@ -106,7 +143,8 @@
     window.playSFX = function (type) {
         loadSettings();
         if (muted || simMuted || sfxVolume <= 0) return;
-        var baseName = (type === 'cleanse' ? 'cleanse' : type === 'banish' ? 'banish' : type);
+        window.unlockAudio();
+        var baseName = type || 'click';
         var fallbackDone = false;
         var fallbackOnce = function () {
             if (fallbackDone) return;
@@ -171,6 +209,16 @@
     };
 
     window.getMuted = function () { loadSettings(); return muted; };
+    window.setMuted = function (value) {
+        loadSettings();
+        muted = !!value;
+        saveSettings();
+        if (muted) {
+            if (musicEl) { musicEl.pause(); musicEl.currentTime = 0; }
+            musicStarted = false;
+        }
+        updateMuteButton();
+    };
     window.toggleMute = function () {
         loadSettings();
         muted = !muted;

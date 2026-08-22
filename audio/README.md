@@ -21,6 +21,8 @@ If present, these replace the built-in synth tones. Use **MP3** or **OGG**; shor
 | `flicker.mp3` | Flicker - shuffle hand, draw 3 |
 | `panic.mp3`  | Panic - flip top of Candle vs Ghost |
 | `turn.mp3`  | Start of turn               |
+| `purge.mp3` | Purge (King) - all ghosts to The Dark |
+| `boo.mp3`   | Joker BOO!                     |
 
 ### Outcomes & elimination
 
@@ -36,6 +38,8 @@ If present, these replace the built-in synth tones. Use **MP3** or **OGG**; shor
 | File        | When it plays        |
 |------------|----------------------|
 | `click.mp3`| UI click             |
+
+The physical **Soundboard** page (`soundboard.html`) exposes every action/outcome pad above (except UI click). Missing files fall back to built-in synth tones.
 
 ## Music (optional)
 

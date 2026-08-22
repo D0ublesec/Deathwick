@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Soundboard - Deathwick</title>
+    <meta name="description" content="Tap sound effects during a physical Deathwick game - Haunt, Banish, Panic, Possession, and more.">
+    <link rel="canonical" href="https://www.deathwick.com/soundboard.html">
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" sizes="180x180" href="images/logo/favicon-180x180.png">
+    <link rel="manifest" href="site.webmanifest">
+    <meta name="theme-color" content="#12100e">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Deathwick">
+    <meta property="og:title" content="Deathwick Soundboard">
+    <meta property="og:description" content="Tap sound effects during a physical Deathwick game.">
+    <meta property="og:url" content="https://www.deathwick.com/soundboard.html">
+    <meta property="og:image" content="https://www.deathwick.com/images/logo/og-image.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,500&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/site.css">
+    <link rel="stylesheet" href="css/soundboard.css">
+</head>
+<body class="soundboard-page">
+
+    <nav class="site-nav">
+        <a href="index.html" class="site-logo-link">
+            <img src="images/logo/deathwick_logo_dark.png" alt="Deathwick" class="site-logo site-logo-nav" width="180" height="60">
+        </a>
+        <div class="site-nav-links">
+            <a href="index.html">Home</a>
+            <a href="manual.html">Manual</a>
+            <a href="soundboard.html" aria-current="page">Soundboard</a>
+            <a href="plans.html">Plans</a>
+            <a class="play-btn-nav" href="game.html">▶ PLAY GAME</a>
+            <a href="attribution.html">Attribution</a>
+        </div>
+    </nav>
+
+    <main class="soundboard-main">
+        <header class="soundboard-header">
+            <h1>Soundboard</h1>
+            <p class="soundboard-lead">For physical games - tap when the event happens at the table. Uses the same sounds as the digital game (bundled files when present, synth tones otherwise).</p>
+        </header>
+
+        <div class="soundboard-toolbar" role="group" aria-label="Soundboard controls">
+            <label class="soundboard-vol">
+                <span>Volume</span>
+                <input type="range" id="soundboard-volume" min="0" max="100" value="80" aria-valuemin="0" aria-valuemax="100">
+                <span id="soundboard-volume-value" aria-live="polite">80</span>
+            </label>
+            <button type="button" class="soundboard-tool-btn" id="soundboard-mute" aria-pressed="false">Mute</button>
+            <button type="button" class="soundboard-tool-btn" id="soundboard-wake" aria-pressed="false" title="Keep the screen awake while this page is open">Keep awake</button>
+        </div>
+        <p class="soundboard-hint" id="soundboard-status">Tap any pad to unlock audio on your phone.</p>
+
+        <div id="soundboard-board" class="soundboard-board" aria-label="Event sound pads"></div>
+    </main>
+
+    <script src="js/audio.js"></script>
+    <script src="js/soundboard.js"></script>
+</body>
+</html>
