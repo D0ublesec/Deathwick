@@ -13,13 +13,13 @@ If present, these replace the built-in synth tones. Use **MP3** or **OGG**; shor
 | `draw.mp3`  | Drawing a card             |
 | `burn.mp3`  | Burning cards (into The Dark) |
 | `haunt.mp3` | Haunt action (number card to neighbour’s Shadow) |
-| `banish.mp3`| Banish — banishing a Ghost (no Siphon) |
-| `cleanse.mp3` | Cleanse (7) / Siphon — banishing a Ghost with rank match |
+| `banish.mp3`| Banish - banishing a Ghost (no Siphon) |
+| `cleanse.mp3` | Cleanse (7) / Siphon - banishing a Ghost with rank match |
 | `salt.mp3`  | Using Salt (interrupt)     |
-| `seance.mp3`| Séance — discarding a pair, taking bottom 4 from The Dark |
+| `seance.mp3`| Séance - discarding a pair, taking bottom 4 from The Dark |
 | `cast.mp3`  | Cast / Summon (face card or Joker effect) |
-| `flicker.mp3` | Flicker — shuffle hand, draw 3 |
-| `panic.mp3`  | Panic — flip top of Candle vs Ghost |
+| `flicker.mp3` | Flicker - shuffle hand, draw 3 |
+| `panic.mp3`  | Panic - flip top of Candle vs Ghost |
 | `turn.mp3`  | Start of turn               |
 
 ### Outcomes & elimination
@@ -39,7 +39,7 @@ If present, these replace the built-in synth tones. Use **MP3** or **OGG**; shor
 
 ## Music (optional)
 
-- `music.mp3` or `music.ogg` — background music (hook this up in settings when ready).
+- `music.mp3` or `music.ogg` - background music (hook this up in settings when ready).
 
 ## Copyright
 

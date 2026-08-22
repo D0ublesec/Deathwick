@@ -4,7 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Deathwick - Play</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect fill='%231a1612' stroke='%23666' width='20' height='28' x='6' y='2' rx='2'/><text x='16' y='20' font-size='12' fill='%23b8b4ac' text-anchor='middle' font-family='sans-serif'>F</text></svg>">
+    <meta name="description" content="Play Deathwick pass-and-play: set up your ritual circle on one device, pick classes, and survive the Haunting. Up to 8 players per circle.">
+    <link rel="canonical" href="https://www.deathwick.com/game.html">
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" sizes="180x180" href="images/logo/favicon-180x180.png">
+    <link rel="manifest" href="site.webmanifest">
+    <meta name="theme-color" content="#12100e">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Deathwick">
+    <meta property="og:title" content="Play Deathwick">
+    <meta property="og:description" content="Play Deathwick pass-and-play on one device: set up your ritual circle, pick classes, and survive the Haunting.">
+    <meta property="og:url" content="https://www.deathwick.com/game.html">
+    <meta property="og:image" content="https://www.deathwick.com/images/logo/og-image.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://www.deathwick.com/images/logo/og-image.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,500&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet">
@@ -38,10 +51,11 @@
     <div id="setup-modal" class="modal" style="display:flex;">
         <div class="modal-content">
             <h2 style="color:var(--accent-color)">SETUP RITUAL</h2>
+            <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:8px; text-align:center;">Pass-and-play on <strong>one device</strong> (not online multiplayer). First time? Read <a href="manual.html#start-here" target="_blank" rel="noopener" style="color:var(--accent-color);">Start here</a>, <a href="manual.html#turn" target="_blank" rel="noopener" style="color:var(--accent-color);">turn order</a>, or tap <strong>RULES</strong> above during play.</p>
             <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:14px; text-align:center;">Empty Candle eliminates you only at <strong>The Draw</strong> or <strong>Am I Alive?</strong> <a href="manual.html#ritual-type" target="_blank" rel="noopener" style="color:var(--accent-color);">Manual → Consumed by the Darkness</a></p>
             <div id="local-setup">
                 <p style="margin-bottom:6px; font-size:0.9rem;"><strong>Number of players:</strong> <span id="player-count-buttons"></span> <span style="font-size:0.8rem; color:var(--text-muted);">(recommended max 8 per circle)</span></p>
-                <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:6px;">Classes in the random draw: <strong>2 players</strong> = 29; <strong>3 players</strong> = 35; <strong>4+</strong> = all 38. At the table you can play with more than 8 in one circle if you wish; from <strong>9+</strong> we recommend splitting—see <a href="manual.html#large-groups" target="_blank" rel="noopener" style="color:var(--accent-color);">Large groups &amp; Final Ritual</a>.</p>
+                <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:6px;">Classes in the random draw: <strong>2 players</strong> = 29; <strong>3 players</strong> = 35; <strong>4+</strong> = all 38. At the table you can play with more than 8 in one circle if you wish; from <strong>9+</strong> we recommend splitting - see <a href="manual.html#large-groups" target="_blank" rel="noopener" style="color:var(--accent-color);">Large groups &amp; Final Ritual</a>.</p>
                 <div id="player-setup-list" style="margin-bottom:10px;"></div>
                 <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;">
                     <button type="button" class="game-btn" onclick="addPlayerSlot()">+ ADD PLAYER</button>
@@ -59,6 +73,7 @@
     <div id="class-modal" class="modal">
         <div class="modal-content">
             <h2 id="class-select-title">CHOOSE CLASS</h2>
+            <p id="class-witness-notice" class="class-witness-notice" hidden><strong>The Witness</strong> cannot win. If only two players remain and one is The Witness, both lose.</p>
             <div id="class-options" style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;"></div>
             <button type="button" class="game-btn" onclick="goBackToSetup()" style="margin-top:20px;">⬅ BACK</button>
         </div>
@@ -72,7 +87,7 @@
             <div id="first-player-step2" style="display:none; margin-top:12px;">
                 <p id="first-player-step2-label" style="margin-bottom:10px; color:var(--text-muted); font-size:0.9rem;"></p>
             </div>
-            <p style="font-size:0.85rem; color:var(--text-muted); margin-top:14px;">Online: agree at the table, then select the winner and their choice—or use Random.</p>
+            <p style="font-size:0.85rem; color:var(--text-muted); margin-top:14px;">Online: agree at the table, then select the winner and their choice - or use Random.</p>
             <button type="button" class="game-btn" style="margin-top:12px;" onclick="chooseFirstPlayerRandom()">RANDOM</button>
         </div>
     </div>
@@ -81,7 +96,7 @@
         <div class="modal-content" style="border-color:var(--accent-color);">
             <h2 style="color:var(--accent-color)">THE HAUNTING</h2>
             <p style="margin-bottom:6px;">Ghosts in your Shadow. Choose before you Burn:</p>
-            <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:16px;"><strong>Endure</strong> — Burn for each ghost. <strong>Panic</strong> — flip your top Candle card against one ghost, then Burn for any left.</p>
+            <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:16px;"><strong>Endure</strong> - Burn for each ghost. <strong>Panic</strong> - flip top Candle vs one ghost: equal/higher <strong>strength</strong> succeeds (<strong>suits ignored</strong>); both go to The Dark - <strong>no Siphon</strong> unless you flip a Joker. Then Burn for any left.</p>
             <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
                 <button type="button" class="game-btn" style="background:var(--bg-elevated); color:var(--text-muted);" onclick="resolveHauntingPanic(false)">Endure</button>
                 <button type="button" class="game-btn panic" onclick="resolveHauntingPanic(true)">Panic</button>
@@ -300,6 +315,7 @@
     <div id="actions-modal" class="modal">
         <div class="modal-content">
             <h2 style="color:var(--accent-color)">Actions</h2>
+            <p class="actions-modal-rank-suit-note">Rank &amp; suit: <strong>Panic</strong> = strength only; success → both to The Dark (no Siphon except Joker). <strong>Banish</strong> = value, then suit tier on ties; Siphon on <em>rank</em>. <strong>Cleanse (7)</strong> = value check; Siphon on <em>suit</em> only. <strong>Purge (K)</strong> = all ghosts to The Dark (not Banish/Cleanse); <strong>no Siphon</strong>.</p>
             <div class="actions-modal-grid">
                 <button type="button" class="game-btn" id="modal-btn-haunt" onclick="actionFromModal(actionHaunt)">HAUNT</button>
                 <button type="button" class="game-btn" id="modal-btn-banish" onclick="actionFromModal(actionBanish)">BANISH</button>

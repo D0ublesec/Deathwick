@@ -4,7 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Manual - Deathwick</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect fill='%23666' width='8' height='20' x='12' y='10' rx='2'/><ellipse fill='%23f90' cx='16' cy='8' rx='4' ry='6'/><ellipse fill='%23fc0' cx='16' cy='8' rx='2' ry='4'/></svg>">
+    <meta name="description" content="Official rules for Deathwick: turn order, the Grimoire, classes, Haunting, Banish, and winning the ritual.">
+    <link rel="canonical" href="https://www.deathwick.com/manual.html">
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" sizes="180x180" href="images/logo/favicon-180x180.png">
+    <link rel="manifest" href="site.webmanifest">
+    <meta name="theme-color" content="#12100e">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Deathwick">
+    <meta property="og:title" content="Deathwick Manual">
+    <meta property="og:description" content="Official rules for Deathwick: turn order, the Grimoire, classes, Haunting, Banish, and winning the ritual.">
+    <meta property="og:url" content="https://www.deathwick.com/manual.html">
+    <meta property="og:image" content="https://www.deathwick.com/images/logo/og-image.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://www.deathwick.com/images/logo/og-image.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,500&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet">
@@ -37,6 +50,7 @@
         </header>
 
         <div class="manual-section-controls">
+            <a href="#start-here" class="tool-btn manual-jump-btn">Start here</a>
             <a href="#class-selection" class="tool-btn manual-jump-btn">Class selection</a>
             <div class="manual-section-controls-actions">
                 <button type="button" class="tool-btn" id="manual-expand-all">Expand all</button>
@@ -47,22 +61,121 @@
         <nav class="manual-toc" aria-label="Manual contents">
             <h2 class="manual-toc-title">Contents</h2>
             <ol class="manual-toc-list">
+                <li><a href="#start-here">Start here - goal &amp; first game</a></li>
+                <li><a href="#rank-suit">Rank &amp; suit</a></li>
                 <li><a href="#setup">1. The Setup</a></li>
                 <li><a href="#class-selection">Class selection</a></li>
                 <li><a href="#board">2. The Ritual Circle</a></li>
                 <li><a href="#turn">3. The Passage of Time</a></li>
                 <li><a href="#grimoire">4. The Grimoire</a></li>
                 <li><a href="#classes">5. The Classes</a></li>
-                <li><a href="#faq">6. FAQ &amp; Edge Cases</a></li>
-                <li><a href="#large-groups">Large groups &amp; Final Ritual</a></li>
+                <li><a href="#faq">6. FAQ &amp; Edge Cases</a> <span class="manual-toc-note">(look-up)</span></li>
+                <li><a href="#track-haunter">Optional: haunter markers</a></li>
+                <li><a href="#large-groups">Advanced: large groups &amp; Final Ritual</a></li>
                 <li><a href="#full-deck">Full deck</a></li>
             </ol>
         </nav>
 
+        <section id="start-here" class="manual-start-here">
+            <h2>Start here</h2>
+
+            <h3 id="goal">Goal - how to win (and lose)</h3>
+            <ul class="setup-list">
+                <li><strong>Win:</strong> Be the last player still <strong>Lit</strong> (your Candle has cards left and you are not Possessed).</li>
+                <li><strong>Lose - Consumed:</strong> Your Candle is empty at <strong>The Draw</strong> or <strong>Am I Alive?</strong> (see <a href="#ritual-type">Consumed by the Darkness</a>). Running out mid-turn does <em>not</em> eliminate you on the spot.</li>
+                <li><strong>Lose - Possessed:</strong> At the <strong>end of your turn</strong>, you have <strong>3+ ghosts of the same suit</strong> in your Shadow (<strong>4+</strong> for <strong>The Sufferer</strong>). Ghosts added on other players’ turns wait until your turn ends.</li>
+            </ul>
+
+            <h3 id="turn-summary">Turn summary</h3>
+            <ol class="setup-list manual-turn-summary">
+                <li><strong>Haunting</strong> - Burn 1 per ghost (or play <strong>Ace Reprieve</strong> first to skip Burning; see <a href="#turn">The Passage of Time</a>).</li>
+                <li><strong>The Draw</strong> - Draw 1 from your Candle. If it is empty, you are <strong>Consumed</strong>.</li>
+                <li><strong>The Ritual</strong> - Exactly one action: Haunt, Banish, Cast/Summon, Flicker, Séance, or Abstain. Some classes also offer an <strong>Ability</strong> that does not use this action.</li>
+                <li><strong>The Burden</strong> - Discard to hand limit (usually 5).</li>
+                <li><strong>Am I Alive?</strong> - Empty Candle check (<a href="#am-i-alive">Consumed</a>) or <a href="#possession-rule">Possession</a>.</li>
+            </ol>
+
+            <h3 id="first-game">Your first game</h3>
+            <ol class="setup-list">
+                <li>Read <a href="#goal">Goal</a>, <a href="#rank-suit">Rank &amp; suit</a> (next), and <a href="#turn-summary">Turn summary</a> above.</li>
+                <li>Skim <a href="#turn">The Passage of Time</a> and the <a href="#quick-ref">Grimoire quick reference</a>.</li>
+                <li>Set up with <a href="#setup">The Setup</a> (standard decks + Jokers; use this site for class picks if you like).</li>
+                <li>Each player chooses one class via <a href="#class-selection">Class selection</a> before the first turn.</li>
+                <li>Save for later (only if needed): <a href="#track-haunter">haunter markers</a>, <a href="#faq">FAQ &amp; edge cases</a>, and <a href="#large-groups">large groups</a>.</li>
+            </ol>
+
+            <h3 id="play-modes">Physical vs digital</h3>
+            <ul class="setup-list">
+                <li><strong>Physical:</strong> Any standard playing card deck(s) plus enough Jokers (see <a href="#setup">Supplies</a>). Deathwick art and reference cards on this site are optional - you only need the rules and something to pick classes (this manual’s selector, or the digital game at the table).</li>
+                <li><strong>Digital (<a href="game.html">Play game</a>):</strong> Pass-and-play on <strong>one device</strong> - not online multiplayer. Up to <strong>8 players</strong> per circle; pass the device when prompted. Use <strong>RULES</strong> in-game for a quick refresher.</li>
+            </ul>
+        </section>
+
+        <section id="rank-suit" class="manual-rank-suit">
+            <h2>Rank &amp; suit (when they matter)</h2>
+            <p>When cards fight ghosts, <strong>rank and suit do not always both matter</strong>. Read this before your first game - especially <strong>Banish vs Cleanse vs Purge</strong>.</p>
+
+            <h3 id="rank-suit-reference">Reference</h3>
+            <ul class="setup-list">
+                <li><strong>Rank values</strong> (Panic strength and Banish value): Ace = <strong>1</strong>; numbered cards use the printed rank; Jack, Queen, and King = <strong>10</strong>.</li>
+                <li><strong>Suit tier</strong> (Banish ties only - never Panic): <span class="suit-spades">♠</span> &gt; <span class="suit-hearts">♥</span> &gt; <span class="suit-clubs">♣</span> &gt; <span class="suit-diamonds">♦</span>.</li>
+                <li><strong>Siphon</strong> = ghost to the <strong>bottom of your Candle</strong> (heal) instead of The Dark. <span class="suit-spades">♠</span> ghosts can <strong>never</strong> be Siphoned. <strong>Purge never Siphons.</strong></li>
+            </ul>
+
+            <h3 id="banish-vs-cleanse">Banish vs Cleanse vs Purge (do not mix these up)</h3>
+            <p><strong>Banish</strong> forces one ghost out by power (rank). <strong>Cleanse</strong> washes one ghost clean by suit (the 7). <strong>Purge (King)</strong> sends every ghost to The Dark - it is <em>neither</em> Banishing nor Cleansing, and <strong>nothing is Siphoned</strong>.</p>
+            <ul class="setup-list">
+                <li><strong>Banish (any card from hand onto one ghost):</strong> Need equal or higher <strong>value</strong>; on a value tie, use <strong>suit tier</strong>. If <strong>ranks match</strong> (and not ♠), you <strong>Siphon</strong> - you named it and stole its essence. That is Banishing, even if the card you played is a 7.</li>
+                <li><strong>Cleanse (Cast the 7):</strong> Still need the same value check to remove the ghost. Cleanse’s gift is <strong>suit only</strong>: if your 7’s <strong>suit matches</strong> the ghost (and not ♠), you <strong>Siphon</strong> - you cleansed it back into the Candle. Cleanse never cares about rank for its Siphon. If you Siphon because ranks match, you are Banishing, not Cleansing.</li>
+                <li><strong>Purge (Summon the King):</strong> No value check. <strong>Purge all</strong> ghosts in your Shadow to The Dark. Not Banish, not Cleanse, and <strong>cannot Siphon</strong> - even matching suits, 10s, and faces go to The Dark. The King clears the Shadow; it does not heal your Candle.</li>
+            </ul>
+
+            <div class="manual-ref-wrap">
+            <table class="manual-ref-table manual-rank-suit-table">
+                <thead>
+                    <tr>
+                        <th>Action</th>
+                        <th>What it is</th>
+                        <th>What matters</th>
+                        <th>On success</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Panic</strong></td>
+                        <td>Desperate Candle flip against one ghost before you Burn.</td>
+                        <td><strong>Strength only</strong> (see Reference). Suits never apply. Equal strength succeeds.</td>
+                        <td>Ghost and flipped card both to <strong>The Dark</strong>. <strong>No Siphon</strong> - even if ranks or suits match. <strong>Exception:</strong> flip a <strong>Joker</strong> → Siphon the ghost (unless ♠).</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Banish</strong></td>
+                        <td>Force one ghost out by power. Matching rank is Banishing.</td>
+                        <td>Equal or higher <strong>value</strong>. On a value tie, <strong>suit tier</strong> ♠ &gt; ♥ &gt; ♣ &gt; ♦.</td>
+                        <td>Ghost to The Dark, <strong>or Siphon</strong> only if <strong>ranks match</strong> (and not ♠).</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Cleanse (7)</strong></td>
+                        <td>Wash one ghost clean. Suit match is Cleansing; rank match is still Banishing.</td>
+                        <td>Same value check as Banish to remove it. Cleanse Siphon uses <strong>suit only</strong>.</td>
+                        <td>Ghost removed. Siphon if <strong>suits match</strong> (Cleanse) or if <strong>ranks match</strong> (Banish Siphon) - never ♠. You must still win the value check first.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Purge (K)</strong></td>
+                        <td>Wipe the Shadow. Neither Banish nor Cleanse.</td>
+                        <td>Removes <strong>all</strong> ghosts. No value check. <strong>No Siphon.</strong></td>
+                        <td>Every ghost (any rank or suit, including matching suits and faces) goes to <strong>The Dark</strong>. Nothing returns to your Candle.</td>
+                    </tr>
+                </tbody>
+            </table>
+            </div>
+            <p class="manual-timing-note" style="margin-top:0.75rem;"><strong>Short version:</strong> Panic = strength only, almost never Siphon. Banish Siphon = <em>rank</em>. Cleanse Siphon = <em>suit</em> (the 7 only). Purge (King) = all ghosts to The Dark, no Siphon, not Banish or Cleanse. If a 7 Siphons because ranks match, say “Banish,” not “Cleanse.”</p>
+        </section>
+
         <section id="setup">
             <h2>1. The Setup</h2>
+            <p class="manual-play-note">You can play with <strong>any standard deck(s)</strong> - Deathwick card art is optional. Use this manual (and the class selector below, or the browser game) for rules and class picks; printed class cards are not required.</p>
             <h3>The Supplies</h3>
-            <p><strong>Per ritual circle:</strong> Build one card pool for <strong>that circle only</strong>. Use <strong>1 standard deck (52 cards) for every 2 players</strong> in the circle, plus Jokers as below—the same math scales to any group size. We <strong>recommend up to 8 players</strong> per circle; with <strong>9 or more</strong> at the table, <strong>split into separate circles</strong> (each with its own pool and Dark—see <a href="#large-groups">Large groups &amp; Final Ritual</a>). You <em>can</em> run one larger circle if you prefer; the rules still work, but rounds get long. A <strong>Final Ritual</strong> uses a fresh pool sized for the Last Lit who advance, not the combined piles from every circle.</p>
+            <p><strong>Per ritual circle:</strong> Build one card pool for <strong>that circle only</strong>. Use <strong>1 standard deck (52 cards) for every 2 players</strong> in the circle, plus Jokers as below - the same math scales to any group size. We <strong>recommend up to 8 players</strong> per circle; with <strong>9 or more</strong> at the table, <strong>split into separate circles</strong> (each with its own pool and Dark - see <a href="#large-groups">Large groups &amp; Final Ritual</a>). You <em>can</em> run one larger circle if you prefer; the rules still work, but rounds get long. A <strong>Final Ritual</strong> uses a fresh pool sized for the Last Lit who advance, not the combined piles from every circle.</p>
             <ul class="setup-list">
                 <li><strong>Jokers in the pool</strong> (players in <em>this</em> circle):
                     <ul>
@@ -71,6 +184,7 @@
                         <li>5–6 players: 6 Jokers</li>
                         <li>7–8 players: 8 Jokers</li>
                     </ul>
+                    <p class="manual-inline-note" style="margin:0.5rem 0 0;">Most decks include only 1–2 Jokers. For larger circles, take extra Jokers from a second deck or use clearly marked spare cards.</p>
                 </li>
                 <li><strong>Decks</strong> (players in <em>this</em> circle):
                     <ul>
@@ -81,11 +195,11 @@
                     </ul>
                 </li>
                 <li><strong>The Shuffle:</strong> Shuffle that circle’s decks and Jokers together into one pool. Deal from it as in <strong>The Circle &amp; The Start</strong> below.</li>
-                <li><strong>Large gatherings:</strong> Repeat the same supplies math for <strong>each</strong> circle (e.g. 9 players → recommended split 5 + 4: the circle of 5 uses 3 decks and 6 Jokers; the circle of 4 uses 2 decks and 4 Jokers). You may also run all 9 at one table (5 decks, 10 Jokers)—see circle size below—but splitting from 9+ is usually better.</li>
-                <li><strong>Optional — haunter markers:</strong> A <strong>pile of small matching pieces per player</strong> (same colour beads, same coin type, etc.—one style per person, <strong>many pieces each</strong>). Needed only when <strong>The Voodoo Doll</strong>, <strong>The Clown</strong>, <strong>The Sealbinder</strong>, or <strong>The Plague</strong> is in the circle—or whenever you want left/right Shadow to stay clear after Mirror/Possess. See <a href="#track-haunter">Tracking who Haunted whom</a>.</li>
+                <li><strong>Large gatherings:</strong> Repeat the same supplies math for <strong>each</strong> circle (e.g. 9 players → recommended split 5 + 4: the circle of 5 uses 3 decks and 6 Jokers; the circle of 4 uses 2 decks and 4 Jokers). You may also run all 9 at one table (5 decks, 10 Jokers); see circle size below. Splitting from 9+ is usually better.</li>
+                <li><strong>Optional - haunter markers:</strong> A <strong>pile of small matching pieces per player</strong> (same colour beads, same coin type, etc. - one style per person, <strong>many pieces each</strong>). Needed only when <strong>The Voodoo Doll</strong>, <strong>The Clown</strong>, <strong>The Sealbinder</strong>, or <strong>The Plague</strong> is in the circle - or whenever you want left/right Shadow to stay clear after Mirror/Possess. See <a href="#track-haunter">Tracking who Haunted whom</a>.</li>
             </ul>
-            <h4>Card backs</h4>
-            <p>The game uses three card-back designs so you can tell decks apart:</p>
+            <h4>Card backs (optional)</h4>
+            <p>If you use Deathwick art or print reference sheets, three back designs help tell piles apart at the table. With plain decks, label piles or use separate discard areas instead:</p>
             <div class="reference-cards-wrap" style="display:flex; flex-wrap:wrap; gap:1.5rem; justify-content:center; align-items:flex-end; margin:1rem 0;">
                 <figure style="margin:0; text-align:center;">
                     <img class="reference-card-img" src="images/cards/backs/deathwick_card_back.png" alt="Playing card back" style="max-height:140px; width:auto;">
@@ -118,7 +232,7 @@
                     <ul style="margin-bottom:0;">
                         <li>Each ritual circle plays best with up to <strong>8 players</strong>, with <strong>one person acting at a time</strong> (clockwise).</li>
                         <li>With <strong>9 or more</strong> at the table, we recommend splitting into <strong>separate circles</strong> (each with its own Dark and turn order). See <a href="#large-groups">Large groups &amp; Final Ritual</a>.</li>
-                        <li>You <em>can</em> run a single circle with more than 8 if you prefer—nothing breaks—but rounds grow long and the table feels slower; splitting is usually better.</li>
+                        <li>You <em>can</em> run a single circle with more than 8 if you prefer (nothing breaks), but rounds grow long and the table feels slower; splitting is usually better.</li>
                     </ul>
                 </li>
             </ol>
@@ -129,7 +243,7 @@
                 <li><strong>The Draw:</strong> At the start of your turn, after the Haunting, you must Draw 1 from your Candle. If it is empty, you are Consumed.</li>
                 <li><strong>Am I Alive?</strong> At the end of your turn, after The Burden, if your Candle is empty, you are Consumed.</li>
             </ul>
-            <p>Running out of cards during the Haunting, mid-action, or on another player’s turn does <strong>not</strong> eliminate you on the spot—you are checked at Draw or at the end of your turn only.</p>
+            <p>Running out of cards during the Haunting, mid-action, or on another player’s turn does <strong>not</strong> eliminate you on the spot. You are checked at Draw or at the end of your turn only.</p>
 
             <h3 id="possession-rule">Possession</h3>
             <p>Possession works differently from an empty Candle. You are <strong>not</strong> eliminated the moment a ghost is added outside your turn. <strong>Possession is checked only at the end of your turn</strong> (after your one action and The Burden).</p>
@@ -142,16 +256,29 @@
         <section id="class-selection">
             <h2>Class Selection</h2>
             <h3 id="calling">The Calling</h3>
-            <p>Once turn order is set, each player chooses a class. <strong>Class selection follows turn order</strong>: the player who goes first picks first, then the next in order, and so on. Each is offered <strong>3 random classes</strong> and chooses one (the last to pick sees all previous choices—a minor advantage). The tiebreaker winner may choose to go first or last when setting turn order.</p>
-            <p style="border: 1px solid var(--accent-color); padding: 10px; border-radius: 4px; background: #1a1a22;"><strong>2-player games:</strong> These classes are excluded from the 2-player pool because they play poorly or feel unsatisfying with only 2 players: <strong>The Mime</strong>, <strong>The Watcher</strong>, <strong>The Plague</strong>, <strong>The Vulture</strong>, plus <strong>The Lich</strong> and <strong>The Gravedigger</strong> (death/neighbour effects need a larger circle). The digital game and the Random Selector below remove them automatically when you choose 2 players.</p>
-            <p style="border: 1px solid var(--accent-color); padding: 10px; border-radius: 4px; background: #1a1a22; margin-top:10px;"><strong>4+ players:</strong> <strong>The Occultist</strong> (Possess any player, not just neighbours), <strong>The Witness</strong> (win-condition pressure needs a larger circle), and <strong>The Funeral Bell</strong> (death ripple needs enough players at the table) require at least <strong>4 players</strong>. They are excluded from 2- and 3-player pools.</p>
-            <h4 style="margin-top:1em;">Classes available by group size</h4>
-            <table class="manual-ref-table" style="max-width:32em;">
+            <p><strong>Every player chooses exactly one class</strong> before the first turn. Once turn order is set, class selection follows that order: the player who goes first picks first, then the next in order, and so on. Each is offered <strong>3 random classes</strong> and chooses one (the last to pick sees all previous choices - a minor advantage). The tiebreaker winner may choose to go first or last when setting turn order.</p>
+            <h4 style="margin-top:1em;">Class pool by group size</h4>
+            <table class="manual-ref-table" style="max-width:36em;">
                 <thead><tr><th>Players</th><th>Pool size</th><th>Notes</th></tr></thead>
                 <tbody>
-                    <tr><td>2</td><td>29 classes</td><td>Restricted pool (see list above)</td></tr>
-                    <tr><td>3</td><td>35 classes</td><td>Adds 3+-only classes; Occultist, Witness &amp; Funeral Bell still out</td></tr>
+                    <tr><td>2</td><td>29 classes</td><td>9 classes excluded (see table below)</td></tr>
+                    <tr><td>3</td><td>35 classes</td><td>3 classes excluded (4+ only)</td></tr>
                     <tr><td>4+</td><td>38 classes</td><td>All classes</td></tr>
+                </tbody>
+            </table>
+            <h4 style="margin-top:1.25em;">Excluded classes (automatic in digital game &amp; selector)</h4>
+            <table class="manual-ref-table manual-class-exclusions" style="max-width:42em;">
+                <thead><tr><th>Class</th><th>Min players</th><th>Reason</th></tr></thead>
+                <tbody>
+                    <tr><td><strong>The Mime</strong></td><td>3+</td><td>Redirect needs a third player at the table</td></tr>
+                    <tr><td><strong>The Watcher</strong></td><td>3+</td><td>Sight effect needs two neighbours</td></tr>
+                    <tr><td><strong>The Plague</strong></td><td>3+</td><td>Spreading needs a larger circle</td></tr>
+                    <tr><td><strong>The Vulture</strong></td><td>3+</td><td>Death timing needs more players</td></tr>
+                    <tr><td><strong>The Lich</strong></td><td>3+</td><td>Revive steal needs multiple living players</td></tr>
+                    <tr><td><strong>The Gravedigger</strong></td><td>3+</td><td>Neighbour death effects need a larger circle</td></tr>
+                    <tr><td><strong>The Occultist</strong></td><td>4+</td><td>Possess-any-player needs a larger circle</td></tr>
+                    <tr><td><strong>The Witness</strong></td><td>4+</td><td>Cannot win; win-condition pressure needs 4+ <span class="manual-warn-inline">(read class before picking)</span></td></tr>
+                    <tr><td><strong>The Funeral Bell</strong></td><td>4+</td><td>Death ripple needs enough players at the table</td></tr>
                 </tbody>
             </table>
             <ul class="setup-list">
@@ -212,20 +339,20 @@
             <p><strong>Shadow layout (3+ players):</strong> In games with three or more players, each player’s <strong>Shadow</strong> is shown split: <strong>ghosts on the left</strong> are from your <strong>left neighbour</strong> (who Haunted you from that side), and <strong>ghosts on the right</strong> are from your <strong>right neighbour</strong>. This lets you see at a glance who Haunted which ghost; especially useful for classes like <strong>The Sealbinder</strong> (whose Haunted ghosts cannot be moved with Possess or Mirror, or Recalled) or <strong>The Clown</strong> (whose Haunted ghosts can only be Banished by Face or Cleanse). In a 2‑player game there is only one opponent, so the Shadow is a single zone.</p>
             <div id="track-haunter" class="manual-tip-box">
                 <h3 class="manual-tip-title">Optional: tracking who Haunted whom (physical play)</h3>
-                <p>Some rules care about the <strong>player who Haunted</strong> a ghost, not just which side of your Shadow it sits on. Split left/right helps for ordinary Haunts in 3+ player games, but <strong>Mirror (J)</strong>, <strong>Possess (9)</strong>, and ghosts passed when someone dies can move cards—so a marker on each ghost stays accurate when it matters.</p>
+                <p>Some rules care about the <strong>player who Haunted</strong> a ghost, not just which side of your Shadow it sits on. Split left/right helps for ordinary Haunts in 3+ player games, but <strong>Mirror (J)</strong>, <strong>Possess (9)</strong>, and ghosts passed when someone dies can move cards - so a marker on each ghost stays accurate when it matters.</p>
                 <p><strong>Which classes need it?</strong> Only <strong>four</strong> class abilities check <em>who</em> Haunted a ghost (see table). No other class reads the haunter. You do <strong>not</strong> need markers for Panic failures, BOO!, or other ghosts that were never Haunted onto someone (e.g. Voodoo Doll does not reflect those).</p>
-                <p><strong>Suggestion:</strong> Assign each player a <strong>style</strong> of marker (e.g. red beads for P1, blue for P2, green for P3)—and bring <strong>several of each</strong>, not just one. Every time someone Haunts a ghost onto you, place <strong>one of that player’s pieces</strong> on that ghost (under the card, on the corner, or beside it in your Shadow). Each ghost needs its own marker: if three different players Haunt you, you have three marked ghosts; if one player Haunts you twice, you need <strong>two</strong> of their pieces. When a ghost leaves your Shadow, return that piece to a discard pile (or move it with the ghost if Mirror/Possess moved it). The digital game tracks this automatically.</p>
+                <p><strong>Suggestion:</strong> Assign each player a <strong>style</strong> of marker (e.g. red beads for P1, blue for P2, green for P3) - and bring <strong>several of each</strong>, not just one. Every time someone Haunts a ghost onto you, place <strong>one of that player’s pieces</strong> on that ghost (under the card, on the corner, or beside it in your Shadow). Each ghost needs its own marker: if three different players Haunt you, you have three marked ghosts; if one player Haunts you twice, you need <strong>two</strong> of their pieces. When a ghost leaves your Shadow, return that piece to a discard pile (or move it with the ghost if Mirror/Possess moved it). The digital game tracks this automatically.</p>
                 <table class="manual-ref-table manual-tip-table">
                     <thead><tr><th>Class / effect</th><th>Why the haunter matters</th></tr></thead>
                     <tbody>
                         <tr><td><strong>The Voodoo Doll</strong></td><td>When you Burn at the Haunting, ♠/♣/♦ ghosts put there by a <strong>Haunt</strong> reflect: that <strong>haunter</strong> Burns 1 too. Mirror and Possess do not change who Haunted the ghost.</td></tr>
                         <tr><td><strong>The Clown</strong></td><td>Ghosts <strong>they</strong> Haunted onto you reject Banish with number cards (except Cleanse&nbsp;7); only Face or Cleanse works.</td></tr>
                         <tr><td><strong>The Sealbinder</strong></td><td>Ghosts <strong>they</strong> Haunted cannot be moved (Possess, Mirror) or returned (Recall). Mirror swaps involving such a ghost are blocked.</td></tr>
-                        <tr><td><strong>The Plague</strong></td><td>Spreading only applies to ghosts <strong>they</strong> Haunted. Also track which players that ghost has <strong>already visited</strong> (it cannot return to the same player)—e.g. small checklist on paper or a second set of tokens, not just the haunter marker.</td></tr>
+                        <tr><td><strong>The Plague</strong></td><td>Spreading only applies to ghosts <strong>they</strong> Haunted. Also track which players that ghost has <strong>already visited</strong> (it cannot return to the same player) - e.g. small checklist on paper or a second set of tokens, not just the haunter marker.</td></tr>
                     </tbody>
                 </table>
-                <p style="font-size:0.92em; color:var(--text-muted, #888);"><strong>Not on this list:</strong> The Mime, Hex, Warlock, and other Haunt-adjacent classes either redirect/cancel the Haunt or use a normal Haunt tag—you still mark the <strong>original attacker</strong> as haunter when a ghost lands, but no extra class rule reads beyond the four above. In 3+ players without these four classes, left/right Shadow is often enough until someone Mirror-swaps or Possesses.</p>
-                <p style="margin-bottom:0; font-size:0.92em; color:var(--text-muted, #888);">Use whatever is at hand—coloured beads, dice, bottle caps, paper clips. A practical starting point is <strong>about 5–8 pieces per player</strong> (more in long games with heavy Haunting). Markers can be reused once a ghost is banished or leaves play.</p>
+                <p style="font-size:0.92em; color:var(--text-muted, #888);"><strong>Not on this list:</strong> The Mime, Hex, Warlock, and other Haunt-adjacent classes either redirect/cancel the Haunt or use a normal Haunt tag - you still mark the <strong>original attacker</strong> as haunter when a ghost lands, but no extra class rule reads beyond the four above. In 3+ players without these four classes, left/right Shadow is often enough until someone Mirror-swaps or Possesses.</p>
+                <p style="margin-bottom:0; font-size:0.92em; color:var(--text-muted, #888);">Use whatever is at hand - coloured beads, dice, bottle caps, paper clips. A practical starting point is <strong>about 5–8 pieces per player</strong> (more in long games with heavy Haunting). Markers can be reused once a ghost is banished or leaves play.</p>
             </div>
             <div id="layout-tool">
                 <button type="button" class="tool-btn" onclick="showDiagram(2)">2 Players</button>
@@ -363,22 +490,41 @@
                 <dt class="game-term">Burn</dt>
                 <dd>Take the top card of your Candle and put it face up on top of The Dark.</dd>
                 <dt class="game-term">Suit tier</dt>
-                <dd>For tie-breaking: <span class="suit-spades">♠</span> &gt; <span class="suit-hearts">♥</span> &gt; <span class="suit-clubs">♣</span> &gt; <span class="suit-diamonds">♦</span> (Spades, Hearts, Clubs, Diamonds).</dd>
+                <dd>For <strong>Banish</strong> tie-breaking only (not Panic): <span class="suit-spades">♠</span> &gt; <span class="suit-hearts">♥</span> &gt; <span class="suit-clubs">♣</span> &gt; <span class="suit-diamonds">♦</span> (Spades, Hearts, Clubs, Diamonds). See <a href="#rank-suit">Rank &amp; suit</a>.</dd>
             </dl>
+
+            <h3>Rank &amp; suit</h3>
+            <p>Full rules and the wide comparison table live in <a href="#rank-suit">Rank &amp; suit</a> (right after Start here). Panic ignores suits; Banish Siphons on rank; Cleanse (7) Siphons on suit; Purge (King) sends all ghosts to The Dark with no Siphon.</p>
+
             <h3>The Haunting</h3>
-            <p>Look at your <strong>Shadow</strong>. The Haunting phase can be skipped if you invoke the <strong>Ace (Reprieve)</strong> at the start of your turn: play the Ace to skip Burning this turn, then Draw and perform the Ritual as normal.</p>
+            <p>Look at your <strong>Shadow</strong>. <strong>Reprieve (Ace):</strong> At the very start of your turn (<em>before</em> Endure, Panic, or Burning) you may play an Ace from your hand to skip the entire Haunting phase. This is <strong>not</strong> a Ritual action; you then Draw and perform the Ritual as normal.</p>
             <p>If you have <strong>any ghosts</strong> in your Shadow, choose once before you Burn:</p>
             <ul class="setup-list">
-                <li><strong>Endure</strong> — Burn one card from your Candle for each ghost (face up on top of The Dark), then continue your turn.</li>
-                <li><strong>Panic</strong> — Choose one ghost in your Shadow and reveal the <strong>top card of your Candle</strong> (you do not look first). Compare: number cards use rank (Ace = 1); J, Q, K count as <strong>10</strong>; face-rank ghosts count as <strong>10</strong>. <strong>Higher or equal</strong> = success (ghost and revealed card to The Dark). <strong>Lower</strong> = failure (ghost stays; revealed card becomes a new ghost). Then Burn for any ghosts still in your Shadow. You may Panic at most once per turn.</li>
+                <li><strong>Endure</strong> - Burn one card from your Candle for each ghost (face up on top of The Dark), then continue your turn.</li>
+                <li><strong>Panic</strong> - Try to clear one ghost before you Burn. You may Panic at most once per turn. (Full compare rules: <a href="#rank-suit">Rank &amp; suit</a>.)
+                    <ul>
+                        <li>Choose one ghost in your Shadow. Reveal the <strong>top card of your Candle</strong> (do not look first).</li>
+                        <li><strong>Values:</strong> number cards use rank (Ace = 1). J, Q, and K count as <strong>10</strong> on both the revealed card and any face-rank ghost.</li>
+                        <li><strong>Suits do not matter for Panic.</strong> Compare strength only. A tie (equal strength) is a <strong>success</strong>. Do <em>not</em> use suit tier here.</li>
+                        <li><strong>Success</strong> (revealed card higher or equal): that ghost and the revealed card both go to <strong>The Dark</strong>. This is <strong>not</strong> a Siphon - matching rank or suit does not put the ghost on your Candle.</li>
+                        <li><strong>Failure</strong> (revealed card lower): the ghost stays; the revealed card becomes a <strong>new ghost</strong> in your Shadow.</li>
+                        <li>Then Burn one card for each ghost still in your Shadow.</li>
+                    </ul>
+                </li>
             </ul>
-            <p class="ritual-action-detail" style="margin-top:0.75rem;"><strong>Joker (Panic):</strong> Instant success; you siphon the ghost (unless it is a Spade). <strong>Walls:</strong> You cannot Panic against a Wall (The Cryptkeeper).</p>
-            <p>If you have <strong>no ghosts</strong>, there is no Burning—proceed to The Draw.</p>
+            <p class="ritual-action-detail" style="margin-top:0.75rem;"><strong>Joker (Panic) - only Siphon case:</strong> Instant success; you <strong>Siphon</strong> the ghost to the bottom of your Candle (unless it is a Spade → The Dark). The Joker goes to The Dark. <strong>Walls:</strong> You cannot Panic against a Wall (The Cryptkeeper).</p>
+            <p>If you have <strong>no ghosts</strong>, there is no Burning - proceed to The Draw.</p>
             <h3>The Draw</h3>
             <p><strong>Draw 1 card</strong> from the top of your Candle into your hand.</p>
+            <p><strong>Consumed by the Darkness:</strong> If your Candle is <strong>empty</strong> when you must Draw (you have no card left to take), you are <strong>Consumed</strong> and eliminated. This is the first of the two empty-Candle checks (the other is <a href="#am-i-alive">Am I Alive?</a> at the end of your turn). Burning your last cards during the Haunting does <em>not</em> eliminate you mid-Haunting; you only lose here if the Candle is already empty when The Draw begins. See <a href="#ritual-type">Consumed by the Darkness</a>.</p>
             <h3>The Ritual</h3>
-            <p>Perform <strong>exactly one</strong> of the following actions, or <strong>Abstain</strong>:</p>
+            <p>Perform <strong>exactly one</strong> of the following actions, or <strong>Abstain</strong>. <strong>Class Abilities</strong> (e.g. The Doomreader, The Mimic, The Grimoire of Rejection) are separate: they do <strong>not</strong> use your Ritual action unless the class says otherwise, and you may use a qualifying Ability and still take a full Ritual action on the same turn. Abilities generally cannot be Salted like Ritual actions - see <a href="#faq">FAQ</a>.</p>
+            <p class="manual-timing-note"><strong>Extra Ritual action:</strong> If you <strong>Cast Greed (2)</strong>, the chosen player draws 2, then <strong>you take another Ritual action</strong> on the same turn (two Ritual actions total that turn).</p>
             <div class="ritual-actions">
+                <div class="ritual-action">
+                    <h4 class="ritual-action-name">ABILITY <span class="ritual-action-tag">Class</span></h4>
+                    <p class="ritual-action-summary">Your class may grant an <strong>Ability</strong> (passive trigger, or a button/action that does not count as your Ritual). Examples: The Doomreader banishes a ghost without a Banish check; The Mimic swaps Candles once per game; The Oracle peeks at your Candle before the Haunting. Read your class card - if it says “Ability” or “does not use your Ritual action,” it stacks with Haunt, Banish, Cast, etc. on the same turn unless limited (e.g. once per turn).</p>
+                </div>
                 <div class="ritual-action">
                     <h4 class="ritual-action-name">HAUNT <span class="ritual-action-tag">Attack</span></h4>
                     <p class="ritual-action-summary"><strong>Only number cards (A or 1 through 10) can be used to Haunt.</strong> Face cards (J, Q, K) and Jokers cannot be used to Haunt; use them to <strong>Summon</strong> instead. (Rare <strong>class abilities</strong> can change this; see each class card and <a href="#faq-haunt-classes">FAQ: Haunting and class exceptions</a>.)</p>
@@ -386,12 +532,12 @@
                 </div>
                 <div class="ritual-action">
                     <h4 class="ritual-action-name">BANISH <span class="ritual-action-tag">Defend</span></h4>
-                    <p class="ritual-action-summary">Play a card from your hand onto one ghost in <em>your</em> Shadow. Your card must have <strong>equal or higher value</strong> than the ghost; on a tie, <strong>suit tier</strong> breaks it: Spades <span class="suit-spades">♠</span> &gt; Hearts <span class="suit-hearts">♥</span> &gt; Clubs <span class="suit-clubs">♣</span> &gt; Diamonds <span class="suit-diamonds">♦</span>. The ghost is banished (to The Dark, or to the bottom of your Candle if you Siphon).</p>
+                    <p class="ritual-action-summary">Play a card from your hand onto one ghost in <em>your</em> Shadow. Your card must have <strong>equal or higher value</strong> than the ghost; on a tie, <strong>suit tier</strong> breaks it: Spades <span class="suit-spades">♠</span> &gt; Hearts <span class="suit-hearts">♥</span> &gt; Clubs <span class="suit-clubs">♣</span> &gt; Diamonds <span class="suit-diamonds">♦</span>. The ghost is <strong>banished</strong> (forced out to The Dark, or Siphoned to your Candle if ranks match). <strong>Unlike Panic, suits matter here on ties.</strong> See <a href="#banish-vs-cleanse">Banish vs Cleanse vs Purge</a>.</p>
                     <div class="ritual-action-detail">
                         <strong>Face cards (J, Q, K):</strong> A Jack, Queen, or King can be played as <strong>Banish</strong> (value <strong>10</strong>; suit tier breaks ties) or as a <strong>Summon</strong> for that card’s Grimoire effect (e.g. Jack for Mirror, King for Purge), one use per play. Against a <strong>face-rank ghost</strong> (J, Q, or K), a 10 or any face card can beat it; matching rank or suit can Siphon (Spades cannot be Siphoned).
                     </div>
                     <div class="ritual-action-detail">
-                        <strong>Siphon:</strong> If your card’s <strong>rank matches</strong> the ghost’s rank (e.g. 7<span class="suit-hearts">♥</span> on 7<span class="suit-clubs">♣</span>), you <strong>siphon</strong>: put that ghost on the bottom of your Candle instead of The Dark. With <strong>Cleanse (7)</strong>, you can also siphon if <strong>suits match</strong> (e.g. 7<span class="suit-hearts">♥</span> on 3<span class="suit-hearts">♥</span>). You cannot siphon <strong>Spades (<span class="suit-spades">♠</span>)</strong>.
+                        <strong>Siphon:</strong> If your card’s <strong>rank matches</strong> the ghost’s rank (e.g. 7<span class="suit-hearts">♥</span> on 7<span class="suit-clubs">♣</span>), you are <strong>Banishing</strong> and may <strong>Siphon</strong>: put that ghost on the bottom of your Candle. That is true even when the card is a 7 - rank Siphon is Banishing, not Cleanse. <strong>Cleanse (7)</strong> adds a different path: Siphon when <strong>suits match</strong> (e.g. 7<span class="suit-hearts">♥</span> on 3<span class="suit-hearts">♥</span>) - that is cleansing. You cannot Siphon <strong>Spades (<span class="suit-spades">♠</span>)</strong>. Cleanse still needs to <strong>win the value check</strong> first (value + suit tier on a value tie).
                     </div>
                 </div>
                 <div class="ritual-action">
@@ -413,7 +559,7 @@
             </div>
             <h3>The Burden</h3>
             <p>Discard down to your hand limit (usually 5 cards).</p>
-            <h3>Am I Alive?</h3>
+            <h3 id="am-i-alive">Am I Alive?</h3>
             <p><strong>Candle check:</strong> If your Candle is empty at the end of your turn, you are <strong>Consumed by the Darkness</strong> and are eliminated (see <a href="#ritual-type">Consumed by the Darkness</a>).</p>
             <p><strong>Possession check:</strong> See <a href="#possession-rule">Possession</a>.</p>
             <p><strong>When you die:</strong> When you are eliminated (Consumed or Possessed), any ghosts in your Shadow are split evenly between your two neighbours. If the number is odd, you decide who gets the extra ghost. See <a href="#faq-death-ghosts">FAQ: When a player is eliminated</a> for details.</p>
@@ -435,15 +581,15 @@
                     <tr><td><img class="grimoire-card-img" src="images/cards/ranks/two/deathwick_2_spades.png" alt="2 of Spades"></td><td>2</td><td>GREED</td><td class="grimoire-effect">Choose any player (including yourself). They draw 2 cards from their Candle to their hand. You then perform an additional Ritual action this turn.</td></tr>
                     <tr><td><img class="grimoire-card-img" src="images/cards/ranks/three/deathwick_3_spades.png" alt="3 of Spades"></td><td>3</td><td>SCARE</td><td class="grimoire-effect">Choose a neighbour. They shuffle their hand and blindly discard 2 cards to The Dark.</td></tr>
                     <tr><td><img class="grimoire-card-img" src="images/cards/ranks/four/deathwick_4_spades.png" alt="4 of Spades"></td><td>4</td><td>DRAIN</td><td class="grimoire-effect">Take the top two cards from each neighbour's Candle and place them on your Candle.</td></tr>
-                    <tr><td><img class="grimoire-card-img" src="images/cards/ranks/five/deathwick_5_spades.png" alt="5 of Spades"></td><td>5</td><td>SALT</td><td class="grimoire-effect"><strong>Reaction:</strong> Cancel any player’s Action (except the Ace); your Salt and their card go to The Dark (see Salt section below).</td></tr>
+                    <tr><td><img class="grimoire-card-img" src="images/cards/ranks/five/deathwick_5_spades.png" alt="5 of Spades"></td><td>5</td><td>SALT</td><td class="grimoire-effect"><strong>Two uses (pick one when you play it):</strong> (1) <strong>Reaction</strong> - keep in hand; reveal later to cancel another player’s Action (except Ace); both cards to The Dark. (2) <strong>Haunt</strong> - play as a normal number card (strength 5). See <a href="#salt">Salt</a>.</td></tr>
                     <tr><td><img class="grimoire-card-img" src="images/cards/ranks/six/deathwick_6_spades.png" alt="6 of Spades"></td><td>6</td><td>SIGHT</td><td class="grimoire-effect">Choose a neighbour; <strong>view their hand</strong> and take <strong>two cards of your choice</strong> to your hand.</td></tr>
-                    <tr><td><img class="grimoire-card-img" src="images/cards/ranks/seven/deathwick_7_spades.png" alt="7 of Spades"></td><td>7</td><td>CLEANSE</td><td class="grimoire-effect">Banish 1 ghost from your Shadow (to the top of The Dark, or to the bottom of your Candle if Siphon: your 7’s <strong>suit</strong> matches the ghost’s suit; <span class="suit-spades">♠</span> cannot be Siphoned).</td></tr>
+                    <tr><td><img class="grimoire-card-img" src="images/cards/ranks/seven/deathwick_7_spades.png" alt="7 of Spades"></td><td>7</td><td>CLEANSE</td><td class="grimoire-effect">Remove 1 ghost from your Shadow (need equal/higher value; on a tie, suit tier). <strong>Cleanse</strong> Siphons only when your 7’s <strong>suit</strong> matches the ghost (never <span class="suit-spades">♠</span>). If you Siphon because <strong>ranks</strong> match, that is Banishing, not Cleanse. See <a href="#banish-vs-cleanse">Banish vs Cleanse vs Purge</a>.</td></tr>
                     <tr><td><img class="grimoire-card-img" src="images/cards/ranks/eight/deathwick_8_spades.png" alt="8 of Spades"></td><td>8</td><td>RECALL</td><td class="grimoire-effect">Take a ghost from any Shadow and add it to your hand.</td></tr>
                     <tr><td><img class="grimoire-card-img" src="images/cards/ranks/nine/deathwick_9_spades.png" alt="9 of Spades"></td><td>9</td><td>POSSESS</td><td class="grimoire-effect">Move a ghost from your Shadow to a neighbour's Shadow.</td></tr>
                     <tr><td><img class="grimoire-card-img" src="images/cards/ranks/ten/deathwick_10_spades.png" alt="10 of Spades"></td><td>10</td><td>REKINDLE</td><td class="grimoire-effect">Take the top 3 cards from The Dark, add them to your Candle, then <strong>shuffle your Candle</strong>.</td></tr>
                     <tr><td><img class="grimoire-card-img" src="images/cards/ranks/jack/deathwick_jack_spades.png" alt="Jack of Spades"></td><td>J</td><td>MIRROR</td><td class="grimoire-effect">Choose a neighbour and swap your Shadow with their Shadow.</td></tr>
                     <tr><td><img class="grimoire-card-img" src="images/cards/ranks/queen/deathwick_queen_spades.png" alt="Queen of Spades"></td><td>Q</td><td>MEDIUM</td><td class="grimoire-effect">Choose: <strong>search</strong> The Dark and take <strong>1 card</strong> of your choice to your hand (number cards <strong>or</strong> face cards J, Q, K; <strong>not</strong> a Joker), OR take the <strong>bottom 2</strong> cards from The Dark without searching, add them to your Candle, then <strong>shuffle your Candle</strong>.</td></tr>
-                    <tr><td><img class="grimoire-card-img" src="images/cards/ranks/king/deathwick_king_spades.png" alt="King of Spades"></td><td>K</td><td>PURGE</td><td class="grimoire-effect">Banish all ghosts in your Shadow (to the top of The Dark; Siphon if suit matches the King’s suit and not Spades; Siphoned ghost to bottom of your Candle).</td></tr>
+                    <tr><td><img class="grimoire-card-img" src="images/cards/ranks/king/deathwick_king_spades.png" alt="King of Spades"></td><td>K</td><td>PURGE</td><td class="grimoire-effect"><strong>Purge all</strong> ghosts in your Shadow to The Dark (neither Banish nor Cleanse; no value check). <strong>Cannot be Siphoned</strong> - matching suits still go to The Dark.</td></tr>
                     <tr><td><span class="grimoire-jokers-wrap"><img class="grimoire-card-img" src="images/cards/ranks/joker/deathwick_joker.png" alt="Joker"><img class="grimoire-card-img" src="images/cards/ranks/joker/deathwick_joker2.png" alt="Joker 2"><img class="grimoire-card-img" src="images/cards/ranks/joker/deathwick_joker3.png" alt="Joker 3"><img class="grimoire-card-img" src="images/cards/ranks/joker/deathwick_joker4.png" alt="Joker 4"></span></td><td>JOKER</td><td>BOO!</td><td class="grimoire-effect">Each other player Burns from the top of their Candle until they reveal a number card (burned cards go to the top of The Dark; the number card becomes a ghost in their Shadow). Each targeted player may use their <strong>own</strong> Salt to avoid the Burn for themselves only.</td></tr>
                 </tbody>
             </table>
@@ -459,15 +605,15 @@
                         <tr><td>2</td><td>Greed</td><td class="manual-ref-effect">Choose any player (including you); they draw 2 from their Candle. You then take another Ritual action.</td></tr>
                         <tr><td>3</td><td>Scare</td><td class="manual-ref-effect">Choose a neighbour; they shuffle hand, blindly discard 2 to The Dark.</td></tr>
                         <tr><td>4</td><td>Drain</td><td class="manual-ref-effect">Take the top two cards from each neighbour's Candle and place them on your Candle.</td></tr>
-                        <tr><td>5</td><td>Salt</td><td class="manual-ref-effect">Reaction: cancel any player’s Action except Ace (both to The Dark). The 5 can also be used to Haunt (strength 5).</td></tr>
+                        <tr><td>5</td><td>Salt</td><td class="manual-ref-effect">Either keep as a reaction to cancel an Action (except Ace), or Haunt with it (strength 5). Not both with the same card.</td></tr>
                         <tr><td>6</td><td>Sight</td><td class="manual-ref-effect">View a neighbour's hand and take two cards.</td></tr>
-                        <tr><td>7</td><td>Cleanse</td><td class="manual-ref-effect">Banish 1 Ghost (to The Dark or Siphon to your Candle if suit matches; ♠ cannot be Siphoned).</td></tr>
+                        <tr><td>7</td><td>Cleanse</td><td class="manual-ref-effect">Remove 1 Ghost (value check). Siphon if <strong>suit</strong> matches (Cleanse); rank-match Siphon is Banishing. ♠ never Siphon.</td></tr>
                         <tr><td>8</td><td>Recall</td><td class="manual-ref-effect">Take a Ghost from any Shadow to your hand.</td></tr>
                         <tr><td>9</td><td>Possess</td><td class="manual-ref-effect">Move a Ghost from your Shadow to a neighbour's Shadow.</td></tr>
                         <tr><td>10</td><td>Rekindle</td><td class="manual-ref-effect">Top 3 from The Dark to your Candle, then shuffle Candle.</td></tr>
                         <tr><td>J</td><td>Mirror</td><td class="manual-ref-effect">Choose a neighbour and swap your Shadow with their Shadow.</td></tr>
                         <tr><td>Q</td><td>Medium</td><td class="manual-ref-effect">Search The Dark, take 1 to hand (numbers or faces J/Q/K; no Joker), OR bottom 2 (no search) → Candle then shuffle (10 = top 3).</td></tr>
-                        <tr><td>K</td><td>Purge</td><td class="manual-ref-effect">Banish all Ghosts in your Shadow (to The Dark; Siphon if suit matches the King’s suit, not Spades).</td></tr>
+                        <tr><td>K</td><td>Purge</td><td class="manual-ref-effect"><strong>Purge all</strong> Ghosts to The Dark (not Banish/Cleanse). <strong>No Siphon</strong> - even matching suits.</td></tr>
                         <tr><td>★</td><td>BOO!</td><td class="manual-ref-effect">Each other player Burns until number (to The Dark); number → Ghost in their Shadow. Each must use their own Salt to avoid it.</td></tr>
                     </tbody>
                 </table>
@@ -488,6 +634,7 @@
 
         <section id="faq">
             <h2>6. FAQ &amp; Edge Cases</h2>
+            <p class="manual-play-note">Look-up section for disputed moments. Skip on a first read; return when something odd happens at the table.</p>
             <p style="border: 1px solid var(--accent-color); padding: 10px; border-radius: 4px; background: #1a1a22;">
                 <strong>When in doubt:</strong> If a rule could be read more than one way, choose the reading that <strong>denies an advantage</strong>: rule against whoever would benefit from the ambiguity, or in favour of whoever is defending or being targeted.
             </p>
@@ -500,29 +647,37 @@
             <ul class="faq-list">
                 <li><strong>Walls and Burn:</strong> During The Haunting, you Burn one card from your Candle for each <strong>ghost</strong> in your Shadow. <strong>Walls</strong> (The Cryptkeeper) are not ghosts for this purpose; they do <strong>not</strong> add an extra Burn. Walls also do not count toward Possession. See <strong>Edge cases: Walls (The Cryptkeeper)</strong>. Convention: ghosts <strong>vertical</strong>, Walls <strong>horizontal</strong> in the Shadow (see <strong>Shadow</strong> in <a href="#turn">The Passage of Time</a>).</li>
             </ul>
-            <h3>Banish (how you remove Ghosts)</h3>
+            <h3>Banish, Cleanse &amp; Purge (how you remove Ghosts)</h3>
             <ul class="manual-bullets">
-                <li><strong>Banish</strong> = play one card from your hand onto one Ghost in <em>your</em> Shadow.</li>
+                <li><strong>Banish</strong> = play one card from your hand onto one Ghost in <em>your</em> Shadow. You force it out by power.</li>
                 <li>Your card must have <strong>equal or higher value</strong> than the Ghost; on a tie, <strong>suit tier</strong> breaks it: Spades <span class="suit-spades">♠</span> &gt; Hearts <span class="suit-hearts">♥</span> &gt; Clubs <span class="suit-clubs">♣</span> &gt; Diamonds <span class="suit-diamonds">♦</span>.</li>
                 <li>You may Banish with a <strong>face card (J, Q, K)</strong>: they count as value 10; suit tier breaks ties. The same cards can be <strong>Summon</strong>ed instead for Mirror, Medium, or Purge; see <strong>Edge cases: Banish vs The Clown</strong> for number-Banish restrictions on certain ghosts.</li>
-                <li>The Ghost is banished. If <strong>rank matched</strong> (or, for Cleanse 7, <strong>suit matched</strong>) and the Ghost wasn’t a Spade, you <strong>Siphon</strong> it (Ghost goes to the bottom of your Candle; see Siphon below).</li>
+                <li>The Ghost is removed. If <strong>ranks matched</strong> and it wasn’t a Spade, you <strong>Siphon</strong> (Banishing heal). If you played a <strong>7</strong> and <strong>suits matched</strong>, that Siphon is <strong>Cleanse</strong>. Rank-match Siphon on a 7 is still Banishing - Cleanse only uses suit. See <a href="#banish-vs-cleanse">Banish vs Cleanse vs Purge</a>.</li>
+                <li><strong>Purge (King):</strong> Summon the King to <strong>purge all</strong> ghosts to The Dark. Neither Banishing nor Cleansing. <strong>No Siphon</strong> - the King does not heal your Candle.</li>
             </ul>
             <h3>Siphon</h3>
             <p><strong>Siphon</strong> is one of the rules: when you remove a Ghost from your Shadow in the right way, you can <strong>Heal</strong>: put that Ghost on the <strong>bottom of your Candle</strong> instead of sending it to The Dark. You get a card back; your Candle lasts longer.</p>
             <ul class="faq-list">
-                <li><strong>When do I Siphon?</strong> When you <strong>Banish</strong> a Ghost: play a card from your hand that meets or beats the Ghost (value, and suit tier on a tie). If your card’s <strong>rank matches</strong> the Ghost’s rank (e.g. your 7<span class="suit-hearts">♥</span> on a 7<span class="suit-clubs">♣</span> Ghost), you Siphon: the Ghost goes to the bottom of your Candle. If the ranks don’t match, you still banish the Ghost but it goes to the top of The Dark (no heal).</li>
-                <li><strong>Siphon when suits match (Cleanse 7):</strong> When you Banish a Ghost with a <strong>7 (Cleanse)</strong>, you can also Siphon if your card’s <strong>suit matches</strong> the Ghost’s suit (e.g. 7<span class="suit-hearts">♥</span> on a 3<span class="suit-hearts">♥</span> Ghost), the Ghost goes to the bottom of your Candle. Spades <span class="suit-spades">♠</span> still cannot be Siphoned; only Hearts <span class="suit-hearts">♥</span>, Clubs <span class="suit-clubs">♣</span>, and Diamonds <span class="suit-diamonds">♦</span>.</li>
-                <li><strong>Same rank and same suit (e.g. 7<span class="suit-hearts">♥</span> on 7<span class="suit-hearts">♥</span>):</strong> In games with <strong>3 or more players</strong>, you use multiple decks, so two identical cards can exist. You can Banish a 7<span class="suit-hearts">♥</span> Ghost with your 7<span class="suit-hearts">♥</span> (equal value). Since rank matches and suits match, you <strong>Siphon</strong>; the Ghost goes to the bottom of your Candle. Not if the Ghost is a Spade <span class="suit-spades">♠</span>.</li>
+                <li><strong>When do I Siphon by Banishing?</strong> Play a card that meets or beats the Ghost (value, and suit tier on a tie). If your card’s <strong>rank matches</strong> the Ghost’s rank (e.g. your 7<span class="suit-hearts">♥</span> on a 7<span class="suit-clubs">♣</span> Ghost), you Siphon. That is <strong>Banishing</strong>, even with a 7. If ranks don’t match, the Ghost still leaves but goes to The Dark (no heal) unless Cleanse suit Siphon applies.</li>
+                <li><strong>When do I Siphon by Cleansing?</strong> Only with a <strong>7 (Cleanse)</strong>, and only when your 7’s <strong>suit matches</strong> the Ghost’s suit (e.g. 7<span class="suit-hearts">♥</span> on a 3<span class="suit-hearts">♥</span>). Cleanse never uses rank for its Siphon. Spades <span class="suit-spades">♠</span> still cannot be Siphoned.</li>
+                <li><strong>Same rank and same suit (e.g. 7<span class="suit-hearts">♥</span> on 7<span class="suit-hearts">♥</span>):</strong> In games with <strong>3 or more players</strong>, you use multiple decks, so two identical cards can exist. You remove the ghost (equal value). You Siphon once - both Banishing (rank) and Cleansing (suit) apply in lore; mechanically one Siphon. Not if the Ghost is a Spade <span class="suit-spades">♠</span>.</li>
                 <li><strong>Face-rank ghost (J, Q, K) in your Shadow:</strong> If a Haunt (or another effect) put a <strong>face card</strong> in your Shadow as a ghost, treat its rank as J, Q, or K. You can <strong>Banish</strong> it with a 10 or with any face card (J, Q, K count as 10). If your card’s <strong>suit matches</strong> the ghost’s suit, you <strong>Siphon</strong>: the ghost goes to the bottom of your Candle. Spades <span class="suit-spades">♠</span> cannot be Siphoned. (See <a href="#faq-haunt-classes">Haunting and class exceptions</a> for how such ghosts get there.)</li>
-                <li><strong>Spades <span class="suit-spades">♠</span> can never be Siphoned because they are cursed by the darkness.</strong> You can Banish a Spade ghost, but it always goes to the top of The Dark. Only Hearts <span class="suit-hearts">♥</span>, Clubs <span class="suit-clubs">♣</span>, and Diamonds <span class="suit-diamonds">♦</span> can be Siphoned (whether by rank match or, with Cleanse, suit match).</li>
+                <li><strong>Spades <span class="suit-spades">♠</span> can never be Siphoned because they are cursed by the darkness.</strong> You can Banish or Cleanse a Spade ghost, but it always goes to the top of The Dark. <strong>Purge</strong> also sends every ghost (including Spades) to The Dark with no Siphon. Only Hearts <span class="suit-hearts">♥</span>, Clubs <span class="suit-clubs">♣</span>, and Diamonds <span class="suit-diamonds">♦</span> can be Siphoned via Banish (rank) or Cleanse (suit on a 7).</li>
                 <li><strong>Do I still use my card when I Siphon?</strong> Yes. You discard the card you played; only the Ghost is healed to the bottom of your Candle.</li>
-                <li><strong>Panic and Joker:</strong> If you Panic and flip a Joker, you Siphon the targeted Ghost (unless it’s a Spade); the Joker goes to The Dark.</li>
+                <li><strong>Panic and Joker:</strong> If you Panic and flip a Joker, you Siphon the targeted Ghost (unless it’s a Spade); the Joker goes to The Dark. This is the <strong>only</strong> Panic outcome that Siphons.</li>
+                <li><strong>Panic success (no Siphon):</strong> If the flipped card’s strength is equal or higher, both the flipped card and the ghost go to <strong>The Dark</strong>. Matching rank does <strong>not</strong> Siphon. Matching suit does nothing.</li>
+                <li><strong>Panic vs Banish vs Cleanse vs Purge:</strong> Panic = strength only (suits ignored), almost never Siphon. Banish Siphon = <strong>rank</strong>. Cleanse Siphon = <strong>suit</strong> on the 7 only. Purge (King) = all to The Dark, <strong>never Siphon</strong>. See <a href="#rank-suit">Rank &amp; suit</a>.</li>
                 <li><strong>Panic failure:</strong> If the revealed card is <strong>lower</strong> than the targeted ghost (after treating J/Q/K as 10 on both sides), the ghost stays and the revealed card becomes a <strong>new ghost</strong> in your Shadow.</li>
             </ul>
-            <h3>Salt (reaction)</h3>
+            <h3 id="salt">Salt (reaction or Haunt)</h3>
+            <p>A <strong>5</strong> in hand is Salt. Each 5 is used in <strong>exactly one</strong> way:</p>
             <ul class="manual-bullets">
-                <li><strong>Salt (5)</strong> is a <strong>reaction</strong>: keep it in hand and, when any player performs an Action, you may reveal Salt to <strong>cancel that Action</strong> (your Salt and their card go to The Dark; their turn ends). The <strong>only</strong> Action that cannot be Salted is the <strong>Ace (Reprieve)</strong>; it is played at the start of your turn and is not an Action in the same sense. You can also play the 5 as a normal number card to <strong>Haunt</strong> (strength 5) instead of saving it for Salt.</li>
-                <li><strong>Optional rule: Salt only when targeted:</strong> You may agree before play to limit Salt to actions that <strong>target you</strong> (Haunt, Scare, Drain, Sight, BOO!, etc.).</li>
+                <li><strong>Keep as a reaction:</strong> Leave it in hand. When any player performs a Ritual action, you may reveal Salt to <strong>cancel that Action</strong> (your Salt and their card go to The Dark; their turn ends). The <strong>only</strong> play that cannot be Salted is the <strong>Ace (Reprieve)</strong>.</li>
+                <li><strong>Play as a Haunt:</strong> On your turn, play the 5 into a neighbour’s Shadow like any other number Haunt (strength 5). Once played this way, it is a ghost, not a reaction.</li>
+            </ul>
+            <p>You cannot cancel with a 5 you already spent to Haunt, and you cannot Haunt with a 5 you already spent as a reaction.</p>
+            <ul class="manual-bullets">
+                <li><strong>Optional rule: Salt only when targeted:</strong> You may agree before play to limit Salt reactions to actions that <strong>target you</strong> (Haunt, Scare, Drain, Sight, BOO!, etc.).</li>
             </ul>
             <ul class="faq-list">
                 <li><strong>What can be Salted?</strong> <strong>Anyone’s Ritual action can be cancelled by Salt</strong>, including King (Purge), Joker (BOO!), Haunt, Scare (3), Drain (4), Sight (6), Rekindle, Flicker, and other card plays that use your action. Exceptions (cannot be Salted): the <strong>Ace (Reprieve)</strong>; <strong>The Silence</strong>’s actions; <strong>The Mimic</strong>’s Candle swap (Ability); a completed <strong>Hex reflect</strong>; and a revealed <strong>Grimoire of Rejection</strong> cancel. Class Abilities that do not use your Ritual action (e.g. Doomreader, placing Grimoire pages, Mimic) are not Ritual actions and are not Salt targets in the same way.</li>
@@ -538,7 +693,7 @@
             </ul>
             <p>When a player is eliminated, ghosts from their Shadow pass to neighbours as above. Receiving those ghosts does <strong>not</strong> cause instant Possession; you are checked at the <strong>end of your turn</strong> only (see <a href="#possession-rule">Possession</a>).</p>
             <h3>Consumed by the Darkness</h3>
-            <p><strong>When does an empty Candle eliminate you?</strong> Only at <strong>The Draw</strong> (cannot draw after the Haunting) or <strong>Am I Alive?</strong> (end of your turn). See <a href="#ritual-type">Consumed by the Darkness</a>.</p>
+            <p><strong>When does an empty Candle eliminate you?</strong> Only at <strong>The Draw</strong> (cannot draw after the Haunting) or <a href="#am-i-alive"><strong>Am I Alive?</strong></a> (end of your turn). See <a href="#ritual-type">Consumed by the Darkness</a>.</p>
             <p><strong>Summary:</strong></p>
             <ul class="manual-bullets">
                 <li><strong>The Draw:</strong> After the Haunting, if your Candle is empty when you must Draw 1, you are <strong>Consumed</strong>.</li>
@@ -554,17 +709,17 @@
             </ul>
             <h3>Other common questions</h3>
             <ul class="faq-list">
-                <li><strong>What does “once per turn” mean?</strong> For <strong>your own</strong> abilities (e.g. The Pyromaniac’s burn, The Doomreader’s banish), it means once per <strong>your</strong> turn; it resets at the start of your next turn. Reactions to someone else’s Haunt (e.g. <strong>The Unseen</strong> or <strong>The Hex</strong>) happen when that Haunt is played—you do not need a separate “once per turn” rule for those.</li>
+                <li><strong>What does “once per turn” mean?</strong> For <strong>your own</strong> abilities (e.g. The Pyromaniac’s burn, The Doomreader’s banish), it means once per <strong>your</strong> turn; it resets at the start of your next turn. Reactions to someone else’s Haunt (e.g. <strong>The Unseen</strong> or <strong>The Hex</strong>) happen when that Haunt is played - you do not need a separate “once per turn” rule for those.</li>
                 <li><strong>What if I can’t play a valid action?</strong> You may <strong>Abstain</strong> from your Ritual action. This is especially common when your hand is all face cards and Jokers and your class does not allow Haunting with them (see <a href="#faq-haunt-classes">Haunting and class exceptions</a>).</li>
                 <li><strong>The Silence and Salt:</strong> The Silence's actions cannot be interrupted by Salt (5), including when they Summon BOO! (Joker). If The Silence plays a Joker, defenders cannot Salt it.</li>
                 <li><strong>Salt vs BOO! (Joker):</strong> When someone plays BOO! (Joker), <strong>each other player is targeted separately</strong>. Each of those players must Burn until they reveal a number (that number becomes a Ghost in their Shadow), unless they use their <strong>own</strong> Salt. <strong>Each person who wants to avoid the Burn must Salt the BOO! themselves</strong>: your Salt only protects you, not the other players. If you use Salt when BOO! targets you, your Salt goes to The Dark and the BOO! has no effect on you (you do not Burn). The only exception is <strong>The Silence</strong>; if they played the Joker, no one can Salt it.</li>
                 <li><strong>The Mime and Salt:</strong> When The Mime redirects a Haunt to you (you are their other neighbour), that redirect is an action targeting you. You may use <strong>Salt (5)</strong> to cancel it: your Salt and the Mime’s discarded card go to The Dark, and the ghost does not enter your Shadow (it stays in The Mime’s Shadow).</li>
                 <li><strong>The Grimoire of Rejection:</strong> Use your <strong>Ability</strong> to place <strong>one</strong> card from your hand face-down in your Grimoire (max <strong>3 pages</strong>; <strong>1 page per turn</strong>; does <strong>not</strong> use your Ritual action). Reserved pages are kept beside your class card and do not count toward hand size. When a <strong>neighbour</strong> plays a card as their Ritual action, you may reveal a page whose <strong>rank matches</strong> (e.g. your tucked 5♣ rejects their 5♥). Cancel that play: <strong>both cards go to The Dark</strong>. That page is removed; other pages stay. The cancel <strong>cannot be interrupted by Salt</strong>. You may still perform a Ritual action on the same turn you add a page.</li>
-                <li><strong>The Voodoo Doll:</strong> When you <strong>burn during the Haunting</strong>, the reflection strikes: for each ghost in your Shadow that is <strong>Spades <span class="suit-spades">♠</span>, Clubs <span class="suit-clubs">♣</span>, or Diamonds <span class="suit-diamonds">♦</span></strong> (put there by a <strong>Haunt</strong>), the player who Haunted that ghost must also <strong>Burn 1</strong>. <strong>Hearts <span class="suit-hearts">♥</span> have no effect.</strong> This repeats each turn while that ghost remains. <strong>Mirror (J)</strong> and <strong>Possess (9)</strong> move ghosts without changing who Haunted them—if a reflecting ghost leaves your Shadow and returns (swapped back, possessed back, or mirrored again), the same haunter still Burns.</li>
-                <li><strong>Voodoo Doll — Haunt, Mirror, and Possess:</strong> Only ghosts <strong>Haunted</strong> onto you can reflect (tracked haunter). <strong>BOO!</strong> and other effects that do not Haunt do not reflect. <strong>Hearts <span class="suit-hearts">♥</span> do not reflect;</strong> you may still <strong>Siphon</strong> ♥ ghosts with normal Banish/Cleanse rules.</li>
-                <li><strong>When a Joker (BOO!) is played, how does the Burn work?</strong> <strong>Each other player</strong> is affected separately: each must Burn from the top of their Candle one card at a time until they reveal a <strong>number card</strong> (A–10); that number becomes a Ghost in their Shadow. (Face cards and Jokers go to The Dark and they Burn again.) If their Candle runs out before a number, they are not eliminated immediately—they are checked at <strong>The Draw</strong> or <strong>Am I Alive?</strong> <strong>Each player who wants to avoid the Burn must use their own Salt</strong>; one Salt only protects the person who played it, not everyone. (Exception: if The Silence played the Joker, no one can Salt it.)</li>
+                <li><strong>The Voodoo Doll:</strong> When you <strong>burn during the Haunting</strong>, the reflection strikes: for each ghost in your Shadow that is <strong>Spades <span class="suit-spades">♠</span>, Clubs <span class="suit-clubs">♣</span>, or Diamonds <span class="suit-diamonds">♦</span></strong> (put there by a <strong>Haunt</strong>), the player who Haunted that ghost must also <strong>Burn 1</strong>. <strong>Hearts <span class="suit-hearts">♥</span> have no effect.</strong> This repeats each turn while that ghost remains. <strong>Mirror (J)</strong> and <strong>Possess (9)</strong> move ghosts without changing who Haunted them - if a reflecting ghost leaves your Shadow and returns (swapped back, possessed back, or mirrored again), the same haunter still Burns.</li>
+                <li><strong>Voodoo Doll - Haunt, Mirror, and Possess:</strong> Only ghosts <strong>Haunted</strong> onto you can reflect (tracked haunter). <strong>BOO!</strong> and other effects that do not Haunt do not reflect. <strong>Hearts <span class="suit-hearts">♥</span> do not reflect;</strong> you may still <strong>Siphon</strong> ♥ ghosts with normal Banish/Cleanse rules.</li>
+                <li><strong>When a Joker (BOO!) is played, how does the Burn work?</strong> <strong>Each other player</strong> is affected separately: each must Burn from the top of their Candle one card at a time until they reveal a <strong>number card</strong> (A–10); that number becomes a Ghost in their Shadow. (Face cards and Jokers go to The Dark and they Burn again.) If their Candle runs out before a number, they are not eliminated immediately - they are checked at <strong>The Draw</strong> or <strong>Am I Alive?</strong> <strong>Each player who wants to avoid the Burn must use their own Salt</strong>; one Salt only protects the person who played it, not everyone. (Exception: if The Silence played the Joker, no one can Salt it.)</li>
                 <li><strong>If two effects happen at once (e.g. death and “when a neighbour dies”), who resolves first?</strong> The active player’s triggers resolve first, then clockwise. If still unclear, rule in favour of the defending player.</li>
-                <li><strong>Large groups: do circles ever merge mid-game?</strong> No. Each circle keeps its own Dark and turn order. When circles finish, the <strong>Last Lit</strong> from each (see <a href="#large-groups">Large groups &amp; Final Ritual</a>) begin a separate <strong>Final Ritual</strong>—same classes, fresh Candles, empty Dark—not a merged pile from every table.</li>
+                <li><strong>Large groups: do circles ever merge mid-game?</strong> No. Each circle keeps its own Dark and turn order. When circles finish, the <strong>Last Lit</strong> from each (see <a href="#large-groups">Large groups &amp; Final Ritual</a>) begin a separate <strong>Final Ritual</strong> (same classes, fresh Candles, empty Dark), not a merged pile from every table.</li>
             </ul>
             <h3>Edge cases</h3>
             <ul class="faq-list">
@@ -581,7 +736,7 @@
                 <li><strong>The Priest.</strong> When you <strong>Banish</strong>, take the top card of The Dark into your hand first, including on Siphon. If The Dark is empty, nothing happens.</li>
                 <li><strong>The Watcher.</strong> When you cast a 6 (Sight), you see <strong>both</strong> neighbours’ hands and may take up to <strong>2 cards from each</strong> (4 total). You may stop early by closing the hand view once you have taken all you want.</li>
                 <li><strong>The Usurer.</strong> As your action, choose a neighbour; take <strong>2 cards</strong> from their hand to yours, then they <strong>Draw 1</strong> from their Candle (if any). You do not discard a card and do not give them a card in return.</li>
-                <li><strong>The Sadist.</strong> When you <strong>Cast Scare (3)</strong>, your chosen neighbour shuffles and <strong>blindly</strong> discards <strong>3</strong> cards to The Dark (instead of 2). No one chooses which cards—same as a normal Scare, just one more discard.</li>
+                <li><strong>The Sadist.</strong> When you <strong>Cast Scare (3)</strong>, your chosen neighbour shuffles and <strong>blindly</strong> discards <strong>3</strong> cards to The Dark (instead of 2). No one chooses which cards - same as a normal Scare, just one more discard.</li>
                 <li><strong>The Sufferer.</strong> You need <strong>4 ghosts of the same suit</strong> in your Shadow to be Possessed (everyone else needs 3).</li>
                 <li><strong>Drain (4) vs The Skeptic.</strong> The Skeptic is immune to Drain. No cards are taken from that neighbour; the 4 is still discarded to The Dark. Other neighbours are still Drained normally.</li>
                 <li><strong>The Plague.</strong> When a ghost that The Plague Haunted is Banished (and not Siphoned), it spreads to a <strong>neighbour of the Banisher</strong> instead of The Dark. Each time it is Banished again, it passes to one of <strong>that</strong> player’s neighbours. A plagued ghost <strong>cannot visit the same player twice</strong>; when it cannot spread, it goes to The Dark. The Plague cannot receive their own plagued ghosts.</li>
@@ -589,24 +744,25 @@
                 <li><strong>The Witness.</strong> The Witness cannot win. If only two players remain and one is The Witness, <strong>both lose</strong> (no winner). In a 2‑player game with The Witness, there is no winner.</li>
                 <li><strong>Haunt vs The Unseen.</strong> When a neighbour would Haunt The Unseen, they may discard 1 card to The Dark to cancel the Haunt (both cards go to The Dark).</li>
                 <li><strong>Haunt vs The Hex.</strong> When a neighbour plays a <strong>number card</strong> (A–10) to Haunt The Hex, they may reveal a <strong>matching suit</strong> from hand. The Hex's card goes to The Dark; the Haunting card becomes a <strong>ghost in the attacker's Shadow</strong> instead of The Hex's. A completed reflect <strong>cannot be Salted</strong>. See below for details.</li>
-                <li><strong>Haunt vs The Hex — resolution order.</strong> When a Haunt targets The Hex: (1) <strong>The Hex</strong> may reflect if they hold a matching suit. (2) If they <strong>Allow Haunt</strong> or have no match, <strong>Salt</strong> and other blocks (Cryptkeeper Wall, etc.) apply as normal. A successful <strong>reflect</strong> resolves the Haunt immediately—the ghost never enters The Hex's Shadow.</li>
-                <li><strong>Haunt vs The Hex — Warlock face Haunts.</strong> <strong>The Warlock</strong> may Haunt with a face card or Joker (strength 10). That is <strong>not</strong> a number-card Haunt, so <strong>The Hex cannot reflect it</strong>. Treat it as a normal Haunt (Salt, Wall, etc.).</li>
-                <li><strong>Haunt vs The Hex — Salt.</strong> <strong>Salt (5)</strong> can cancel a Haunt on The Hex <strong>before</strong> it lands if The Hex does not reflect (or chooses <strong>Allow Haunt</strong>). Salt and the attacker's Haunt card go to The Dark; the attacker's turn ends. <strong>Counter-Salt</strong> works as usual. A completed <strong>Hex reflect</strong> is not an Action and cannot be Salted—the Haunt has already been turned back onto the attacker.</li>
-                <li><strong>Haunt vs The Hex — multiple circles.</strong> If several ritual circles are playing at once, each Haunt is resolved in its own circle only. Hex, Salt, and other reactions never cross between circles until a <strong>Final Ritual</strong> begins.</li>
-                <li><strong>Haunt vs The Hex — The Mime.</strong> If The Mime redirects a Haunt onto The Hex, The Hex reacts as normal. A reflect sends the Haunting card to the <strong>original attacker's Shadow</strong> (the neighbour who played the Haunt card), not The Mime's—unless The Mime was the one Haunting.</li>
-                <li><strong>Haunt vs The Hex — Cryptkeeper Wall.</strong> If The Hex <strong>Allow Haunt</strong>, a Cryptkeeper with a Wall may still block as usual (ghost and Wall to The Dark). A <strong>reflect</strong> never puts a ghost on The Hex, so Walls are not used for the reflect itself—the ghost goes to the <strong>attacker's</strong> Shadow.</li>
-                <li><strong>Haunt vs The Hex — matching suit.</strong> Suit must match exactly (♠ with ♠, ♥ with ♥, etc.). <strong>Rank does not matter</strong> for the reflect. You need a card of that suit in hand when the Haunt is played; you cannot reflect after the ghost has already landed.</li>
-                <li><strong>Haunt vs The Hex — no match in hand.</strong> If The Hex has no card of that suit, the ability does not trigger. The Haunt proceeds (Salt, Wall, etc.). Holding only a different suit does not help.</li>
-                <li><strong>Haunt vs The Hex — reflected ghost.</strong> The ghost in the attacker's Shadow counts for their <strong>Haunting</strong> (Burn) and <strong>Possession</strong> like any other ghost. It is treated as a ghost they Haunted onto themselves for tracking (e.g. Voodoo Doll, Plague, Sealbinder rules apply to that ghost on the attacker as usual).</li>
+                <li><strong>Haunt vs The Hex - resolution order.</strong> When a Haunt targets The Hex: (1) <strong>The Hex</strong> may reflect if they hold a matching suit. (2) If they <strong>Allow Haunt</strong> or have no match, <strong>Salt</strong> and other blocks (Cryptkeeper Wall, etc.) apply as normal. A successful <strong>reflect</strong> resolves the Haunt immediately - the ghost never enters The Hex's Shadow.</li>
+                <li><strong>Haunt vs The Hex - Warlock face Haunts.</strong> <strong>The Warlock</strong> may Haunt with a face card or Joker (strength 10). That is <strong>not</strong> a number-card Haunt, so <strong>The Hex cannot reflect it</strong>. Treat it as a normal Haunt (Salt, Wall, etc.).</li>
+                <li><strong>Haunt vs The Hex - Salt.</strong> <strong>Salt (5)</strong> can cancel a Haunt on The Hex <strong>before</strong> it lands if The Hex does not reflect (or chooses <strong>Allow Haunt</strong>). Salt and the attacker's Haunt card go to The Dark; the attacker's turn ends. <strong>Counter-Salt</strong> works as usual. A completed <strong>Hex reflect</strong> is not an Action and cannot be Salted - the Haunt has already been turned back onto the attacker.</li>
+                <li><strong>Haunt vs The Hex - multiple circles.</strong> If several ritual circles are playing at once, each Haunt is resolved in its own circle only. Hex, Salt, and other reactions never cross between circles until a <strong>Final Ritual</strong> begins.</li>
+                <li><strong>Haunt vs The Hex - The Mime.</strong> If The Mime redirects a Haunt onto The Hex, The Hex reacts as normal. A reflect sends the Haunting card to the <strong>original attacker's Shadow</strong> (the neighbour who played the Haunt card), not The Mime's - unless The Mime was the one Haunting.</li>
+                <li><strong>Haunt vs The Hex - Cryptkeeper Wall.</strong> If The Hex <strong>Allow Haunt</strong>, a Cryptkeeper with a Wall may still block as usual (ghost and Wall to The Dark). A <strong>reflect</strong> never puts a ghost on The Hex, so Walls are not used for the reflect itself - the ghost goes to the <strong>attacker's</strong> Shadow.</li>
+                <li><strong>Haunt vs The Hex - matching suit.</strong> Suit must match exactly (♠ with ♠, ♥ with ♥, etc.). <strong>Rank does not matter</strong> for the reflect. You need a card of that suit in hand when the Haunt is played; you cannot reflect after the ghost has already landed.</li>
+                <li><strong>Haunt vs The Hex - no match in hand.</strong> If The Hex has no card of that suit, the ability does not trigger. The Haunt proceeds (Salt, Wall, etc.). Holding only a different suit does not help.</li>
+                <li><strong>Haunt vs The Hex - reflected ghost.</strong> The ghost in the attacker's Shadow counts for their <strong>Haunting</strong> (Burn) and <strong>Possession</strong> like any other ghost. It is treated as a ghost they Haunted onto themselves for tracking (e.g. Voodoo Doll, Plague, Sealbinder rules apply to that ghost on the attacker as usual).</li>
                 <li><strong>Hand limit (e.g. The Hoarder 8):</strong> Discard down at end of your turn. Effects that add cards can push you over until end of that turn.</li>
                 <li><strong>“Top of Candle” effects with no cards:</strong> Effect fizzles (e.g. Drain does nothing).</li>
             </ul>
         </section>
 
         <section id="large-groups">
-            <h2>Large groups &amp; Final Ritual</h2>
+            <h2>Advanced: large groups &amp; Final Ritual</h2>
+            <p class="manual-play-note">Optional - only needed when <strong>9 or more</strong> people want to play together. For a first game, stick to one circle of 2–8.</p>
             <p>When <strong>9 or more people</strong> want to play, we recommend splitting into <strong>separate ritual circles</strong>. Each circle is its own game: own seating, neighbours, turn order, and <strong>The Dark</strong>. Only <strong>one player acts at a time</strong> within each circle.</p>
-            <p>You <em>can</em> keep everyone in one circle above 8 if you really want—the rules still work—but rounds get long and attention drifts. Splitting into smaller circles (aim for <strong>8 or fewer</strong> each) usually feels better.</p>
+            <p>You <em>can</em> keep everyone in one circle above 8 if you really want - the rules still work - but rounds get long and attention drifts. Splitting into smaller circles (aim for <strong>8 or fewer</strong> each) usually feels better.</p>
             <h3>How to split</h3>
             <p>Split as evenly as you can. Examples when you divide the group:</p>
             <table class="manual-ref-table" style="max-width:28em;">
@@ -628,14 +784,14 @@
             <h3 id="final-ritual">The Final Ritual</h3>
             <p>When each circle ends, do <strong>not</strong> merge card piles or ghost states mid-game. Instead, gather the <strong>Last Lit</strong> from each circle into a new <strong>Final Ritual</strong>:</p>
             <ul class="setup-list">
-                <li><strong>Who advances:</strong> From each circle, take either the sole player still <strong>Lit</strong> when that circle ends, or the <strong>last two players still Lit</strong> (house choice—two per circle makes a fuller Final Ritual).</li>
+                <li><strong>Who advances:</strong> From each circle, take either the sole player still <strong>Lit</strong> when that circle ends, or the <strong>last two players still Lit</strong> (house choice - two per circle makes a fuller Final Ritual).</li>
                 <li><strong>Same classes:</strong> Each player keeps the class they chose in their circle.</li>
                 <li><strong>Fresh flame:</strong> Deal new Candles and starting hands as normal for the Final Ritual player count. <strong>The Dark starts empty</strong> (or as you would for a brand-new game of that size).</li>
                 <li><strong>New turn order:</strong> Decide order again (tiebreaker, random, or agree at the table).</li>
                 <li><strong>Play to one winner:</strong> The last player still Lit in the Final Ritual wins the gathering.</li>
             </ul>
             <p>This avoids bloated Dark piles from shoving several tables into one economy, and keeps reactions (Salt, Hex, Unseen, etc.) clear because only one person acts at a time.</p>
-            <p><strong>Digital:</strong> The app supports one ritual circle of up to <strong>8 players</strong> (our recommended max). For 9+ at a physical table, run separate circles—or one larger circle if your group prefers—then start a new digital game for the Final Ritual with the Last Lit and the same classes.</p>
+            <p><strong>Digital:</strong> The app supports one ritual circle of up to <strong>8 players</strong> (our recommended max). For 9+ at a physical table, run separate circles - or one larger circle if your group prefers - then start a new digital game for the Final Ritual with the Last Lit and the same classes.</p>
         </section>
 
         <section id="full-deck">
@@ -711,8 +867,8 @@
                     <button type="button" id="manual-picked-pin-pick-again" class="tool-btn manual-picked-pin-pick-again-btn">Reset &amp; pick again</button>
                 </div>
             </div>
-            <p class="manual-picked-pin-suit-order" aria-label="Suit tier for tie-breaking: Spades, Hearts, Clubs, Diamonds">
-                <span class="manual-picked-pin-suit-label">Suit tier:</span>
+            <p class="manual-picked-pin-suit-order" aria-label="Suit tier for Banish tie-breaking: Spades, Hearts, Clubs, Diamonds">
+                <span class="manual-picked-pin-suit-label">Suit tier (Banish only):</span>
                 <span class="suit-spades">♠</span> &gt; <span class="suit-hearts">♥</span> &gt; <span class="suit-clubs">♣</span> &gt; <span class="suit-diamonds">♦</span>
             </p>
             <div id="manual-picked-pin-list" class="manual-picked-pin-list" role="tablist" aria-label="Selected classes"></div>
@@ -724,8 +880,8 @@
         <button type="button" class="manual-picked-fullscreen-close" aria-label="Close">&times;</button>
         <div id="manual-picked-fullscreen-grid" class="manual-picked-fullscreen-grid"></div>
         <div class="manual-picked-fullscreen-footer">
-            <p class="manual-picked-pin-suit-order manual-picked-fullscreen-suit-order" aria-label="Suit tier for tie-breaking: Spades, Hearts, Clubs, Diamonds">
-                <span class="manual-picked-pin-suit-label">Suit tier:</span>
+            <p class="manual-picked-pin-suit-order manual-picked-fullscreen-suit-order" aria-label="Suit tier for Banish tie-breaking: Spades, Hearts, Clubs, Diamonds">
+                <span class="manual-picked-pin-suit-label">Suit tier (Banish only):</span>
                 <span class="suit-spades">♠</span> &gt; <span class="suit-hearts">♥</span> &gt; <span class="suit-clubs">♣</span> &gt; <span class="suit-diamonds">♦</span>
             </p>
             <button type="button" id="manual-picked-fullscreen-clear" class="tool-btn secondary manual-picked-fullscreen-clear-btn">Clear classes</button>

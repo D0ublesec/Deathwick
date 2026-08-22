@@ -1,5 +1,5 @@
 /**
- * Deathwick — Audio: music/SFX settings and sound effects.
+ * Deathwick - Audio: music/SFX settings and sound effects.
  * Uses bundled files from audio/*.mp3 when present (e.g. in Electron); otherwise synth fallback.
  */
 (function () {

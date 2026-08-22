@@ -1,4 +1,4 @@
-/* Game view — board, cards, controls, modals */
+/* Game view - board, cards, controls, modals */
 @import 'variables.css';
 @import 'site.css';
 
@@ -113,7 +113,7 @@ body.game-page {
     min-height: 1.2em;
 }
 
-/* View switcher: neighbours only vs all (6+ players) — prominent so player can see full table */
+/* View switcher: neighbours only vs all (6+ players) - prominent so player can see full table */
 #view-switcher-wrap {
     display: none;
     align-items: center;
@@ -230,7 +230,7 @@ body.game-page {
 #game-board #controls-bar { flex-shrink: 0; align-self: stretch; }
 #game-board #selection-hint { align-self: stretch; }
 
-/* Poker-table oval — canvas draws oval in JS to match shape; overlays on top */
+/* Poker-table oval - canvas draws oval in JS to match shape; overlays on top */
 .ritual-table {
     position: relative;
     overflow: visible;
@@ -351,7 +351,7 @@ body.game-page {
     grid-column: 1 / -1;
     width: 100%;
 }
-/* Other players: normal column order — shadow row first (toward player / on table), hand second (toward center). No column-reverse so shadow stays on table, not behind The Dark. */
+/* Other players: normal column order - shadow row first (toward player / on table), hand second (toward center). No column-reverse so shadow stays on table, not behind The Dark. */
 /* One row on table: left (deck + class) | shadow (centre) | candle (right); rotated toward centre */
 .ritual-zone-row {
     display: flex;
@@ -700,7 +700,7 @@ body.game-page {
     object-fit: cover;
 }
 
-/* Outer ritual ring — flush to table edge */
+/* Outer ritual ring - flush to table edge */
 .ritual-table::before {
     content: '';
     position: absolute;
@@ -722,12 +722,12 @@ body.game-page {
     box-shadow: inset 0 0 15px rgba(0,0,0,0.25);
 }
 
-/* Decorative candles removed — only player health candles on table */
+/* Decorative candles removed - only player health candles on table */
 .ritual-candles {
     display: none !important;
 }
 
-/* Thin lines connecting candle clusters (ritual light) — behind candles */
+/* Thin lines connecting candle clusters (ritual light) - behind candles */
 .ritual-candle-lines {
     position: absolute;
     inset: 0;
@@ -753,7 +753,7 @@ body.game-page {
 }
 
 /* 30 candles in 10 clusters (3 per pentagram point); cluster offset in px */
-/* Cluster 1: top — remove 3 candles from top of page */
+/* Cluster 1: top - remove 3 candles from top of page */
 
 /* Cluster 2 */
 .ritual-candles .ambient-candle:nth-child(4) { left: 83.2%; top: 39.1%; transform: translate(-50%, -50%) translate(-10px, 0); animation-delay: 0.08s; }
@@ -779,7 +779,7 @@ body.game-page {
 .ritual-candles .ambient-candle:nth-child(19) { left: 70.9%; top: 56.7%; transform: translate(-50%, -50%) translate(-10px, 0); animation-delay: 0.12s; }
 .ritual-candles .ambient-candle:nth-child(20) { left: 70.9%; top: 56.7%; transform: translate(-50%, -50%) translate(10px, 0); animation-delay: 0.2s; }
 .ritual-candles .ambient-candle:nth-child(21) { left: 70.9%; top: 56.7%; transform: translate(-50%, -50%) translate(0, 12px); animation-delay: 0.02s; }
-/* Cluster 8 (bottom centre) — hide so candle not in front of player 1 */
+/* Cluster 8 (bottom centre) - hide so candle not in front of player 1 */
 .ritual-candles .ambient-candle:nth-child(22),
 .ritual-candles .ambient-candle:nth-child(23),
 .ritual-candles .ambient-candle:nth-child(24) { display: none; }
@@ -949,7 +949,7 @@ body.game-page {
     height: clamp(50px, 11vw, 64px);
 }
 
-/* The Dark — void pit at centre: creepy, always on top */
+/* The Dark - void pit at centre: creepy, always on top */
 .dark-ritual-symbol {
     width: clamp(56px, 13vw, 88px);
     height: clamp(56px, 13vw, 88px);
@@ -1121,7 +1121,7 @@ body.game-page {
     overflow: visible;
     margin: 2px;
 }
-/* Your seat: no box — just name, hand label, and cards */
+/* Your seat: no box - just name, hand label, and cards */
 .ritual-seat-you {
     border: none;
     box-shadow: none;
@@ -1231,7 +1231,7 @@ body.game-page {
 .ritual-seat-other.seat-crowded .nb-shadow-zone,
 .ritual-seat-other.seat-crowded .seat-shadow-zone { min-width: calc(2 * 20px + 2px + 4px); }
 
-/* 4+ players: compact representation — show hand/shadow as counts to save space */
+/* 4+ players: compact representation - show hand/shadow as counts to save space */
 .ritual-seat-other.seat-compact .seat-hand-label,
 .ritual-seat-other.seat-compact .seat-shadow-label { font-size: 0.5rem; }
 .ritual-seat-other.seat-compact .nb-hand-zone,
@@ -1331,7 +1331,7 @@ body.game-page {
     font-size: clamp(0.7rem, 2vw, 0.85rem);
 }
 
-/* Ritual icon on current player(s) turn — highly visible */
+/* Ritual icon on current player(s) turn - highly visible */
 .ritual-seat.active-turn .seat-header::before {
     content: '✦';
     color: var(--accent-color);
@@ -1381,7 +1381,7 @@ body.game-page {
     margin-top: 4px;
 }
 
-/* Candle visual — shortens/grows with value (--candle-pct: 0–100), flickering flame */
+/* Candle visual - shortens/grows with value (--candle-pct: 0–100), flickering flame */
 .candle-visual {
     --candle-pct: 100;
     width: 24px;
@@ -1591,7 +1591,7 @@ body.game-page {
     z-index: 2;
 }
 
-/* Cards — ritual deck, candlelit */
+/* Cards - ritual deck, candlelit */
 .g-card {
     width: 56px;
     height: 80px;
@@ -1743,7 +1743,7 @@ body.game-page {
     transform: rotate(180deg);
 }
 
-/* Card info (i) — cast/summon effect, non-invasive */
+/* Card info (i) - cast/summon effect, non-invasive */
 .g-card {
     position: relative;
 }
@@ -1807,7 +1807,7 @@ body.game-page {
     color: var(--text-color);
 }
 
-/* The Dark — top of discard pile shown on the right side of the page */
+/* The Dark - top of discard pile shown on the right side of the page */
 .dark-preview {
     position: fixed;
     top: 50%;
@@ -1847,7 +1847,7 @@ body.game-page {
 .dark-preview-card .g-card .br { font-size: 0.75rem; }
 .dark-preview-card .g-card .mid { font-size: 1.15rem; }
 
-/* Selected card preview — centered, non-blocking so actions remain clickable; close via button */
+/* Selected card preview - centered, non-blocking so actions remain clickable; close via button */
 .selected-card-preview-wrap {
     position: fixed;
     inset: 0;
@@ -1933,7 +1933,7 @@ body.game-page {
     50% { border-color: var(--magic-color); }
 }
 
-/* Controls bar — ritual altar strip, creepy */
+/* Controls bar - ritual altar strip, creepy */
 #controls-bar {
     position: relative;
     display: flex;
@@ -1981,6 +1981,18 @@ body.game-page {
     grid-template-columns: repeat(3, 1fr);
     gap: 10px 12px;
     margin: 16px 0 0;
+}
+
+.actions-modal-rank-suit-note {
+    font-size: 0.8rem;
+    line-height: 1.45;
+    color: var(--text-muted);
+    text-align: left;
+    margin: 0 0 4px;
+    padding: 10px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    background: rgba(0, 0, 0, 0.25);
 }
 
 .actions-modal-grid .game-btn {
@@ -2145,6 +2157,11 @@ body.game-page {
 }
 .cheatsheet-content #cheatsheet-body .cs-list li {
     margin: 0.25em 0;
+}
+.cheatsheet-content #cheatsheet-body .cs-note {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin: 0.5em 0 0;
 }
 .cheatsheet-content #cheatsheet-body .cs-table {
     width: 100%;
@@ -2319,6 +2336,26 @@ body.game-page.ritual-theme-blood #theme-btn-blood {
 .class-box:hover {
     border-color: var(--accent-color);
     background: var(--bg-elevated);
+}
+
+.class-box-witness {
+    border-color: rgba(201, 77, 40, 0.55);
+}
+
+.class-witness-notice {
+    font-size: 0.85rem;
+    color: var(--accent-color);
+    text-align: center;
+    margin: 0 0 12px;
+    padding: 8px 10px;
+    border: 1px solid var(--accent-color);
+    border-radius: var(--radius-sm);
+    background: rgba(201, 77, 40, 0.08);
+}
+
+.class-witness-warn {
+    color: var(--accent-color);
+    font-weight: 600;
 }
 
 .class-title {

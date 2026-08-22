@@ -1,4 +1,4 @@
-/* Shared game data — used by both manual and game */
+/* Shared game data - used by both manual and game */
 window.CLASSES = [
     { name: "THE CLOWN", desc: "Ghosts you Haunt cannot be Banished by Numbers, only Face or Cleanse (7)." },
     { name: "THE CRYPTKEEPER", desc: "Play a card face-down in your Shadow as a Wall (costs your whole turn, your one action). When someone Haunts you, you may discard one Wall: that ghost and the Wall both go to The Dark (the ghost never lands on your Shadow)." },

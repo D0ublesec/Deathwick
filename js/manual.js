@@ -1,4 +1,4 @@
-/* Manual view only — class selector, diagram buttons */
+/* Manual view only - class selector, diagram buttons */
 (function () {
     var CLASSES = window.CLASSES;
     var getClassImageFilename = window.getClassImageFilename;
@@ -31,19 +31,19 @@
         {
             id: 'four-plus-only',
             title: '4+ players only',
-            subtitle: '3 classes — need at least 4 players',
+            subtitle: '3 classes - need at least 4 players',
             match: function (c) { return !!fourPlusOnlySet[c.name]; }
         },
         {
             id: 'three-plus-only',
             title: '3+ players only',
-            subtitle: '6 classes — not in the 2-player pool',
+            subtitle: '6 classes - not in the 2-player pool',
             match: function (c) { return !!threePlusOnlySet[c.name]; }
         },
         {
             id: 'two',
             title: '2-player pool',
-            subtitle: '29 classes — available at every group size',
+            subtitle: '29 classes - available at every group size',
             match: function (c) { return !!twoPoolSet[c.name]; }
         }
     ];
@@ -389,8 +389,17 @@
         var nameEl = document.getElementById('name-' + i);
         var descEl = document.getElementById('desc-' + i);
         var img = document.getElementById('img-' + i);
+        var cardEl = nameEl ? nameEl.closest('.choice-card') : null;
         if (nameEl) nameEl.textContent = cls.name;
-        if (descEl) descEl.textContent = cls.desc;
+        if (descEl) {
+            var witnessPrefix = cls.name === 'THE WITNESS'
+                ? 'Cannot win - if only two remain and one is The Witness, both lose. '
+                : '';
+            descEl.textContent = witnessPrefix + cls.desc;
+        }
+        if (cardEl) {
+            cardEl.classList.toggle('choice-card-witness', cls.name === 'THE WITNESS');
+        }
         if (!img) return;
         var imgBtn = img.closest('.choice-card-img-btn');
         var path = getClassImagePath(cls.name);

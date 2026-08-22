@@ -1,4 +1,4 @@
-/* Deathwick — Design tokens (ritual circle, flickering candles) */
+/* Deathwick - Design tokens (ritual circle, flickering candles) */
 :root {
     --bg-color: #060508;
     --bg-elevated: #0c0a0e;
@@ -40,7 +40,7 @@
     --candle-wax-shadow: #a09878;
     --dark-pit: #050408;
     --dark-glow: rgba(80, 40, 60, 0.3);
-    /* Ritual theme: fire (default) vs blood — overridden by body.ritual-theme-blood */
+    /* Ritual theme: fire (default) vs blood - overridden by body.ritual-theme-blood */
     --ritual-bg: #0a0806;
     --ritual-bg-radial: rgba(60, 30, 15, 0.5);
     --ritual-table-surface: #141210;
@@ -63,7 +63,7 @@
     --safe-right: env(safe-area-inset-right, 0px);
 }
 
-/* Blood theme — deep red, ritual sigil / blood circle */
+/* Blood theme - deep red, ritual sigil / blood circle */
 body.game-page.ritual-theme-blood {
     --ritual-bg: #0c0505;
     --ritual-bg-radial: rgba(80, 20, 20, 0.6);
@@ -88,7 +88,7 @@ body.game-page.ritual-theme-blood {
     --dark-glow: rgba(60, 15, 20, 0.5);
 }
 
-/* Fire theme (default) — ember, warm candlelight, dark table */
+/* Fire theme (default) - ember, warm candlelight, dark table */
 body.game-page.ritual-theme-fire {
     --ritual-bg: #0a0806;
     --ritual-bg-radial: rgba(60, 30, 15, 0.5);
@@ -98,7 +98,7 @@ body.game-page.ritual-theme-fire {
     --ritual-ring-color: rgba(201, 77, 40, 0.3);
 }
 
-/* Dark ritual — stricter ruling + visibly darker theme so it's clear dark mode is on */
+/* Dark ritual - stricter ruling + visibly darker theme so it's clear dark mode is on */
 body.game-page.dark-mode {
     --bg-color: #020203;
     --bg-elevated: #050406;

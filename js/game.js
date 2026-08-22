@@ -1,4 +1,4 @@
-/* Game engine + UI — requires data.js loaded first (CLASSES, SUITS, RANKS, getVal) */
+/* Game engine + UI - requires data.js loaded first (CLASSES, SUITS, RANKS, getVal) */
 (function () {
     var CLASSES = window.CLASSES;
     var SUITS = window.SUITS;
@@ -72,13 +72,16 @@
         var modal = document.getElementById('class-modal');
         var title = document.getElementById('class-select-title');
         var opts = document.getElementById('class-options');
+        var witnessNotice = document.getElementById('class-witness-notice');
         if (!modal || !opts) return;
         modal.style.display = 'flex';
         if (title) title.textContent = p.name + ': CHOOSE CLASS';
+        var hasWitness = choices.some(function (c) { return c.name === 'THE WITNESS'; });
+        if (witnessNotice) witnessNotice.hidden = !hasWitness;
         opts.innerHTML = '';
         choices.forEach(function (c) {
             var b = document.createElement('div');
-            b.className = 'class-box';
+            b.className = 'class-box' + (c.name === 'THE WITNESS' ? ' class-box-witness' : '');
             var classImgName = getClassImageFilename(c.name);
             if (classImgName) {
                 var img = document.createElement('img');
@@ -92,7 +95,10 @@
             }
             var textWrap = document.createElement('div');
             textWrap.className = 'class-box-text';
-            textWrap.innerHTML = '<span class="class-title">' + c.name + '</span><small>' + c.desc + '</small>';
+            var witnessLead = c.name === 'THE WITNESS'
+                ? '<span class="class-witness-warn">Cannot win - </span>'
+                : '';
+            textWrap.innerHTML = '<span class="class-title">' + c.name + '</span><small>' + witnessLead + c.desc + '</small>';
             b.appendChild(textWrap);
             b.onclick = function () {
                 applyClassToPlayer(p, c);
@@ -148,6 +154,79 @@
     };
     var GAME_SETTINGS_KEY = 'finalFlickerGameSettings';
     var SIM_MAX_TURNS = 10000;
+    var SIM_MAX_STEPS = SIM_MAX_TURNS * 8;
+
+    function simResolveBlockingState() {
+        if (gameState.pendingGrimoireRejection) {
+            var grGuard = 0;
+            while (gameState.pendingGrimoireRejection && grGuard < 8) {
+                grGuard++;
+                promptNextGrimoireRejectionCandidate();
+            }
+            if (gameState.pendingGrimoireRejection) {
+                var grPending = gameState.pendingGrimoireRejection;
+                gameState.pendingGrimoireRejection = null;
+                grPending.onContinue();
+            }
+            return true;
+        }
+        if (gameState.pendingJokerAttacker) {
+            runNextJokerTarget();
+            return true;
+        }
+        if (gameState.pendingPlagueSpread) {
+            var plaguePending = gameState.pendingPlagueSpread;
+            gameState.pendingPlagueSpread = null;
+            if (plaguePending.candidates && plaguePending.candidates.length) {
+                var plaguePick = plaguePending.candidates[Math.floor(Math.random() * plaguePending.candidates.length)];
+                if (plaguePending.ghost.plagueVisited.indexOf(plaguePick.id) < 0) plaguePending.ghost.plagueVisited.push(plaguePick.id);
+                plaguePick.shadow.push(plaguePending.ghost);
+                log(plaguePending.banisher.name + ' Banished ' + plaguePending.ghost.r + plaguePending.ghost.s + ' but THE PLAGUE spread it to ' + plaguePick.name + '.');
+                if (checkPossessionInstantIfDark(plaguePick)) {
+                    if (plaguePending.onComplete) plaguePending.onComplete();
+                    return true;
+                }
+            } else {
+                gameState.lastDiscardByPlayerId = plaguePending.banisher.id;
+                gameState.discard.push(plaguePending.ghost);
+            }
+            if (plaguePending.onComplete) plaguePending.onComplete();
+            return true;
+        }
+        return false;
+    }
+
+    function simDriveUntilDone() {
+        var steps = 0;
+        while (!gameState.isGameOver && steps < SIM_MAX_STEPS) {
+            steps++;
+            if (simResolveBlockingState()) continue;
+            var p = gameState.players[gameState.activeIdx];
+            if (!p) break;
+            if (p.isDead) {
+                endTurn();
+                continue;
+            }
+            if (p.type !== 'ai') break;
+            if (gameState.turnPhase === 'HAUNTING') {
+                runAIHauntingAndDraw(p);
+                continue;
+            }
+            if (gameState.turnPhase === 'ACTION') {
+                runAIActionPhase(p);
+                continue;
+            }
+            if (gameState.turnPhase === 'END') {
+                endTurn();
+                continue;
+            }
+            break;
+        }
+        if (gameState.simStats) gameState.simStats.simSteps = steps;
+        if (!gameState.isGameOver) {
+            gameOver('Sim aborted: step limit exceeded.');
+        }
+    }
 
     function isSimMode() {
         return !!gameState.simMode;
@@ -155,7 +234,6 @@
 
     function simSchedule(fn, delay) {
         if (isSimMode()) {
-            if (!gameState.isPaused) fn();
             return null;
         }
         return setTimeout(function () {
@@ -258,9 +336,36 @@
             noWinnerReason: null,
             finalists: [],
             eliminations: [],
-            actions: { haunt: {}, cast: {}, summon: {}, banish: {} },
-            turns: 0
+            eliminationOrder: [],
+            placements: [],
+            actions: { haunt: {}, cast: {}, summon: {}, banish: {}, pass: 0 },
+            classAbilities: {},
+            grimoireRejects: 0,
+            jokerPlays: 0,
+            deathReasons: { consumed: 0, possessed: 0, witness: 0 },
+            roundTurns: 0,
+            logEvents: 0,
+            simSteps: 0,
+            completedFully: true,
+            abortedReason: null
         };
+    }
+
+    function recordSimMetric(key, amount) {
+        if (!isSimMode() || !gameState.simStats) return;
+        var v = gameState.simStats[key];
+        if (typeof v === 'number') gameState.simStats[key] = v + (amount || 1);
+    }
+
+    function recordSimClassAbility(key) {
+        if (!isSimMode() || !gameState.simStats) return;
+        if (!gameState.simStats.classAbilities) gameState.simStats.classAbilities = {};
+        gameState.simStats.classAbilities[key] = (gameState.simStats.classAbilities[key] || 0) + 1;
+    }
+
+    function recordSimDeathReason(reason) {
+        if (!isSimMode() || !gameState.simStats || !gameState.simStats.deathReasons) return;
+        gameState.simStats.deathReasons[reason] = (gameState.simStats.deathReasons[reason] || 0) + 1;
     }
 
     function recordSimClassSelection(p, cls) {
@@ -269,11 +374,16 @@
     }
 
     function recordSimAction(actionType, rank) {
-        if (!isSimMode() || !gameState.simStats || !rank) return;
+        if (!isSimMode() || !gameState.simStats) return;
+        if (actionType === 'pass') {
+            gameState.simStats.actions.pass = (gameState.simStats.actions.pass || 0) + 1;
+            return;
+        }
         var bucket = gameState.simStats.actions[actionType];
-        if (!bucket) return;
+        if (!bucket || !rank) return;
         var key = String(rank);
         bucket[key] = (bucket[key] || 0) + 1;
+        if (key === 'JOKER' || key === '★') recordSimMetric('jokerPlays');
     }
 
     function trackSimLog(msg) {
@@ -292,7 +402,11 @@
     function finalizeSimGame(msg) {
         var stats = gameState.simStats;
         if (!stats) return;
-        stats.turns = logSequence;
+        stats.roundTurns = gameState.simTurnCount || 0;
+        stats.logEvents = logSequence;
+        stats.turns = stats.roundTurns;
+        stats.completedFully = msg.indexOf('Sim aborted') < 0;
+        if (!stats.completedFully) stats.abortedReason = msg;
         if (msg.indexOf(' WINS!') >= 0) {
             var alive = gameState.players.filter(function (pl) { return !pl.isDead; });
             if (alive.length === 1 && alive[0].class) {
@@ -306,6 +420,17 @@
             stats.noWinnerReason = msg;
             stats.finalists = gameState.players.filter(function (pl) { return pl.class; }).map(function (pl) {
                 return { className: pl.class.name, survived: !pl.isDead };
+            });
+        }
+        stats.placements = [];
+        if (stats.winner && stats.winner.className) {
+            stats.placements.push({ className: stats.winner.className, place: 1 });
+        }
+        for (var ei = 0; ei < stats.eliminationOrder.length; ei++) {
+            stats.placements.push({
+                className: stats.eliminationOrder[ei].className,
+                place: stats.playerCount - ei,
+                reason: stats.eliminationOrder[ei].reason
             });
         }
     }
@@ -326,6 +451,8 @@
         gameState.pendingCardIdx = null;
         gameState.pendingGhostIdx = null;
         gameState.isGameOver = false;
+        gameState.isPaused = false;
+        gameState.bonusRitualAction = false;
         gameState.lastDamageTo = {};
         gameState.darkMode = false;
         gameState.funeralBellTriggeredThisTurn = false;
@@ -338,6 +465,10 @@
         gameState.pendingSkipBurn = false;
         gameState.simTurnCount = 0;
         logSequence = 0;
+        saltCallback = null;
+        saltCounterCallback = null;
+        readyCallback = null;
+        alertModalCallback = null;
         for (var i = 0; i < playerCount; i++) {
             gameState.players.push({
                 id: i,
@@ -358,6 +489,7 @@
         gameState.simMode = true;
         gameState.simStats = createEmptySimGameStats(playerCount);
         chooseFirstPlayerRandom();
+        simDriveUntilDone();
         gameState.simMode = false;
         return gameState.simStats;
     }
@@ -386,7 +518,7 @@
             results.push(result);
             index++;
             onProgress(index, count, result);
-            simSchedule(runNext, 0);
+            setTimeout(runNext, 0);
         }
 
         runNext();
@@ -693,14 +825,32 @@
     var MAX_RITUAL_CIRCLE_PLAYERS = 8;
     var CHEATSHEET_TURN_DARK = '<li>Empty Candle at <strong>The Draw</strong> or <strong>Am I Alive?</strong> → Consumed (lose).</li>';
     var CHEATSHEET_POSSESSION_DARK = '<li>3 Ghosts same suit → Possessed (lose) at <strong>end of your turn</strong> only. THE SUFFERER needs 4. Ghosts added on others’ turns wait until your turn ends.</li>';
-    var CHEATSHEET_REST = '<section class="cs-section"><h3>Ritual actions</h3><ul class="cs-list"><li><strong>Haunt:</strong> number card to a neighbour\'s Shadow.</li><li><strong>Banish:</strong> match/beat a Ghost in your Shadow.</li><li><strong>Séance:</strong> pair → heal 4 from The Dark.</li><li><strong>Cast</strong> (number cards) / <strong>Summon</strong> (face cards &amp; Jokers): use card effect (see Grimoire).</li><li><strong>Flicker:</strong> shuffle hand, draw 3.</li><li><strong>Ability:</strong> class power.</li><li><strong>Abstain:</strong> skip your Ritual action (uses your action this turn).</li></ul></section>' +
-        '<section class="cs-section"><h3>Banish &amp; Siphon</h3><ul class="cs-list"><li><strong>Banish:</strong> play a card on a ghost in your Shadow (equal or higher value; suit tier breaks ties).</li><li><strong>Siphon (Heal):</strong> when your Banish card\'s rank matches the ghost (or Cleanse 7 suit matches), put the ghost on the bottom of your Candle instead of The Dark. Spades cannot be Siphoned.</li><li><strong>Face cards:</strong> J, Q, and K only. <strong>Jokers</strong> are separate (Summoned for BOO!). <strong>The Warlock</strong> may Haunt with a face card or Joker (strength 10).</li></ul></section>' +
+    var CHEATSHEET_RANK_SUIT = '<section class="cs-section"><h3>Rank &amp; suit (when they matter)</h3>' +
+        '<p class="cs-note"><strong>Reference:</strong> Ace=1; numbers as printed; J/Q/K=10. Suit tier (Banish ties only): ♠ &gt; ♥ &gt; ♣ &gt; ♦. ♠ never Siphon.</p>' +
+        '<ul class="cs-list">' +
+        '<li><strong>Panic:</strong> Compare <strong>strength only</strong>. Equal or higher = success. <strong>Suits never apply.</strong> Success: ghost + flipped card both to <strong>The Dark</strong> - <strong>no Siphon</strong> even if ranks match. Only a <strong>Joker</strong> flip Siphons (unless ♠).</li>' +
+        '<li><strong>Banish:</strong> Need equal or higher <strong>value</strong>. On a value tie, <strong>suit tier</strong> ♠ &gt; ♥ &gt; ♣ &gt; ♦. Siphon only if <strong>ranks match</strong> (non-♠). Matching rank is always Banishing.</li>' +
+        '<li><strong>Cleanse (7):</strong> Same value check to remove the ghost. Cleanse Siphon uses <strong>suit only</strong> (never ♠). If you Siphon because ranks match, you are Banishing, not Cleansing.</li>' +
+        '<li><strong>Purge (K):</strong> <strong>Purge all</strong> ghosts to The Dark. Neither Banish nor Cleanse. <strong>No Siphon</strong> - even matching suits go to The Dark. No value check.</li>' +
+        '</ul>' +
+        '<p class="cs-note">Short version: Panic = strength, no Siphon (except Joker). Banish Siphon = rank. Cleanse Siphon = suit (7 only). Purge = all to The Dark, never Siphon.</p>' +
+        '</section>';
+    var CHEATSHEET_REST = '<section class="cs-section"><h3>Ritual actions</h3><ul class="cs-list"><li><strong>Haunt:</strong> number card to a neighbour\'s Shadow (rank only for strength; suit is just the ghost\'s suit).</li><li><strong>Banish:</strong> equal/higher value; suit tier on ties (see Rank &amp; suit).</li><li><strong>Séance:</strong> pair → heal 4 from The Dark.</li><li><strong>Cast</strong> (number cards) / <strong>Summon</strong> (face cards &amp; Jokers): use card effect (see Grimoire).</li><li><strong>Flicker:</strong> shuffle hand, draw 3.</li><li><strong>Ability:</strong> class power.</li><li><strong>Abstain:</strong> skip your Ritual action (uses your action this turn).</li></ul></section>' +
+        '<section class="cs-section"><h3>Banish, Cleanse &amp; Purge</h3><ul class="cs-list">' +
+        '<li><strong>Banish:</strong> play a hand card onto a ghost in your Shadow. Must meet or beat value; on a tie use suit tier ♠&gt;♥&gt;♣&gt;♦. Siphon on rank match (non-♠).</li>' +
+        '<li><strong>Cleanse (7):</strong> Value check to remove. Siphon gift is <strong>suit match only</strong>. Rank-match Siphon with a 7 is Banishing, not Cleanse.</li>' +
+        '<li><strong>Purge (K):</strong> Purge all ghosts to The Dark. Not Banish or Cleanse. <strong>Cannot Siphon.</strong></li>' +
+        '<li><strong>Siphon (Heal):</strong> ghost to bottom of Candle. Rank = Banishing. Suit on a 7 = Cleanse. Purge never Siphons. Spades never Siphon. Panic does not Siphon except Joker.</li>' +
+        '<li><strong>Panic (contrast):</strong> strength only; suits ignored; equal strength succeeds. Both cards to The Dark - no Siphon unless you flipped a Joker.</li>' +
+        '<li><strong>Face cards:</strong> J, Q, and K only. <strong>Jokers</strong> are separate (Summoned for BOO!). <strong>The Warlock</strong> may Haunt with a face card or Joker (strength 10).</li>' +
+        '</ul></section>' +
         '<section class="cs-section"><h3>Targeting</h3><p>Most effects target one of your two Neighbours (left/right) unless a card or class says otherwise (e.g. <strong>Drain (4)</strong> hits all neighbours; <strong>Greed (2)</strong> = any player; THE OCCULTIST 9 = any player).</p></section>' +
-        '<section class="cs-section"><h3>Grimoire</h3><table class="cs-table"><tr><td>A or 1</td><td>Reprieve</td><td>At the start of your turn you may play the Ace to skip the Haunting phase (you do not Burn); you then Draw and perform the Ritual as normal.</td></tr><tr><td>2</td><td>Greed</td><td>Choose any player; they draw 2 from their Candle. You then take another Ritual action.</td></tr><tr><td>3</td><td>Scare</td><td>Choose a neighbour; they shuffle hand, blindly discard 2 to The Dark.</td></tr><tr><td>4</td><td>Drain</td><td>Take the top two cards from each neighbour\'s Candle and place them on your Candle.</td></tr><tr><td>5</td><td>Salt</td><td>Reaction: cancel any player’s Action except Ace (both to The Dark). The 5 can also be used to Haunt (strength 5).</td></tr><tr><td>6</td><td>Sight</td><td>View a neighbour\'s hand and take two cards.</td></tr><tr><td>7</td><td>Cleanse</td><td>Banish 1 Ghost (to The Dark or Siphon to your Candle).</td></tr><tr><td>8</td><td>Recall</td><td>Take a Ghost from any Shadow to your hand.</td></tr><tr><td>9</td><td>Possess</td><td>Move a Ghost from your Shadow to a neighbour\'s Shadow.</td></tr><tr><td>10</td><td>Rekindle</td><td>Top 3 from The Dark to your Candle, then shuffle Candle.</td></tr><tr><td>J</td><td>Mirror</td><td>Choose a neighbour and swap your Shadow with their Shadow.</td></tr><tr><td>Q</td><td>Medium</td><td>Search Dark, take 1 (numbers or faces; no Joker), OR bottom 2 (no search) → Candle then shuffle.</td></tr><tr><td>K</td><td>Purge</td><td>Banish all Ghosts in your Shadow (to The Dark / Siphon).</td></tr><tr><td>★</td><td>BOO!</td><td>Others Burn until number (to The Dark); number → Ghost in their Shadow.</td></tr></table></section>';
+        '<section class="cs-section"><h3>Grimoire</h3><table class="cs-table"><tr><td>A or 1</td><td>Reprieve</td><td>At the start of your turn you may play the Ace to skip the Haunting phase (you do not Burn); you then Draw and perform the Ritual as normal.</td></tr><tr><td>2</td><td>Greed</td><td>Choose any player; they draw 2 from their Candle. You then take another Ritual action.</td></tr><tr><td>3</td><td>Scare</td><td>Choose a neighbour; they shuffle hand, blindly discard 2 to The Dark.</td></tr><tr><td>4</td><td>Drain</td><td>Take the top two cards from each neighbour\'s Candle and place them on your Candle.</td></tr><tr><td>5</td><td>Salt</td><td>Either keep as a reaction to cancel an Action (except Ace), or Haunt with it (strength 5).</td></tr><tr><td>6</td><td>Sight</td><td>View a neighbour\'s hand and take two cards.</td></tr><tr><td>7</td><td>Cleanse</td><td>Remove 1 ghost (value + suit tier on ties). Cleanse Siphon = suit match only; rank-match Siphon = Banishing. ♠ never Siphon.</td></tr><tr><td>8</td><td>Recall</td><td>Take a Ghost from any Shadow to your hand.</td></tr><tr><td>9</td><td>Possess</td><td>Move a Ghost from your Shadow to a neighbour\'s Shadow.</td></tr><tr><td>10</td><td>Rekindle</td><td>Top 3 from The Dark to your Candle, then shuffle Candle.</td></tr><tr><td>J</td><td>Mirror</td><td>Choose a neighbour and swap your Shadow with their Shadow.</td></tr><tr><td>Q</td><td>Medium</td><td>Search Dark, take 1 (numbers or faces; no Joker), OR bottom 2 (no search) → Candle then shuffle.</td></tr><tr><td>K</td><td>Purge</td><td>Purge all Ghosts to The Dark (not Banish/Cleanse). No Siphon.</td></tr><tr><td>★</td><td>BOO!</td><td>Others Burn until number (to The Dark); number → Ghost in their Shadow.</td></tr></table></section>';
 
     function getCheatsheetHTML() {
-        return '<section class="cs-section"><h3>Win</h3><p>Be the last player with a lit Candle.</p></section>' +
-            '<section class="cs-section"><h3>Turn order</h3><ol class="cs-list"><li>Haunting: if ghosts, choose <strong>Endure</strong> or <strong>Panic</strong> once, then Burn 1 per ghost (or Ace Reprieve to skip).</li><li>Draw 1.</li><li>Perform the Ritual (or Abstain).</li><li>Discard down to 5.</li>' + CHEATSHEET_TURN_DARK + CHEATSHEET_POSSESSION_DARK + '</ol></section>' +
+        return '<section class="cs-section"><h3>Win</h3><p>Be the last player with a lit Candle. Lose if Consumed (empty Candle at Draw or Am I Alive?) or Possessed (3+ ghosts same suit at end of turn; 4+ for The Sufferer).</p></section>' +
+            '<section class="cs-section"><h3>Turn order</h3><ol class="cs-list"><li>Haunting: Ace Reprieve optional first (skip Burn); else Endure or Panic once, then Burn 1 per ghost. Panic: equal/higher strength succeeds; suits ignored; success = both to The Dark (no Siphon except Joker).</li><li>Draw 1. If your Candle is empty here, you are Consumed.</li><li>Perform the Ritual (or Abstain). Class Abilities are separate and usually do not use this action.</li><li>Discard down to 5.</li>' + CHEATSHEET_TURN_DARK + CHEATSHEET_POSSESSION_DARK + '</ol><p class="cs-note">Cast Greed (2): target draws 2, then you take <strong>another</strong> Ritual action.</p></section>' +
+            CHEATSHEET_RANK_SUIT +
             CHEATSHEET_REST;
     }
 
@@ -1436,7 +1586,7 @@
             gameState.turnPhase = 'ACTION';
         } else {
             if (gameState.darkMode) {
-                if (handleDeath(p)) return;
+                if (handleDeath(p, 'consumed')) return;
                 endTurn();
                 return;
             }
@@ -1444,16 +1594,17 @@
         if (!gameState.isGameOver) updateUI();
     }
 
-    function handleDeath(p) {
+    function resolveDeathReason(p, deathReason) {
+        if (deathReason) return deathReason;
+        if (checkPossession(p.shadow, p)) return 'possessed';
+        return 'consumed';
+    }
+
+    function handleDeath(p, deathReason, opts) {
+        opts = opts || {};
         var killerId = gameState.lastDamageTo && gameState.lastDamageTo[p.id];
         var killer = killerId != null ? gameState.players[killerId] : null;
         var neighbours = getNeighbours(p);
-        if (isSimMode() && gameState.simStats && p.class) {
-            gameState.simStats.eliminations.push({
-                victimClass: p.class.name,
-                killerClass: killer && killer.class ? killer.class.name : null
-            });
-        }
         p.isDead = true;
         log(p.name + ' ELIMINATED!');
         if (p.class && p.class.name === 'THE LICH' && !p.usedLichRevive) {
@@ -1466,6 +1617,20 @@
             p.hand = [];
             log(p.name + ' LICH revived! Stole 3 from each.');
             return false;
+        }
+        if (isSimMode() && gameState.simStats && p.class && !opts.skipDeathStats) {
+            var reason = resolveDeathReason(p, deathReason);
+            gameState.simStats.eliminations.push({
+                victimClass: p.class.name,
+                killerClass: killer && killer.class ? killer.class.name : null,
+                reason: reason
+            });
+            recordSimDeathReason(reason);
+            gameState.simStats.eliminationOrder.push({
+                className: p.class.name,
+                playerId: p.id,
+                reason: reason
+            });
         }
         if (neighbours.left && neighbours.left.class && neighbours.left.class.name === 'THE VULTURE') {
             var vLeft = 0;
@@ -1547,7 +1712,7 @@
                 var otherPlayer = alive[0] === witnessPlayer ? alive[1] : alive[0];
                 otherPlayer.isDead = true;
                 log(otherPlayer.name + ' also loses (THE WITNESS).');
-                return handleDeath(otherPlayer);
+                return handleDeath(otherPlayer, 'witness');
             }
         }
         if (alive.length >= 1) {
@@ -1668,7 +1833,7 @@
                         var tl = cards[j].querySelector('.tl');
                         if (mid && tl) parts.push((tl.textContent || '').trim() + (mid.textContent || '').trim());
                     }
-                    tooltip.innerHTML = '<strong>' + (player.name || '') + '</strong> ' + (label ? '— ' + label : '') + (parts.length ? '<div class="shadow-reveal-cards">' + parts.join(', ') + '</div>' : '<div class="shadow-reveal-cards">(empty)</div>');
+                    tooltip.innerHTML = '<strong>' + (player.name || '') + '</strong> ' + (label ? ' -  ' + label : '') + (parts.length ? '<div class="shadow-reveal-cards">' + parts.join(', ') + '</div>' : '<div class="shadow-reveal-cards">(empty)</div>');
                     tooltip.classList.add('visible');
                     tooltip.style.left = Math.min(e.clientX + 12, document.documentElement.clientWidth - 290) + 'px';
                     tooltip.style.top = (e.clientY + 12) + 'px';
@@ -1680,7 +1845,7 @@
                     if (gameState.selectionMode === 'SELECT_TARGET') return;
                     if (e.target.closest('.g-card.targetable')) return;
                     if (!modal || !modalTitle || !modalCards) return;
-                    modalTitle.textContent = (player.name || '') + (label ? ' — ' + label : '') + ' (Shadow)';
+                    modalTitle.textContent = (player.name || '') + (label ? ' - ' + label : '') + ' (Shadow)';
                     modalCards.innerHTML = '';
                     var cards = zone.querySelectorAll('.g-card');
                     for (var j = 0; j < cards.length; j++) {
@@ -1714,15 +1879,15 @@
         '2': { name: 'Greed', effect: 'Choose any player (including yourself). They draw 2 from their Candle to their hand. You then perform another Ritual action this turn.' },
         '3': { name: 'Scare', effect: 'Choose a neighbour. They shuffle their hand and blindly discard 2 to The Dark.' },
         '4': { name: 'Drain', effect: 'Take the top two cards from each neighbour\'s Candle and place them on your Candle.' },
-        '5': { name: 'Salt', effect: 'Reaction: cancel any player’s Action except the Ace (your Salt and their card go to The Dark). You can also play the 5 to Haunt (strength 5).' },
+        '5': { name: 'Salt', effect: 'Either keep as a reaction to cancel an Action (except Ace), or Haunt with it (strength 5). Not both with the same card.' },
         '6': { name: 'Sight', effect: 'Choose a neighbour; view their hand and take two cards of your choice to your hand.' },
-        '7': { name: 'Cleanse', effect: 'Banish 1 Ghost from your Shadow (to the top of The Dark, or to the bottom of your Candle if Siphon).' },
+        '7': { name: 'Cleanse', effect: 'Remove 1 ghost (need equal/higher value; on a tie, suit tier ♠>♥>♣>♦). Cleanse Siphon = suit match only. Rank-match Siphon = Banishing, not Cleanse. Spades never Siphon.' },
         '8': { name: 'Recall', effect: 'Take a Ghost from any Shadow and add it to your hand.' },
         '9': { name: 'Possess', effect: 'Move a Ghost from your Shadow to a neighbour\'s Shadow.' },
         '10': { name: 'Rekindle', effect: 'Take the top 3 cards from The Dark and put them on top of your Candle.' },
         'J': { name: 'Mirror', effect: 'Choose a neighbour and swap your Shadow with their Shadow.' },
         'Q': { name: 'Medium', effect: 'Choose: search The Dark and take 1 card of your choice to your hand (number cards or face cards J/Q/K; not a Joker), OR take the bottom 2 cards from The Dark without searching, add them to your Candle, then shuffle your Candle.' },
-        'K': { name: 'Purge', effect: 'Banish all Ghosts in your Shadow (to the top of The Dark; Siphon if suit matches the King\'s suit and not Spades; Siphoned to bottom of your Candle).' },
+        'K': { name: 'Purge', effect: 'Purge all ghosts in your Shadow to The Dark (neither Banish nor Cleanse; no value check). Cannot Siphon - even matching suits go to The Dark.' },
         'JOKER': { name: 'BOO!', effect: 'Each other player Burns from the top of their Candle until they reveal a number (burned cards go to the top of The Dark; the number becomes a Ghost in their Shadow).' }
     };
 
@@ -2027,7 +2192,7 @@
                 var top = gameState.discard[gameState.discard.length - 1];
                 if (top && !top.isWall) previewCard = top;
             }
-            /* No preview when player selects their own hand card — only for top of The Dark */
+            /* No preview when player selects their own hand card - only for top of The Dark */
             selectedPreviewWrap.classList.toggle('visible', !!previewCard);
             selectedPreviewWrap.setAttribute('aria-hidden', previewCard ? 'false' : 'true');
             selectedPreviewInner.innerHTML = '';
@@ -2069,7 +2234,24 @@
         var hintEl = document.getElementById('selection-hint');
         if (hintEl) {
             if (gameState.selectionMode === 'SELECT_GHOST') {
-                hintEl.textContent = gameState.hauntingPanicMode ? 'Panic: select a ghost in your Shadow to target.' : (gameState.pendingDoomreader ? 'Select a ghost in your Shadow to exile to The Dark.' : (gameState.selectionTarget != null ? 'Select a ghost (yours)' : 'Select a ghost'));
+                if (gameState.hauntingPanicMode) {
+                    hintEl.textContent = 'Panic: pick a ghost. Equal/higher strength succeeds (suits ignored). Success → both to The Dark; no Siphon except Joker.';
+                } else if (gameState.pendingDoomreader) {
+                    hintEl.textContent = 'Select a ghost in your Shadow to exile to The Dark.';
+                } else if (gameState.pendingAction === 'banish') {
+                    hintEl.textContent = 'Banish: pick a ghost you can beat (equal/higher value; on a tie, suit tier ♠>♥>♣>♦). Siphon if ranks match (never ♠).';
+                } else {
+                    var hintActiveCard = p && gameState.pendingCardIdx != null ? p.hand[gameState.pendingCardIdx] : null;
+                    if (hintActiveCard && hintActiveCard.r === '7') {
+                        hintEl.textContent = 'Cleanse: pick a ghost (value + suit tier on ties). Siphon on suit match (Cleanse); rank match = Banishing Siphon. ♠ never Siphon.';
+                    } else if (hintActiveCard && (hintActiveCard.isFace || hintActiveCard.r === 'J' || hintActiveCard.r === 'Q' || hintActiveCard.r === 'K')) {
+                        hintEl.textContent = 'Banish with face card (value 10): equal/higher value; on a tie, suit tier ♠>♥>♣>♦.';
+                    } else if (gameState.selectionTarget != null) {
+                        hintEl.textContent = 'Select a ghost in your Shadow (Banish needs equal/higher value; suit tier on ties).';
+                    } else {
+                        hintEl.textContent = 'Select a ghost';
+                    }
+                }
                 hintEl.style.display = 'block';
             } else if (gameState.selectionMode === 'SELECT_TARGET') {
                 var hintActive = getActivePlayer();
@@ -2086,13 +2268,13 @@
                 hintEl.textContent = 'Click a card in your hand to discard (cancel the Haunt).';
                 hintEl.style.display = 'block';
             } else if (gameState.selectionMode === 'PHANTOM_DECISION' && gameState.pendingPhantomCancel) {
-                hintEl.textContent = 'THE UNSEEN: use the popup — allow the Haunt or discard 1 to cancel (both cards → The Dark).';
+                hintEl.textContent = 'THE UNSEEN: use the popup - allow the Haunt or discard 1 to cancel (both cards → The Dark).';
                 hintEl.style.display = 'block';
             } else if (gameState.selectionMode === 'MIME_REDIRECT_DISCARD' && gameState.pendingMimeRedirect) {
                 hintEl.textContent = 'Click a card to discard (redirect Haunt to ' + gameState.pendingMimeRedirect.otherNeighbour.name + ').';
                 hintEl.style.display = 'block';
             } else if (gameState.selectionMode === 'MIME_DECISION' && gameState.pendingMimeRedirect) {
-                hintEl.textContent = 'THE MIME: use the popup — accept the Haunt or discard 1 to redirect to ' + gameState.pendingMimeRedirect.otherNeighbour.name + '.';
+                hintEl.textContent = 'THE MIME: use the popup - accept the Haunt or discard 1 to redirect to ' + gameState.pendingMimeRedirect.otherNeighbour.name + '.';
                 hintEl.style.display = 'block';
             } else if (gameState.selectionMode === 'HEX_DISCARD') {
                 hintEl.textContent = 'THE HEX: click a matching suit to reflect the Haunt into their Shadow.';
@@ -2208,7 +2390,7 @@
                 if (c.isWall) {
                     el = document.createElement('div');
                     el.className = 'g-card wall-card ghost';
-                    el.innerHTML = '<div class="tl">WALL</div><div class="mid">—</div><div class="br">WALL</div>';
+                    el.innerHTML = '<div class="tl">WALL</div><div class="mid">-</div><div class="br">WALL</div>';
                 } else {
                     el = mkCard(c, true);
                 }
@@ -2354,7 +2536,7 @@
                     if (sc.isWall) {
                         el = document.createElement('div');
                         el.className = 'g-card wall-card ghost small';
-                        el.innerHTML = '<div class="tl">WALL</div><div class="mid">—</div><div class="br">WALL</div>';
+                        el.innerHTML = '<div class="tl">WALL</div><div class="mid">-</div><div class="br">WALL</div>';
                     } else {
                         el = mkCard(sc, true);
                         el.classList.add('small');
@@ -3098,6 +3280,7 @@
             gameState.discard.push(played);
         }
         log(owner.name + ' (THE GRIMOIRE OF REJECTION) rejected ' + caster.name + "'s " + formatPlayedCardLabel(card) + '. Both → The Dark.');
+        recordSimMetric('grimoireRejects');
         return true;
     }
 
@@ -3159,10 +3342,17 @@
     }
 
     function openGrimoireRejectionRevealModal(owner, caster, playedCard, pageIdxs) {
+        if (isSimMode()) {
+            resolveGrimoireRejection(null);
+            return;
+        }
         var modal = document.getElementById('grimoire-rejection-modal');
         var msg = document.getElementById('grimoire-rejection-msg');
         var container = document.getElementById('grimoire-rejection-pages');
-        if (!modal || !container) return;
+        if (!modal || !container) {
+            resolveGrimoireRejection(null);
+            return;
+        }
         if (msg) {
             msg.textContent = caster.name + ' played ' + formatPlayedCardLabel(playedCard) + '. Reveal a matching page (same rank) to cancel? Both cards → The Dark.';
         }
@@ -3364,7 +3554,7 @@
         return false;
     }
 
-    /** Panic: J/Q/K and face-rank ghosts count as 10; Ace–10 use card.val. */
+    /** Panic: J/Q/K and face-rank ghosts count as 10; Ace–10 use card.val. Suits never matter; equal strength succeeds. */
     function panicCompareStrength(card) {
         if (!card || card.isWall) return 0;
         if (card.isFace || card.r === 'J' || card.r === 'Q' || card.r === 'K') return 10;
@@ -3392,7 +3582,7 @@
     function actionBanish() {
         var p = gameState.players[gameState.activeIdx];
         if (gameState.selectedIdxs.length !== 1) {
-            showAlertModal('Select exactly 1 card to banish.', 'Banish');
+            showAlertModal('Select exactly 1 card from your hand to Banish with. Need equal or higher value than the ghost; on a value tie, suit tier breaks it: ♠ > ♥ > ♣ > ♦.', 'Banish');
             return;
         }
         var hasGhosts = p.shadow.some(function (g) { return !g.isWall; });
@@ -3549,7 +3739,7 @@
         var d = document.getElementById('hand-view-area');
         var modal = document.getElementById('hand-view-modal');
         var h2 = modal ? modal.querySelector('h2') : null;
-        if (h2) h2.textContent = need > 1 && gameState.pendingClaimTaken > 0 ? 'Sight — pick one more card to take' : 'Sight — pick a card to take';
+        if (h2) h2.textContent = need > 1 && gameState.pendingClaimTaken > 0 ? 'Sight - pick one more card to take' : 'Sight - pick a card to take';
         if (d) d.innerHTML = '';
         for (var i = 0; i < target.hand.length; i++) {
             (function (idx) {
@@ -3641,8 +3831,8 @@
         var totalSoFar = watcherTotalTaken();
         if (h2) {
             h2.textContent = totalSoFar > 0
-                ? 'Sight (THE WATCHER) — take up to 2 from each neighbour (' + totalSoFar + ' taken so far)'
-                : 'Sight (THE WATCHER) — take up to 2 from each neighbour (4 total)';
+                ? 'Sight (THE WATCHER) - take up to 2 from each neighbour (' + totalSoFar + ' taken so far)'
+                : 'Sight (THE WATCHER) - take up to 2 from each neighbour (4 total)';
         }
         if (d) d.innerHTML = '';
         function addHandLabel(name, taken) {
@@ -3688,7 +3878,7 @@
         var d = document.getElementById('hand-view-area');
         var modal = document.getElementById('hand-view-modal');
         var h2 = modal ? modal.querySelector('h2') : null;
-        if (h2) h2.textContent = "SIGHT (THE WATCHER) — All Neighbours' Hands";
+        if (h2) h2.textContent = "SIGHT (THE WATCHER) - All Neighbours' Hands";
         if (d) d.innerHTML = '';
         if (n.left) {
             var leftLabel = document.createElement('p');
@@ -3910,22 +4100,10 @@
                 break;
             case 'K': {
                 gameState.lastDiscardByPlayerId = p.id;
-                var kingSuit = c.s;
-                var toDark = [];
-                var siphoned = 0;
-                for (var pi = 0; pi < p.shadow.length; pi++) {
-                    var g = p.shadow[pi];
-                    if (g.isWall) { toDark.push(g); continue; }
-                    if (kingSuit === g.s && g.s !== '♠') {
-                        p.candle.push(g);
-                        siphoned++;
-                    } else {
-                        toDark.push(g);
-                    }
-                }
-                gameState.discard.push.apply(gameState.discard, toDark);
+                var purged = p.shadow.slice();
+                gameState.discard.push.apply(gameState.discard, purged);
                 p.shadow = [];
-                log(p.name + ' used Purge.' + (siphoned ? ' Siphoned ' + siphoned + ' to Candle.' : ''));
+                log(p.name + ' used Purge: all ghosts to The Dark (no Siphon).');
                 if (typeof window.playSFX === 'function') window.playSFX('banish');
                 break;
             }
@@ -4019,7 +4197,7 @@
                     });
                     return;
                 } else {
-                    showAlertModal('Card too weak to banish that ghost.', 'Banish');
+                    showAlertModal('That card is too weak. Banish needs equal or higher value; on a tie, suit tier ♠ > ♥ > ♣ > ♦ must favour your card.', 'Banish');
                 }
                 return;
             }
@@ -4093,7 +4271,7 @@
                     finishAction();
                 });
             } else {
-                showAlertModal('Card too weak to banish that ghost.', 'Banish');
+                showAlertModal('That card is too weak. Banish needs equal or higher value; on a tie, suit tier ♠ > ♥ > ♣ > ♦ must favour your card.', 'Banish');
             }
             return;
         }
@@ -4108,7 +4286,7 @@
         }
     }
 
-    /** Siphon when: rank match, or Cleanse 7 suit match, or face ghost banished with 10/face and suit match; never Spades; Leech always (non-Spade). */
+    /** Siphon when: rank match (Banishing), or Cleanse 7 suit match (Cleansing), or face ghost banished with 10/face and suit match; never Spades; Leech always (non-Spade). */
     function computeSiphon(p, c, ghost) {
         if (ghost.s === '♠') return false;
         if (p.class && p.class.name === 'THE LEECH') return true;
@@ -4504,7 +4682,7 @@
             for (var fi = 0; fi < t.hand.length; fi++) {
                 if (t.hand[fi].isFace || t.hand[fi].r === 'J' || t.hand[fi].r === 'Q' || t.hand[fi].r === 'K') { hasFace = true; break; }
             }
-            log(p.name + ' (THE INQUISITOR) revealed ' + t.name + "'s hand" + (hasFace ? '—Face card! ' + t.name + ' Burns 3.' : '.'));
+            log(p.name + ' (THE INQUISITOR) revealed ' + t.name + "'s hand" + (hasFace ? ' - Face card! ' + t.name + ' Burns 3.' : '.'));
             if (hasFace) {
                 for (var bi = 0; bi < 3 && t.candle.length; bi++) {
                     gameState.lastDiscardByPlayerId = t.id;
@@ -4675,13 +4853,13 @@
         var p = gameState.players[gameState.activeIdx];
         if (!p) return;
         if (p && !p.isDead && p.candle.length === 0) {
-            handleDeath(p);
+            handleDeath(p, 'consumed');
             if (gameState.isGameOver) return;
         }
         if (checkPossession(p.shadow, p)) {
             var possThreshold = getPossessionThreshold(p);
             log(p.name + ' POSSESSED! (' + possThreshold + ' same suit at end of turn.)');
-            if (handleDeath(p)) return;
+            if (handleDeath(p, 'possessed')) return;
         }
         var n = gameState.turnOrder.length;
         gameState.turnIdx = (gameState.turnIdx + 1) % n;
@@ -4742,7 +4920,7 @@
         return cnt['♠'] >= threshold || cnt['♥'] >= threshold || cnt['♣'] >= threshold || cnt['♦'] >= threshold;
     }
 
-    /** Possession is evaluated at end of turn only—not when ghosts are added mid-round. */
+    /** Possession is evaluated at end of turn only - not when ghosts are added mid-round. */
     function checkPossessionInstantIfDark(player) {
         return false;
     }
@@ -4854,6 +5032,7 @@
             if (order[i] === 'haunt' && simTryHaunt(ai)) return;
         }
         log('AI Passed');
+        recordSimAction('pass');
         finishAction();
     }
 
@@ -4866,6 +5045,7 @@
                 aiGrPages.push(ai.hand.splice(tuckIdx, 1)[0]);
                 ai.grimoirePageAddedThisTurn = true;
                 log(ai.name + ' placed a page in THE GRIMOIRE OF REJECTION (' + aiGrPages.length + '/3).');
+                recordSimClassAbility('grimoirePageTucked');
             }
         }
         if (isSimMode()) {
@@ -4902,6 +5082,7 @@
                 var t = ai.candle.shift();
                 ai.candle.push(t);
                 log(ai.name + ' (THE ORACLE) put top card on bottom.');
+                recordSimClassAbility('oracleReorder');
             }
         }
         var aiGhostCount = ai.shadow.filter(function (g) { return !g.isWall; }).length;
@@ -4915,9 +5096,13 @@
             gameState.lastDiscardByPlayerId = ai.id;
             gameState.discard.push(aiAce);
             log(ai.name + ' played Reprieve (Ace): skipped the Haunting phase.');
+            recordSimClassAbility('reprieve');
             burn = 0;
         }
-        if (ai.class && ai.class.name === 'THE VESSEL' && burn > 0) burn = Math.max(0, burn - 1);
+        if (ai.class && ai.class.name === 'THE VESSEL' && burn > 0) {
+            burn = Math.max(0, burn - 1);
+            recordSimClassAbility('vesselBurnReduce');
+        }
         for (var i = 0; i < burn; i++) {
             if (ai.candle.length) { gameState.lastDiscardByPlayerId = ai.id; gameState.discard.push(ai.candle.shift()); }
         }
@@ -4938,7 +5123,7 @@
             gameState.turnPhase = 'ACTION';
         } else {
             if (gameState.darkMode) {
-                if (handleDeath(ai)) return;
+                if (handleDeath(ai, 'consumed')) return;
                 endTurn();
                 return;
             }
@@ -5088,6 +5273,10 @@
             });
         }
         if (typeof window.updateMuteButton === 'function') window.updateMuteButton();
+
+        if (document.body.classList.contains('sim-page')) {
+            return;
+        }
 
         if (loadGameState()) {
             var setupModal = document.getElementById('setup-modal');
