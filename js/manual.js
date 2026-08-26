@@ -943,7 +943,8 @@
 
         function expandForHash() {
             var hash = location.hash.slice(1);
-            if (hash === 'curses' || hash === 'calling') hash = hash === 'curses' ? 'classes' : 'class-selection';
+            if (hash === 'curses') hash = 'classes';
+            if (hash === 'calling') hash = 'choose-your-class';
             if (!hash) return;
             var target = document.getElementById(hash);
             if (!target) return;

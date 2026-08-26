@@ -283,6 +283,15 @@
         </div>
     </div>
 
+    <div id="grimoire-stock-modal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <h2 style="color:var(--magic-color)">THE GRIMOIRE OF REJECTION</h2>
+            <p id="grimoire-stock-msg">You were Haunted. Choose one card from the top of The Dark as a Grimoire page, or skip.</p>
+            <div id="grimoire-stock-options" class="card-grid" style="margin-top:12px;"></div>
+            <button type="button" class="game-btn" style="margin-top:12px; background:#444;" onclick="resolveGrimoireStock(null)">Skip</button>
+        </div>
+    </div>
+
     <div id="seer-modal" class="modal" style="display:none;">
         <div class="modal-content">
             <h2 style="color:var(--magic-color)">THE WATCHER</h2>
@@ -315,7 +324,7 @@
     <div id="actions-modal" class="modal">
         <div class="modal-content">
             <h2 style="color:var(--accent-color)">Actions</h2>
-            <p class="actions-modal-rank-suit-note">Rank &amp; suit: <strong>Panic</strong> = strength only; success → both to The Dark (no Siphon except Joker). <strong>Banish</strong> = value, then suit tier on ties; Siphon on <em>rank</em>. <strong>Cleanse (7)</strong> = value check; Siphon on <em>suit</em> only. <strong>Purge (K)</strong> = all ghosts to The Dark (not Banish/Cleanse); <strong>no Siphon</strong>.</p>
+            <p class="actions-modal-rank-suit-note">Rank &amp; suit: <strong>Panic</strong> = strength only; success → both to The Dark (no Siphon except Joker). <strong>Banish</strong> = value, then suit tier on ties; Siphon on <em>rank</em> (number cards only - faces never Siphon). <strong>Cleanse (Cast 7)</strong> = no value check; Siphon on <em>suit</em> only. <strong>Purge (K)</strong> = all ghosts to The Dark (not Banish/Cleanse); <strong>no Siphon</strong>.</p>
             <div class="actions-modal-grid">
                 <button type="button" class="game-btn" id="modal-btn-haunt" onclick="actionFromModal(actionHaunt)">HAUNT</button>
                 <button type="button" class="game-btn" id="modal-btn-banish" onclick="actionFromModal(actionBanish)">BANISH</button>

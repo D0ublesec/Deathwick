@@ -376,6 +376,34 @@ th {
     max-width: none;
 }
 
+.manual-logic-table {
+    min-width: 520px;
+}
+
+.manual-logic-table td:first-child,
+.manual-logic-table td:nth-child(2) {
+    width: auto;
+    font-weight: 700;
+    color: var(--text-color);
+    white-space: nowrap;
+}
+
+.manual-logic-table .logic-yes {
+    color: var(--life-color, #3d8b47);
+    font-weight: 600;
+    background: rgba(61, 139, 71, 0.12);
+}
+
+.manual-logic-table .logic-no {
+    color: var(--panic-color, #c73a2e);
+    font-weight: 600;
+    background: rgba(199, 58, 46, 0.1);
+}
+
+.manual-logic-table .logic-na {
+    color: var(--text-muted);
+}
+
 .manual-ref-effect {
     min-width: 180px;
 }
