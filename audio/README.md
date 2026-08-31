@@ -16,10 +16,9 @@ If present, these replace the built-in synth tones. Use **MP3** or **OGG**; shor
 | `banish.mp3`| Banish - banishing a Ghost (no Siphon) |
 | `cleanse.mp3` | Cleanse (7) / Siphon - banishing a Ghost with rank match |
 | `salt.mp3`  | Using Salt (interrupt)     |
-| `seance.mp3`| Séance - discarding a pair, taking bottom 4 from The Dark |
+| `seance.mp3`| Séance - discarding a pair, taking bottom 6 from The Dark |
 | `cast.mp3`  | Cast / Summon (face card or Joker effect) |
 | `flicker.mp3` | Flicker - shuffle hand, draw 3 |
-| `panic.mp3`  | Panic - flip top of Candle vs Ghost |
 | `turn.mp3`  | Start of turn               |
 | `purge.mp3` | Purge (King) - all ghosts to The Dark |
 | `boo.mp3`   | Joker BOO!                     |

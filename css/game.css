@@ -2406,8 +2406,7 @@ body.game-page.ritual-theme-blood #theme-btn-blood {
     #controls-bar #btn-seance,
     #controls-bar #btn-cast,
     #controls-bar #btn-class,
-    #controls-bar #btn-flicker,
-    #controls-bar #btn-panic { display: none !important; }
+    #controls-bar #btn-flicker { display: none !important; }
     #controls-bar #btn-actions { display: block !important; }
     #controls-bar {
         padding: 8px 10px;

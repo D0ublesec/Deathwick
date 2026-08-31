@@ -55,7 +55,7 @@
             <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:14px; text-align:center;">Empty Candle eliminates you only at <strong>The Draw</strong> or <strong>Am I Alive?</strong> <a href="manual.html#ritual-type" target="_blank" rel="noopener" style="color:var(--accent-color);">Manual → Consumed by the Darkness</a></p>
             <div id="local-setup">
                 <p style="margin-bottom:6px; font-size:0.9rem;"><strong>Number of players:</strong> <span id="player-count-buttons"></span> <span style="font-size:0.8rem; color:var(--text-muted);">(recommended max 8 per circle)</span></p>
-                <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:6px;">Classes in the random draw: <strong>2 players</strong> = 29; <strong>3 players</strong> = 35; <strong>4+</strong> = all 38. At the table you can play with more than 8 in one circle if you wish; from <strong>9+</strong> we recommend splitting - see <a href="manual.html#large-groups" target="_blank" rel="noopener" style="color:var(--accent-color);">Large groups &amp; Final Ritual</a>.</p>
+                <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:6px;">Classes in the random draw: <strong>2 players</strong> = 25; <strong>3 players</strong> = 31; <strong>4+</strong> = all 34. At the table you can play with more than 8 in one circle if you wish; from <strong>9+</strong> we recommend splitting - see <a href="manual.html#large-groups" target="_blank" rel="noopener" style="color:var(--accent-color);">Large groups &amp; Final Ritual</a>.</p>
                 <div id="player-setup-list" style="margin-bottom:10px;"></div>
                 <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;">
                     <button type="button" class="game-btn" onclick="addPlayerSlot()">+ ADD PLAYER</button>
@@ -92,31 +92,19 @@
         </div>
     </div>
 
-    <div id="haunting-panic-modal" class="modal" style="display:none; z-index:2550;">
-        <div class="modal-content" style="border-color:var(--accent-color);">
-            <h2 style="color:var(--accent-color)">THE HAUNTING</h2>
-            <p style="margin-bottom:6px;">Ghosts in your Shadow. Choose before you Burn:</p>
-            <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:16px;"><strong>Endure</strong> - Burn for each ghost. <strong>Panic</strong> - flip top Candle vs one ghost: equal/higher <strong>strength</strong> succeeds (<strong>suits ignored</strong>); both go to The Dark - <strong>no Siphon</strong> unless you flip a Joker. Then Burn for any left.</p>
-            <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
-                <button type="button" class="game-btn" style="background:var(--bg-elevated); color:var(--text-muted);" onclick="resolveHauntingPanic(false)">Endure</button>
-                <button type="button" class="game-btn panic" onclick="resolveHauntingPanic(true)">Panic</button>
-            </div>
-        </div>
-    </div>
-
     <div id="queen-modal" class="modal">
         <div class="modal-content">
             <h2 style="color:var(--magic-color)">THE MEDIUM'S TRANCE</h2>
-            <button type="button" class="game-btn" onclick="queenExhume()">EXHUME (Search The Dark, take 1)</button>
-            <button type="button" class="game-btn" onclick="queenRekindle()">REKINDLE (Bottom 2 from Dark → Candle, shuffle)</button>
+            <p id="queen-modal-prompt" style="font-size:0.85rem; color:var(--text-muted); margin-bottom:16px;">Search The Dark. Take 2 cards of your choice to your hand (not Jokers).</p>
             <div id="exhume-area" class="card-grid"></div>
+            <button type="button" class="game-btn" style="margin-top:12px; background:var(--bg-elevated); color:var(--text-muted);" onclick="cancelQueenMedium()">Cancel</button>
         </div>
     </div>
 
     <div id="reprieve-modal" class="modal" style="display:none;">
         <div class="modal-content" style="border-color:var(--accent-color);">
             <h2 style="color:var(--accent-color)">REPRIEVE (Ace)</h2>
-            <p style="margin-bottom:12px;">At the start of your turn you may play the Ace to skip the Haunting phase (you do not Burn this turn); you then Draw and perform the Ritual as normal.</p>
+            <p style="margin-bottom:12px;">Play at the start of your turn to skip the Haunting phase. Then Draw and perform the Ritual as normal.</p>
             <p style="margin-bottom:16px;"><strong>Play your Ace now to skip Burning?</strong></p>
             <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
                 <button type="button" class="game-btn" id="reprieve-play-btn" onclick="resolveReprieve(true)">Play Ace (skip Haunting)</button>
@@ -152,17 +140,6 @@
             <div id="salt-counter-buttons" style="display:none; gap:20px; justify-content:center;" class="salt-buttons-row">
                 <button type="button" class="game-btn" style="background:#444;" onclick="resolveSaltCounter(false)">No (Haunt cancelled)</button>
                 <button type="button" class="game-btn panic" style="background:var(--salt-color); color:black;" onclick="resolveSaltCounter(true)">Yes (Counter with Salt)</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="phantom-modal" class="modal" style="z-index:3000;">
-        <div class="modal-content" style="border-color:var(--magic-color);">
-            <h2 style="color:var(--magic-color)">THE UNSEEN</h2>
-            <p id="phantom-msg">Discard 1 card to cancel the Haunt?</p>
-            <div style="display:flex; gap:20px; justify-content:center;">
-                <button type="button" class="game-btn" style="background:#444;" onclick="resolvePhantomCancel(true)">ALLOW HAUNT</button>
-                <button type="button" class="game-btn" style="background:var(--magic-color); color:black;" onclick="resolvePhantomCancel(false)">DISCARD 1 TO CANCEL</button>
             </div>
         </div>
     </div>
@@ -305,14 +282,6 @@
         </div>
     </div>
 
-    <div id="usurer-swap-modal" class="modal" style="display:none;">
-        <div class="modal-content" style="border-color:var(--class-color);">
-            <h2 style="color:var(--class-color)">THE USURER</h2>
-            <p id="usurer-swap-msg">Choose cards to take from their hand (2 total). They will then Draw 1 from their Candle.</p>
-            <div id="usurer-swap-cards" class="card-grid" style="margin-top:14px;"></div>
-        </div>
-    </div>
-
     <div id="plague-spread-modal" class="modal" style="display:none; z-index:3000;">
         <div class="modal-content" style="border-color:var(--accent-color);">
             <h2 style="color:var(--accent-color)">THE PLAGUE</h2>
@@ -324,7 +293,7 @@
     <div id="actions-modal" class="modal">
         <div class="modal-content">
             <h2 style="color:var(--accent-color)">Actions</h2>
-            <p class="actions-modal-rank-suit-note">Rank &amp; suit: <strong>Panic</strong> = strength only; success → both to The Dark (no Siphon except Joker). <strong>Banish</strong> = value, then suit tier on ties; Siphon on <em>rank</em> (number cards only - faces never Siphon). <strong>Cleanse (Cast 7)</strong> = no value check; Siphon on <em>suit</em> only. <strong>Purge (K)</strong> = all ghosts to The Dark (not Banish/Cleanse); <strong>no Siphon</strong>.</p>
+            <p class="actions-modal-rank-suit-note">Rank &amp; suit: <strong>Banish</strong> = value, then suit tier on ties; Siphon on <em>rank</em> (number cards only - faces never Siphon). <strong>Cleanse (Cast 7)</strong> = no value check; Siphon on <em>suit</em> only. <strong>Purge (K)</strong> = all ghosts to The Dark (not Banish/Cleanse); <strong>no Siphon</strong>.</p>
             <div class="actions-modal-grid">
                 <button type="button" class="game-btn" id="modal-btn-haunt" onclick="actionFromModal(actionHaunt)">HAUNT</button>
                 <button type="button" class="game-btn" id="modal-btn-banish" onclick="actionFromModal(actionBanish)">BANISH</button>

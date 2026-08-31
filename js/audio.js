@@ -71,7 +71,6 @@
             case 'seance': playTone(360, 0.1, 'sine'); setTimeout(function () { playTone(480, 0.12, 'triangle'); }, 100); break;
             case 'cast': playTone(500, 0.08, 'triangle'); setTimeout(function () { playTone(700, 0.1, 'sine'); }, 60); break;
             case 'flicker': playTone(420, 0.05, 'sine'); setTimeout(function () { playTone(380, 0.05, 'sine'); }, 50); setTimeout(function () { playTone(450, 0.08, 'sine'); }, 100); break;
-            case 'panic': playTone(240, 0.08, 'sawtooth'); setTimeout(function () { playTone(190, 0.14, 'triangle'); }, 70); break;
             case 'boo': playTone(120, 0.2, 'sawtooth'); setTimeout(function () { playTone(90, 0.25, 'sawtooth'); }, 120); break;
             case 'turn': playTone(280, 0.06, 'sine'); break;
             case 'win': playTone(523, 0.15, 'sine'); setTimeout(function () { playTone(659, 0.15, 'sine'); }, 120); setTimeout(function () { playTone(784, 0.2, 'sine'); }, 240); break;
@@ -90,10 +89,9 @@
         { id: 'cleanse', label: 'Cleanse / Siphon', group: 'Ritual', hint: 'Siphon heal to Candle' },
         { id: 'purge', label: 'Purge', group: 'Ritual', hint: 'King - all ghosts to The Dark' },
         { id: 'salt', label: 'Salt', group: 'Ritual', hint: 'Cancel an action' },
-        { id: 'seance', label: 'Séance', group: 'Ritual', hint: 'Pair → heal 4 from The Dark' },
+        { id: 'seance', label: 'Séance', group: 'Ritual', hint: 'Pair → heal 6 from The Dark' },
         { id: 'cast', label: 'Cast / Summon', group: 'Ritual', hint: 'Play a Grimoire effect' },
         { id: 'flicker', label: 'Flicker', group: 'Ritual', hint: 'Shuffle hand, draw 3' },
-        { id: 'panic', label: 'Panic', group: 'Haunting', hint: 'Flip Candle vs a ghost' },
         { id: 'burn', label: 'Burn', group: 'Haunting', hint: 'Candle card to The Dark' },
         { id: 'draw', label: 'Draw', group: 'Haunting', hint: 'Draw from Candle' },
         { id: 'turn', label: 'Turn start', group: 'Haunting', hint: 'Next player\'s turn' },

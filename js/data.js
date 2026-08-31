@@ -3,7 +3,6 @@ window.CLASSES = [
     { name: "THE CLOWN", desc: "Ghosts you Haunt cannot be Banished by Numbers, only Face or Cleanse (7)." },
     { name: "THE CRYPTKEEPER", desc: "Play a card face-down in your Shadow as a Wall (costs your whole turn, your one action). When someone Haunts you, you may discard one Wall: that ghost and the Wall both go to The Dark (the ghost never lands on your Shadow)." },
     { name: "THE CROW", desc: "If a neighbour Burns a Face card (to the top of The Dark), you may add it to your hand instead." },
-    { name: "THE DOOMREADER", desc: "Once per turn (Ability; does not use your Ritual action): discard 1 card to The Dark to banish one ghost from your Shadow to The Dark (no Banish check; no Siphon)." },
     { name: "THE EXORCIST", desc: "Your 7 (Cleanse) removes 2 Ghosts from your Shadow. You Siphon each that is not a Spade and not a face card." },
     { name: "THE EXTORTIONER", desc: "When you play a 6 (Sight), take 3 cards from that neighbour's hand instead of 2." },
     { name: "THE FUNERAL BELL", desc: "When a player dies, each other remaining player Burns 2 cards. You are not affected." },
@@ -11,11 +10,10 @@ window.CLASSES = [
     { name: "THE GRAVEDIGGER", desc: "When a neighbour dies, add their remaining Candle to the bottom of yours." },
     { name: "THE GRIMOIRE OF REJECTION", desc: "When a neighbour Haunts you, you may take one card from the top 3 of The Dark face-down as a Grimoire page (max 3 pages; not in hand size). When a neighbour plays a card as their Ritual action, you may reveal a matching page (same rank) to cancel it; both cards go to The Dark. Cannot be Salted." },
     { name: "THE HEX", desc: "When a neighbour Haunts you with a number card, you may reveal a matching suit from hand. Your card goes to The Dark; their Haunt becomes a ghost in their Shadow instead of yours. A completed reflect cannot be Salted." },
-    { name: "THE HOARDER", desc: "Hand Limit is 8 (instead of 5)." },
+    { name: "THE HOARDER", desc: "Starting hand is 5 (instead of 3). Hand Limit is 8 (instead of 5). Cards you discard from The Burden go to the bottom of your Candle instead of The Dark." },
     { name: "THE INQUISITOR", desc: "As your action, you may discard 1 card to the top of The Dark to choose a neighbour; they reveal their hand. If they reveal a Face Card, they must Burn 3 (to the top of The Dark)." },
     { name: "THE LEECH", desc: "When you Banish a Ghost, you always Siphon it. (Spades are still banished to The Dark)." },
-    { name: "THE LICH", desc: "The first time you die, steal the top 3 cards from each living player's Candle to your hand to revive." },
-    { name: "THE MEDDLER", desc: "When you Haunt a neighbour, you may put the top card of their Candle on the bottom of their Candle (you see it; they don't)." },
+    { name: "THE LICH", desc: "The first time you die, steal the top 2 cards from each living player's Candle onto yours to revive." },
     { name: "THE MIME", desc: "When a neighbour Haunts you, you may discard 1 to The Dark to redirect that Ghost to your other neighbour's Shadow." },
     { name: "THE MIMIC", desc: "Once per game, use Ability (does not use your Ritual action): choose a neighbour and swap your Candle with theirs. Cannot be prevented by Salt." },
     { name: "THE OCCULTIST", desc: "Your 9 (Possess) can choose any player, not just neighbours. When you Possess to a non-neighbour, add 2 cards from the top of The Dark to the bottom of your Candle (once per turn)." },
@@ -28,10 +26,8 @@ window.CLASSES = [
     { name: "THE SADIST", desc: "When you Cast Scare (3), your chosen neighbour shuffles and blindly discards 3 cards to The Dark (instead of 2)." },
     { name: "THE SEALBINDER", desc: "Ghosts you Haunt cannot be moved (Possess, Mirror) or returned (Recall). Other ghosts in a Shadow still move; Mirror leaves your sealed ghosts put and swaps the rest." },
     { name: "THE SILENCE", desc: "Your actions cannot be interrupted by Salt (5), including when you play BOO! (Joker)." },
-    { name: "THE SKEPTIC", desc: "Immune to 4s (Drain)." },
+    { name: "THE SKEPTIC", desc: "Immune to 3s (Scare) and 4s (Drain)." },
     { name: "THE SUFFERER", desc: "You need 4 ghosts of the same suit in your Shadow to be Possessed (instead of 3)." },
-    { name: "THE UNSEEN", desc: "When a neighbour would Haunt you, you may discard 1 card to the top of The Dark to cancel the Haunt (both cards to the top of The Dark)." },
-    { name: "THE USURER", desc: "As your action, choose a neighbour; take 2 cards from their hand, then they Draw 1 from their Candle." },
     { name: "THE VESSEL", desc: "The first Ghost in your Shadow does not cause you to Burn (you still Burn for the rest)." },
     { name: "THE VOODOO DOLL", desc: "When you burn during the Haunting, the reflection strikes: for each ghost in your Shadow that is Spades ♠, Clubs ♣, or Diamonds ♦, the player who Haunted that ghost must also Burn 1. Hearts ♥ have no effect. Mirror (J) and Possess (9) move ghosts without changing who Haunted them; if a ghost returns to your Shadow, the same haunter still reflects." },
     { name: "THE VULTURE", desc: "When a neighbour dies, add the top 5 cards from The Dark to the bottom of your Candle." },
@@ -47,7 +43,7 @@ window.TWO_PLAYER_EXCLUDED_CLASS_NAMES = [
 
 window.FOUR_PLAYER_ONLY_CLASS_NAMES = ['THE OCCULTIST', 'THE WITNESS', 'THE FUNERAL BELL'];
 
-/** poolSize: 2 (29) | 3 (35) | 4 | 'plus' (all 38) */
+/** poolSize: 2 (25) | 3 (31) | 4 | 'plus' (all 34) */
 window.getClassPoolBySize = function (poolSize) {
     var list = window.CLASSES;
     if (poolSize === 2) {

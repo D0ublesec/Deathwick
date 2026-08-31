@@ -43,7 +43,7 @@
         {
             id: 'two',
             title: '2-player pool',
-            subtitle: '29 classes - available at every group size',
+            subtitle: POOL_2.length + ' classes - available at every group size',
             match: function (c) { return !!twoPoolSet[c.name]; }
         }
     ];
