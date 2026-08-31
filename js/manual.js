@@ -848,6 +848,7 @@
 
         if (grid) {
             grid.addEventListener('click', function (e) {
+                if (e.target.closest && e.target.closest('.manual-class-card-img')) return;
                 var card = e.target.closest ? e.target.closest('.class-card') : null;
                 if (!card || !grid.contains(card)) return;
                 e.preventDefault();
@@ -870,6 +871,8 @@
 
         document.addEventListener('keydown', function (e) {
             if (e.key !== 'Escape') return;
+            var gallery = document.getElementById('grimoire-card-preview');
+            if (gallery && gallery.classList.contains('visible')) return;
             if (viewer.classList.contains('visible')) {
                 closeClassViewer();
                 return;
@@ -961,47 +964,224 @@
 
     (function initCardPreview() {
         var preview = document.getElementById('grimoire-card-preview');
-        var previewImg = preview && preview.querySelector('.grimoire-card-preview-img');
-        var backdrop = preview && preview.querySelector('.grimoire-card-preview-backdrop');
+        var previewImg = preview && preview.querySelector('.card-gallery-img');
+        var backdrop = preview && preview.querySelector('.card-gallery-backdrop');
+        var closeBtn = preview && preview.querySelector('.card-gallery-close');
+        var prevBtn = preview && preview.querySelector('.card-gallery-prev');
+        var nextBtn = preview && preview.querySelector('.card-gallery-next');
+        var captionEl = preview && preview.querySelector('.card-gallery-caption');
+        var counterEl = preview && preview.querySelector('.card-gallery-counter');
+        var stage = preview && preview.querySelector('.card-gallery-stage');
         var manualView = document.getElementById('manual-view');
-        if (!preview || !previewImg || !backdrop || !manualView) return;
+        if (!preview || !previewImg || !backdrop || !manualView || !stage) return;
 
-        var cardSelector = '.grimoire-card-img, .reference-card-img, .choice-card-img';
+        var sourceSelector = '.grimoire-card-img, .reference-card-img, .choice-card-img, .manual-class-card-img, .manual-class-viewer-img';
+        var slides = [];
+        var index = 0;
+        var drag = null;
 
-        function showCardPreviewFromTarget(target) {
-            var img = target.closest ? target.closest(cardSelector) : null;
-            if (!img) {
-                var zoomBtn = target.closest ? target.closest('.choice-card-img-btn') : null;
-                if (zoomBtn) img = zoomBtn.querySelector('.choice-card-img');
+        function slideKey(src) {
+            if (!src) return '';
+            try {
+                return new URL(src, location.href).pathname.replace(/\\/g, '/').toLowerCase();
+            } catch (err) {
+                return String(src).split('?')[0].replace(/\\/g, '/').toLowerCase();
             }
-            if (!img || !img.src) return false;
-            if (!manualView.contains(img)) return false;
-            show(img.src, img.alt);
-            return true;
         }
 
-        function show(src, alt) {
-            previewImg.src = src || '';
-            previewImg.alt = alt || '';
+        function fileName(src) {
+            var key = slideKey(src);
+            var parts = key.split('/');
+            return parts[parts.length - 1] || key;
+        }
+
+        function collectGallerySlides() {
+            var list = [];
+            var seen = {};
+            function addSlide(src, alt, group) {
+                var key = slideKey(src);
+                if (!key || seen[key]) return;
+                seen[key] = true;
+                list.push({ src: src, alt: alt || '', group: group });
+            }
+            manualView.querySelectorAll('.reference-card-img').forEach(function (img) {
+                var src = img.getAttribute('src');
+                if (src) addSlide(src, img.alt, 'Reference');
+            });
+            var grim = document.getElementById('grimoire');
+            if (grim) {
+                grim.querySelectorAll('.grimoire-card-img:not(.full-deck-card)').forEach(function (img) {
+                    var src = img.getAttribute('src');
+                    if (src) addSlide(src, img.alt, 'Grimoire');
+                });
+            }
+            CLASS_POOL_GROUPS.forEach(function (group) {
+                getClassesForGroup(group, CLASSES).forEach(function (cls) {
+                    var path = getClassImagePath(cls.name);
+                    if (path) addSlide(path, cls.name, 'Class');
+                });
+            });
+            return list;
+        }
+
+        function findSlideIndex(src) {
+            var key = slideKey(src);
+            var name = fileName(src);
+            var i;
+            for (i = 0; i < slides.length; i++) {
+                if (slideKey(slides[i].src) === key || fileName(slides[i].src) === name) return i;
+            }
+            var mapped = name.replace(/_(hearts|clubs|diamonds)\.png$/, '_spades.png');
+            if (mapped !== name) {
+                for (i = 0; i < slides.length; i++) {
+                    if (fileName(slides[i].src) === mapped) return i;
+                }
+            }
+            return 0;
+        }
+
+        function preloadAround(i) {
+            [i - 1, i + 1].forEach(function (n) {
+                if (n < 0) n = slides.length - 1;
+                if (n >= slides.length) n = 0;
+                if (!slides[n]) return;
+                var img = new Image();
+                img.src = slides[n].src;
+            });
+        }
+
+        function renderSlide() {
+            var slide = slides[index];
+            if (!slide) return;
+            previewImg.src = slide.src;
+            previewImg.alt = slide.alt;
+            previewImg.style.transform = '';
+            previewImg.classList.remove('is-dragging');
+            if (captionEl) captionEl.textContent = slide.alt;
+            if (counterEl) {
+                counterEl.textContent = slide.group + ' · ' + (index + 1) + ' / ' + slides.length;
+            }
+            preloadAround(index);
+        }
+
+        function goTo(nextIndex) {
+            if (!slides.length) return;
+            index = (nextIndex + slides.length) % slides.length;
+            renderSlide();
+        }
+
+        function showAt(src) {
+            slides = collectGallerySlides();
+            if (!slides.length) return;
+            index = findSlideIndex(src);
+            renderSlide();
             preview.classList.add('visible');
             preview.setAttribute('aria-hidden', 'false');
+            document.body.classList.add('card-gallery-open');
+            if (closeBtn) closeBtn.focus();
         }
 
         function hide() {
             preview.classList.remove('visible');
             preview.setAttribute('aria-hidden', 'true');
+            document.body.classList.remove('card-gallery-open');
+            previewImg.style.transform = '';
+            previewImg.classList.remove('is-dragging');
+            drag = null;
         }
 
-        /* Preview only on click (no hover) */
+        function showCardPreviewFromTarget(target) {
+            var img = target.closest ? target.closest(sourceSelector) : null;
+            if (!img) {
+                var zoomBtn = target.closest ? target.closest('.choice-card-img-btn') : null;
+                if (zoomBtn) img = zoomBtn.querySelector('.choice-card-img');
+            }
+            if (!img || !(img.getAttribute('src') || img.src)) return false;
+            if (img.classList.contains('manual-class-viewer-img')) {
+                showAt(img.getAttribute('src') || img.src);
+                return true;
+            }
+            if (!manualView.contains(img)) return false;
+            showAt(img.getAttribute('src') || img.src);
+            return true;
+        }
+
         document.addEventListener('click', function (e) {
             if (!showCardPreviewFromTarget(e.target)) return;
             e.preventDefault();
-        });
+            e.stopPropagation();
+        }, true);
 
         backdrop.addEventListener('click', hide);
+        if (closeBtn) closeBtn.addEventListener('click', hide);
+        if (prevBtn) prevBtn.addEventListener('click', function (e) { e.stopPropagation(); goTo(index - 1); });
+        if (nextBtn) nextBtn.addEventListener('click', function (e) { e.stopPropagation(); goTo(index + 1); });
 
         document.addEventListener('keydown', function (e) {
-            if (e.key === 'Escape' && preview.classList.contains('visible')) hide();
-        });
+            if (!preview.classList.contains('visible')) return;
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                hide();
+                return;
+            }
+            if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                goTo(index - 1);
+            } else if (e.key === 'ArrowRight') {
+                e.preventDefault();
+                goTo(index + 1);
+            }
+        }, true);
+
+        function onPointerDown(e) {
+            if (!preview.classList.contains('visible')) return;
+            if (e.pointerType === 'mouse' && e.button !== 0) return;
+            if (e.target.closest && e.target.closest('.card-gallery-close, .card-gallery-nav')) return;
+            drag = {
+                id: e.pointerId,
+                x: e.clientX,
+                y: e.clientY,
+                dx: 0,
+                dy: 0,
+                moved: false
+            };
+            previewImg.classList.add('is-dragging');
+            try { stage.setPointerCapture(e.pointerId); } catch (err) {}
+        }
+
+        function onPointerMove(e) {
+            if (!drag || e.pointerId !== drag.id) return;
+            drag.dx = e.clientX - drag.x;
+            drag.dy = e.clientY - drag.y;
+            if (Math.abs(drag.dx) > 8 || Math.abs(drag.dy) > 8) drag.moved = true;
+            if (Math.abs(drag.dx) >= Math.abs(drag.dy)) {
+                previewImg.style.transform = 'translateX(' + drag.dx + 'px)';
+            } else if (drag.dy > 0) {
+                previewImg.style.transform = 'translateY(' + drag.dy + 'px)';
+            }
+        }
+
+        function onPointerUp(e) {
+            if (!drag || e.pointerId !== drag.id) return;
+            var dx = drag.dx;
+            var dy = drag.dy;
+            var wasDrag = drag.moved;
+            drag = null;
+            previewImg.classList.remove('is-dragging');
+            previewImg.style.transform = '';
+            try { stage.releasePointerCapture(e.pointerId); } catch (err) {}
+            if (!wasDrag) return;
+            if (dy > 90 && Math.abs(dy) > Math.abs(dx)) {
+                hide();
+                return;
+            }
+            if (dx <= -50) goTo(index + 1);
+            else if (dx >= 50) goTo(index - 1);
+        }
+
+        stage.addEventListener('pointerdown', onPointerDown);
+        stage.addEventListener('pointermove', onPointerMove);
+        stage.addEventListener('pointerup', onPointerUp);
+        stage.addEventListener('pointercancel', onPointerUp);
     })();
 })();

@@ -250,7 +250,7 @@ th {
     border-radius: var(--radius-sm);
     border: 1px solid var(--border-color);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
-    cursor: pointer;
+    cursor: zoom-in;
     flex-shrink: 0;
 }
 
@@ -294,7 +294,7 @@ th {
 }
 
 .grimoire-table .grimoire-card-img {
-    cursor: pointer;
+    cursor: zoom-in;
 }
 
 .grimoire-jokers-wrap {
@@ -408,45 +408,161 @@ th {
     min-width: 180px;
 }
 
-/* Big card preview (hover or click) */
-.grimoire-card-preview {
+/* Full-screen swipeable card gallery */
+.grimoire-card-preview,
+.card-gallery {
     position: fixed;
     inset: 0;
-    z-index: 1000;
+    z-index: 1200;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     pointer-events: none;
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.2s ease, visibility 0.2s ease;
+    padding: max(12px, var(--safe-top, 0px)) max(12px, var(--safe-right, 0px)) max(12px, var(--safe-bottom, 0px)) max(12px, var(--safe-left, 0px));
+    box-sizing: border-box;
 }
 
-.grimoire-card-preview.visible {
+.grimoire-card-preview.visible,
+.card-gallery.visible {
     pointer-events: auto;
     opacity: 1;
     visibility: visible;
 }
 
+.card-gallery-backdrop,
 .grimoire-card-preview-backdrop {
     position: absolute;
     inset: 0;
-    background: rgba(0, 0, 0, 0.75);
+    background: rgba(0, 0, 0, 0.88);
     cursor: pointer;
 }
 
+.card-gallery-close {
+    position: absolute;
+    top: max(8px, var(--safe-top, 0px));
+    right: max(8px, var(--safe-right, 0px));
+    z-index: 2;
+    width: 44px;
+    height: 44px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(20, 20, 24, 0.85);
+    color: var(--text-color, #eee);
+    font-size: 1.75rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.card-gallery-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 2;
+    width: 44px;
+    height: 64px;
+    border: none;
+    border-radius: var(--radius-sm);
+    background: rgba(20, 20, 24, 0.7);
+    color: var(--accent-color, #c9a227);
+    font-size: 2rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.card-gallery-prev {
+    left: max(4px, var(--safe-left, 0px));
+}
+
+.card-gallery-next {
+    right: max(4px, var(--safe-right, 0px));
+}
+
+.card-gallery-stage {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    flex: 1;
+    min-height: 0;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.card-gallery-img,
 .grimoire-card-preview-img {
     position: relative;
     z-index: 1;
-    max-width: min(85vw, 320px);
-    width: 320px;
+    max-width: min(92vw, 420px);
+    max-height: min(78vh, 78dvh);
+    width: auto;
     height: auto;
-    aspect-ratio: 56 / 80;
     object-fit: contain;
     border-radius: var(--radius-md);
     border: 2px solid var(--accent-color);
     box-shadow: 0 8px 40px rgba(0, 0, 0, 0.6);
     pointer-events: none;
+    transition: transform 0.2s ease;
+}
+
+.card-gallery-img.is-dragging {
+    transition: none;
+}
+
+.card-gallery-meta {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    padding: 8px 56px 4px;
+    max-width: 100%;
+}
+
+.card-gallery-caption,
+.card-gallery-counter {
+    margin: 0;
+    color: var(--text-color, #eee);
+}
+
+.card-gallery-caption {
+    font-family: var(--font-heading, inherit);
+    font-size: 1.05rem;
+    color: var(--accent-color, #c9a227);
+}
+
+.card-gallery-counter {
+    margin-top: 4px;
+    font-size: 0.85rem;
+    color: var(--text-muted, #b0b0b8);
+}
+
+body.card-gallery-open {
+    overflow: hidden;
+}
+
+@media (max-width: 640px) {
+    .card-gallery-img,
+    .grimoire-card-preview-img {
+        max-width: min(96vw, calc(100vw - 16px));
+        max-height: calc(100dvh - 7.5rem - var(--safe-top, 0px) - var(--safe-bottom, 0px));
+        width: auto;
+        height: auto;
+    }
+
+    .card-gallery-nav {
+        width: 40px;
+        height: 56px;
+        background: rgba(20, 20, 24, 0.45);
+    }
+
+    .card-gallery-meta {
+        padding: 6px 48px 2px;
+    }
 }
 
 .manual-class-search-wrap {
@@ -576,7 +692,7 @@ th {
     object-position: bottom left;
     border-radius: var(--radius-sm);
     border: 1px solid var(--border-color);
-    cursor: pointer;
+    cursor: zoom-in;
 }
 
 .rules-list, .setup-list {
@@ -1600,6 +1716,7 @@ body.manual-picked-fullscreen-open {
     border: 2px solid var(--accent-color);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
     flex-shrink: 0;
+    cursor: zoom-in;
 }
 
 .manual-class-viewer-text {

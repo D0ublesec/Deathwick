@@ -53,6 +53,7 @@
         <div class="manual-section-controls">
             <a href="#start-here" class="tool-btn manual-jump-btn">Start here</a>
             <a href="#class-selection" class="tool-btn manual-jump-btn">Class selection</a>
+            <a href="#grimoire" class="tool-btn manual-jump-btn">Grimoire</a>
             <div class="manual-section-controls-actions">
                 <button type="button" class="tool-btn" id="manual-expand-all">Expand all</button>
                 <button type="button" class="tool-btn secondary" id="manual-collapse-all">Collapse all</button>
@@ -538,7 +539,7 @@
 
         <section id="grimoire">
             <h2 id="quick-ref">4. The Grimoire</h2>
-            <p class="grimoire-intro">Art shown is <span class="suit-spades">♠</span> Spades; effects are the same for every suit.</p>
+            <p class="grimoire-intro">Art shown is <span class="suit-spades">♠</span> Spades; effects are the same for every suit. Tap a card for a full-screen view, then swipe for the next (reference cards, Grimoire, then classes).</p>
             <div class="reference-cards-wrap">
                 <img class="reference-card-img" src="images/cards/reference/deathwick_grimoire_reference1.png" alt="Grimoire reference card 1">
                 <img class="reference-card-img" src="images/cards/reference/deathwick_grimoire_reference2.png" alt="Grimoire reference card 2">
@@ -568,7 +569,7 @@
 
         <section id="classes">
             <h2>5. The Classes</h2>
-            <p class="manual-class-pool-intro">Classes are grouped by which pool they belong to. Use the filters to show only classes legal for your player count.</p>
+            <p class="manual-class-pool-intro">Classes are grouped by which pool they belong to. Use the filters to show only classes legal for your player count. Tap a class card image for a full-screen view; swipe continues through all classes.</p>
             <div class="manual-class-pool-filters" id="manual-class-pool-filters" role="group" aria-label="Filter classes by pool">
                 <button type="button" class="tool-btn selected" data-pool-filter="all">All classes (34)</button>
                 <button type="button" class="tool-btn secondary" data-pool-filter="2">2-player pool (25)</button>
@@ -713,9 +714,18 @@
             </div>
         </section>
 
-        <div id="grimoire-card-preview" class="grimoire-card-preview" role="dialog" aria-modal="true" aria-label="Card preview" aria-hidden="true">
-            <div class="grimoire-card-preview-backdrop"></div>
-            <img class="grimoire-card-preview-img" src="" alt="">
+        <div id="grimoire-card-preview" class="grimoire-card-preview card-gallery" role="dialog" aria-modal="true" aria-label="Card gallery" aria-hidden="true">
+            <div class="card-gallery-backdrop grimoire-card-preview-backdrop"></div>
+            <button type="button" class="card-gallery-close" aria-label="Close card gallery">&times;</button>
+            <button type="button" class="card-gallery-nav card-gallery-prev" aria-label="Previous card">‹</button>
+            <div class="card-gallery-stage">
+                <img class="card-gallery-img grimoire-card-preview-img" src="" alt="">
+            </div>
+            <button type="button" class="card-gallery-nav card-gallery-next" aria-label="Next card">›</button>
+            <div class="card-gallery-meta">
+                <p class="card-gallery-caption"></p>
+                <p class="card-gallery-counter" aria-live="polite"></p>
+            </div>
         </div>
 
         <footer>
